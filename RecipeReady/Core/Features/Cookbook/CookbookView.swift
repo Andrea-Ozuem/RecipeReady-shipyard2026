@@ -67,7 +67,7 @@ struct CookbookView: View {
                 ScrollView {
                     LazyVGrid(columns: columns, spacing: 24) {
                         ForEach(cookbooks) { cookbook in
-                             NavigationLink(destination: CookbookDetailView(title: cookbook.title)) {
+                             NavigationLink(destination: CookbookDetailView(cookbook: cookbook)) {
                                  CollectionCard(cookbook: cookbook)
                              }
                         }
@@ -109,98 +109,7 @@ struct CollectionCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             // Card Visual
-            ZStack {
-                // Background varies: Favorites uses softBeige, Collage uses White (gap color)
-                if cookbook.isFavorites {
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(Color.softBeige)
-                } else {
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(Color.white)
-                }
-                
-                if cookbook.isFavorites {
-                    // Favorites Style: Centered Heart
-                    Image(systemName: "heart.fill")
-                        .font(.system(size: 32))
-                        .foregroundColor(.primaryOrange)
-                } else {
-                    // Collage Style: 1 Top, 2 Bottom
-                    GeometryReader { geo in
-                        let halfHeight = (geo.size.height - 4) / 2
-                        let halfWidth = (geo.size.width - 4) / 2
-                        
-                        VStack(spacing: 5) {
-                            // Top Half
-                            Group {
-                                if let urlString = cookbook.imageURLs.first, let url = URL(string: urlString) {
-                                    AsyncImage(url: url) { phase in
-                                        if let image = phase.image {
-                                            image
-                                                .resizable()
-                                                .aspectRatio(contentMode: .fill)
-                                                .frame(width: geo.size.width, height: halfHeight)
-                                                .clipped()
-                                        } else {
-                                            Color.softBeige
-                                        }
-                                    }
-                                } else {
-                                    Rectangle().fill(Color.softBeige)
-                                }
-                            }
-                            .frame(height: halfHeight)
-                            .clipped()
-                            
-                            // Bottom Half
-                            HStack(spacing: 5) {
-                                // Bottom Left
-                                Group {
-                                    if cookbook.imageURLs.count > 1, let url = URL(string: cookbook.imageURLs[1]) {
-                                        AsyncImage(url: url) { phase in
-                                            if let image = phase.image {
-                                                image
-                                                    .resizable()
-                                                    .aspectRatio(contentMode: .fill)
-                                                    .frame(width: halfWidth, height: halfHeight)
-                                                    .clipped()
-                                            } else {
-                                                Color.softBeige
-                                            }
-                                        }
-                                    } else {
-                                        Rectangle().fill(Color.softBeige)
-                                    }
-                                }
-                                .frame(width: halfWidth, height: halfHeight)
-                                
-                                // Bottom Right
-                                Group {
-                                    if cookbook.imageURLs.count > 2, let url = URL(string: cookbook.imageURLs[2]) {
-                                        AsyncImage(url: url) { phase in
-                                            if let image = phase.image {
-                                                image
-                                                    .resizable()
-                                                    .aspectRatio(contentMode: .fill)
-                                                    .frame(width: halfWidth, height: halfHeight)
-                                                    .clipped()
-                                            } else {
-                                                Color.softBeige
-                                            }
-                                        }
-                                    } else {
-                                        Rectangle().fill(Color.softBeige)
-                                    }
-                                }
-                                .frame(width: halfWidth, height: halfHeight)
-                            }
-                            .frame(height: halfHeight)
-                        }
-                    }
-                    .clipShape(RoundedRectangle(cornerRadius: 16))
-                }
-            }
-            .aspectRatio(0.8, contentMode: .fill) // Vertical Aspect Ratio
+            CookbookCoverView(cookbook: cookbook)
             // .background(Color.white) // Removed this in favor of explicit ZStack logic logic
             // .clipShape(RoundedRectangle(cornerRadius: 16)) // Moved inside
             

@@ -10,11 +10,13 @@ import SwiftData
 
 struct CookbookDetailView: View {
     @Environment(\.dismiss) private var dismiss
-    let title: String
+    let cookbook: CookbookItem
     
     // In a real app, we'd query recipes filtered by this cookbook.
     // For now, we show all mock recipes.
     @Query(sort: \Recipe.createdAt, order: .reverse) private var recipes: [Recipe]
+    
+    @State private var isShowingEditSheet = false
     
     // Grid Setup
     private let columns = [
@@ -36,7 +38,7 @@ struct CookbookDetailView: View {
                     }
                 }
                 .padding(.horizontal, 20)
-                .padding(.top, -20)
+                .padding(.top, 10)
             }
             .background(Color.screenBackground)
             .navigationBarBackButtonHidden(true) // Custom back button
@@ -52,7 +54,7 @@ struct CookbookDetailView: View {
                 }
                 
                 ToolbarItem(placement: .principal) {
-                    Text(title)
+                    Text(cookbook.title)
                         .font(.heading1)
                         .foregroundColor(.textPrimary)
                 }
@@ -63,18 +65,40 @@ struct CookbookDetailView: View {
                             Image(systemName: "magnifyingglass")
                                 .foregroundColor(.textPrimary)
                         }
-                        Button(action: {}) {
+                        Button(action: {
+                            isShowingEditSheet = true
+                        }) {
                             Image(systemName: "pencil")
                                 .foregroundColor(.textPrimary)
                         }
                     }
                 }
             }
+            .sheet(isPresented: $isShowingEditSheet) {
+                EditCookbookSheet(
+                    cookbook: cookbook,
+                    onSave: { newTitle in
+                        // TODO: Update title in parent/model
+                        print("Saved title: \(newTitle)")
+                    },
+                    onDelete: {
+                        // TODO: Delete action
+                        print("Deleted cookbook")
+                        dismiss()
+                    }
+                )
+                .presentationDetents([.fraction(0.75)])
+                .presentationDragIndicator(.visible)
+            }
         }
     }
 }
 
 #Preview {
-    CookbookDetailView(title: "Salad")
+    CookbookDetailView(cookbook: CookbookItem(title: "Salad", count: 4, imageURLs: [
+        "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=500&q=80",
+        "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=500&q=80",
+        "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&q=80"
+    ]))
         .modelContainer(for: Recipe.self, inMemory: true)
 }
