@@ -14,6 +14,9 @@ struct CookbookView: View {
         GridItem(.flexible(), spacing: 16)
     ]
     
+    // UI State
+    @State private var isShowingAddCookbook = false
+    
     var body: some View {
         NavigationStack {
             VStack(alignment: .leading, spacing: 24) {
@@ -26,7 +29,7 @@ struct CookbookView: View {
                     Spacer()
                     
                     Button(action: {
-                        // TODO: Add Collection Action
+                        isShowingAddCookbook = true
                     }) {
                         Image(systemName: "plus")
                             .font(.system(size: 24, weight: .regular))
@@ -54,6 +57,11 @@ struct CookbookView: View {
             }
             .background(Color.screenBackground)
             .navigationBarHidden(true)
+            .sheet(isPresented: $isShowingAddCookbook) {
+                AddCookbookSheet()
+                    .presentationDetents([.medium])
+                    .presentationDragIndicator(.visible)
+            }
         }
     }
 }
@@ -83,7 +91,7 @@ struct CollectionCard: View {
             // Meta Text
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
-                    .font(.bodyRegular)
+                    .font(.bodyBold)
                     .foregroundColor(.textPrimary)
                     .multilineTextAlignment(.leading)
                     .lineLimit(2)
@@ -92,6 +100,52 @@ struct CollectionCard: View {
                     .font(.captionMeta)
                     .foregroundColor(.textSecondary)
             }
+        }
+    }
+}
+
+// MARK: - Sheets
+
+struct AddCookbookSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @State private var title: String = ""
+    
+    // Focus state for the input field to potentially drive border color
+    @FocusState private var isFocused: Bool
+    
+    var body: some View {
+        NavigationStack {
+            VStack(alignment: .leading, spacing: 12) {
+                // Title Label
+                Text("Title")
+                    .font(.bodyBold)
+                    .foregroundColor(.textPrimary)
+                
+                // Input Field
+                TextField("Title", text: $title)
+                    .padding()
+                    .background(Color.inputBackground)
+                    .cornerRadius(12)
+                
+                Spacer()
+                
+                // Full-width Save Button at bottom
+                Button(action: {
+                    // TODO: Save logic
+                    dismiss()
+                }) {
+                    Text("Save cookbook")
+                        .font(.bodyBold)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 50)
+                        .background(Color.primaryOrange)
+                        .cornerRadius(25)
+                }
+            }
+            .padding(20)
+            .navigationTitle("Create a cookbook")
+            .navigationBarTitleDisplayMode(.inline)
         }
     }
 }
