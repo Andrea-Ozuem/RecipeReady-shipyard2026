@@ -26,7 +26,7 @@ struct TimeCircleView: View {
         VStack(spacing: 10) {
             ZStack {
                 Circle()
-                    .stroke(Color.softBeige, lineWidth: 2)
+                    .stroke(Color.divider, lineWidth: 2)
                     .frame(width: 60, height: 60)
                 
                 // Orange progress arc (decorator)

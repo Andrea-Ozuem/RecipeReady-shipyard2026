@@ -158,7 +158,7 @@ struct RecipeDetailView: View {
                     // TODO: Share action
                 }) {
                     Image(systemName: "square.and.arrow.up")
-                        .font(.system(size: 17, weight: .semibold))
+                        .font(.system(size: 17, weight: .regular))
                         .foregroundColor(.textPrimary)
                         .padding(10)
                         .background(Circle().fill(Color.white))
@@ -169,7 +169,7 @@ struct RecipeDetailView: View {
                     // TODO: Favorite action
                 }) {
                     Image(systemName: "heart")
-                        .font(.system(size: 17, weight: .semibold))
+                        .font(.system(size: 17, weight: .regular))
                         .foregroundColor(.textPrimary)
                         .padding(10)
                         .background(Circle().fill(Color.white))
