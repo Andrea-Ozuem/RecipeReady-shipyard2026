@@ -33,7 +33,7 @@ extension Recipe {
                 CookingStep(order: 3, instruction: "Add chicken and coat well with the marinade.")
             ],
             sourceLink: "https://kitchenstories.com",
-            imageURL: "mock_food_image", // We will use a system placeholder if generic
+            imageURL: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80", // Salad Unsplash
             difficulty: "Medium",
             prepTime: 15,
             bakingTime: 40,

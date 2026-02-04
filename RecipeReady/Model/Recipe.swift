@@ -24,6 +24,11 @@ final class Recipe {
     var prepTime: Int?
     var bakingTime: Int?
     var restingTime: Int?
+    // UI-Specific Mock Properties
+    var authorName: String = "Mengting" // Default mock
+    var authorImageURL: String = "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=150&q=80"
+    var likesCount: String = "41.3K"
+    var tags: [String] = ["Healthy", "Salad"]
     
     var confidenceScore: Double
     var createdAt: Date

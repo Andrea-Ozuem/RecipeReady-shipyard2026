@@ -18,7 +18,27 @@ struct CookbookView: View {
     // UI State
     @State private var isShowingAddCookbook = false
     @State private var cookbooks: [CookbookItem] = [
-        CookbookItem(title: "My favourite recipes", isFavorites: true)
+        CookbookItem(title: "My favourite recipes", count: 5, isFavorites: true),
+        CookbookItem(
+            title: "Salad",
+            count: 4,
+            isFavorites: false,
+            imageURLs: [
+                "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=500&q=80",
+                "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=500&q=80",
+                "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&q=80"
+            ]
+        ),
+        CookbookItem(
+            title: "Chicken",
+            count: 7,
+            isFavorites: false,
+            imageURLs: [
+                "https://images.unsplash.com/photo-1532550907401-a500c9a57435?w=500&q=80",
+                "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?w=500&q=80",
+                "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=500&q=80"
+            ]
+        )
     ]
     
     var body: some View {
@@ -47,7 +67,7 @@ struct CookbookView: View {
                 ScrollView {
                     LazyVGrid(columns: columns, spacing: 24) {
                         ForEach(cookbooks) { cookbook in
-                             NavigationLink(destination: RecipeListView()) {
+                             NavigationLink(destination: CookbookDetailView(title: cookbook.title)) {
                                  CollectionCard(cookbook: cookbook)
                              }
                         }
@@ -107,21 +127,74 @@ struct CollectionCard: View {
                 } else {
                     // Collage Style: 1 Top, 2 Bottom
                     GeometryReader { geo in
-                        VStack(spacing: 4) {
+                        let halfHeight = (geo.size.height - 4) / 2
+                        let halfWidth = (geo.size.width - 4) / 2
+                        
+                        VStack(spacing: 5) {
                             // Top Half
-                            Rectangle()
-                                .fill(Color.softBeige)
-                                .frame(height: (geo.size.height - 2) / 2)
+                            Group {
+                                if let urlString = cookbook.imageURLs.first, let url = URL(string: urlString) {
+                                    AsyncImage(url: url) { phase in
+                                        if let image = phase.image {
+                                            image
+                                                .resizable()
+                                                .aspectRatio(contentMode: .fill)
+                                                .frame(width: geo.size.width, height: halfHeight)
+                                                .clipped()
+                                        } else {
+                                            Color.softBeige
+                                        }
+                                    }
+                                } else {
+                                    Rectangle().fill(Color.softBeige)
+                                }
+                            }
+                            .frame(height: halfHeight)
+                            .clipped()
                             
                             // Bottom Half
-                            HStack(spacing: 4) {
-                                Rectangle()
-                                    .fill(Color.softBeige)
-                                    .frame(maxWidth: .infinity)
-                                Rectangle()
-                                    .fill(Color.softBeige)
-                                    .frame(maxWidth: .infinity)
+                            HStack(spacing: 5) {
+                                // Bottom Left
+                                Group {
+                                    if cookbook.imageURLs.count > 1, let url = URL(string: cookbook.imageURLs[1]) {
+                                        AsyncImage(url: url) { phase in
+                                            if let image = phase.image {
+                                                image
+                                                    .resizable()
+                                                    .aspectRatio(contentMode: .fill)
+                                                    .frame(width: halfWidth, height: halfHeight)
+                                                    .clipped()
+                                            } else {
+                                                Color.softBeige
+                                            }
+                                        }
+                                    } else {
+                                        Rectangle().fill(Color.softBeige)
+                                    }
+                                }
+                                .frame(width: halfWidth, height: halfHeight)
+                                
+                                // Bottom Right
+                                Group {
+                                    if cookbook.imageURLs.count > 2, let url = URL(string: cookbook.imageURLs[2]) {
+                                        AsyncImage(url: url) { phase in
+                                            if let image = phase.image {
+                                                image
+                                                    .resizable()
+                                                    .aspectRatio(contentMode: .fill)
+                                                    .frame(width: halfWidth, height: halfHeight)
+                                                    .clipped()
+                                            } else {
+                                                Color.softBeige
+                                            }
+                                        }
+                                    } else {
+                                        Rectangle().fill(Color.softBeige)
+                                    }
+                                }
+                                .frame(width: halfWidth, height: halfHeight)
                             }
+                            .frame(height: halfHeight)
                         }
                     }
                     .clipShape(RoundedRectangle(cornerRadius: 16))
@@ -134,7 +207,7 @@ struct CollectionCard: View {
             // Meta Text
             VStack(alignment: .leading, spacing: 4) {
                 Text(cookbook.title)
-                    .font(.bodyBold)
+                    .font(.bodyRegular)
                     .foregroundColor(.textPrimary)
                     .multilineTextAlignment(.leading)
                     .lineLimit(2)
