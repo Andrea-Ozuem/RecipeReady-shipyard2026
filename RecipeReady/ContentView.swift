@@ -6,19 +6,21 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct ContentView: View {
+    // We keep the environments to avoid breaking the App entry point if it injects them
+    @Environment(\.modelContext) private var modelContext
+    
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        NavigationStack {
+            // For UI-First dev, we directly show the Detail View with Mock Data
+            RecipeDetailView(recipe: .mock)
         }
-        .padding()
     }
 }
 
 #Preview {
     ContentView()
+        .modelContainer(for: Recipe.self, inMemory: true)
 }
