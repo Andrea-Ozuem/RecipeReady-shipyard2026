@@ -66,10 +66,7 @@ struct RecipeDetailView: View {
                                 
                                 if let rest = recipe.restingTime {
                                     TimeCircleView(title: "Resting", minutes: rest)
-                                    Spacer()
                                 }
-                                 // Last spacer ensures left alignment if fewer items, or even spacing if 3.
-                                 // Screenshot shows spaced out evenly.
                             }
                             .padding(.horizontal, 16)
                         }

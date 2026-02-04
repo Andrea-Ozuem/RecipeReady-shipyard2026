@@ -38,13 +38,13 @@ struct TimeCircleView: View {
                     .rotationEffect(.degrees(-90))
                 
                 Text(timeString)
-                    .font(.captionMeta)
+                    .font(.bodyRegular)
                     .foregroundColor(.textPrimary)
             }
             
             Text(title)
                 .font(.caption)
-                .foregroundColor(.textSecondary)
+                .foregroundColor(.textPrimary)
         }
     }
 }
