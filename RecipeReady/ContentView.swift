@@ -13,10 +13,8 @@ struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     
     var body: some View {
-        NavigationStack {
-            // For UI-First dev, we directly show the Detail View with Mock Data
-            RecipeDetailView(recipe: .mock)
-        }
+        // Temporarily showing CookbookView as the main screen
+        CookbookView()
     }
 }
 

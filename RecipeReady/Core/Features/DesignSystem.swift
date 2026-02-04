@@ -19,6 +19,7 @@ extension Color {
     
     // UI Elements
     static let divider = Color(hex: "E5E5E5")
+    static let primaryOrange = Color(hex: "FF6B35") // Vibrant orange from screenshot
     
     // Helper init for Hex
     init(hex: String) {
@@ -49,6 +50,10 @@ extension Color {
 
 // Typography Extensions
 extension Font {
+    static var largeTitle: Font {
+        .system(size: 34, weight: .bold, design: .default)
+    }
+
     static var heading1: Font {
         .system(size: 24, weight: .bold, design: .default)
     }
@@ -62,6 +67,6 @@ extension Font {
     }
     
     static var captionMeta: Font {
-        .system(size: 14, weight: .medium, design: .default)
+        .system(size: 14, weight: .regular, design: .default)
     }
 }
