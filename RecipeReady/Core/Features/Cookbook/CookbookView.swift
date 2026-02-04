@@ -15,7 +15,11 @@ struct CookbookView: View {
     ]
     
     // UI State
+    // UI State
     @State private var isShowingAddCookbook = false
+    @State private var cookbooks: [CookbookItem] = [
+        CookbookItem(title: "My favourite recipes", isFavorites: true)
+    ]
     
     var body: some View {
         NavigationStack {
@@ -42,14 +46,10 @@ struct CookbookView: View {
                 // MARK: - Grid Content
                 ScrollView {
                     LazyVGrid(columns: columns, spacing: 24) {
-                        // "My favourite recipes" Card
-                        NavigationLink(destination: RecipeListView()) {
-                            CollectionCard(
-                                title: "My favourite recipes",
-                                count: 0, // TODO: Bind to actual count
-                                icon: "heart.fill",
-                                iconColor: .white // Orange heart on beige bg
-                            )
+                        ForEach(cookbooks) { cookbook in
+                             NavigationLink(destination: RecipeListView()) {
+                                 CollectionCard(cookbook: cookbook)
+                             }
                         }
                     }
                     .padding(.horizontal, 20)
@@ -58,45 +58,88 @@ struct CookbookView: View {
             .background(Color.screenBackground)
             .navigationBarHidden(true)
             .sheet(isPresented: $isShowingAddCookbook) {
-                AddCookbookSheet()
-                    .presentationDetents([.medium])
-                    .presentationDragIndicator(.visible)
+                AddCookbookSheet(onSave: { newTitle in
+                    let newCookbook = CookbookItem(title: newTitle, isFavorites: false)
+                    cookbooks.append(newCookbook)
+                })
+                .presentationDetents([.medium])
+                .presentationDragIndicator(.visible)
             }
         }
     }
 }
 
+// MARK: - Models
+
+struct CookbookItem: Identifiable {
+    let id = UUID()
+    let title: String
+    var count: Int = 0
+    var isFavorites: Bool = false
+    var imageURLs: [String] = [] // Top, Bottom Left, Bottom Right
+}
+
+// MARK: - Subviews
+
 // MARK: - Subviews
 
 struct CollectionCard: View {
-    let title: String
-    let count: Int
-    let icon: String
-    let iconColor: Color
+    let cookbook: CookbookItem
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             // Card Visual
             ZStack {
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(Color.softBeige)
-                    .aspectRatio(0.8, contentMode: .fill) // Vertical Aspect Ratio
+                // Background varies: Favorites uses softBeige, Collage uses White (gap color)
+                if cookbook.isFavorites {
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(Color.softBeige)
+                } else {
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(Color.white)
+                }
                 
-                Image(systemName: icon)
-                    .font(.system(size: 32))
-                    .foregroundColor(.primaryOrange)
+                if cookbook.isFavorites {
+                    // Favorites Style: Centered Heart
+                    Image(systemName: "heart.fill")
+                        .font(.system(size: 32))
+                        .foregroundColor(.primaryOrange)
+                } else {
+                    // Collage Style: 1 Top, 2 Bottom
+                    GeometryReader { geo in
+                        VStack(spacing: 4) {
+                            // Top Half
+                            Rectangle()
+                                .fill(Color.softBeige)
+                                .frame(height: (geo.size.height - 2) / 2)
+                            
+                            // Bottom Half
+                            HStack(spacing: 4) {
+                                Rectangle()
+                                    .fill(Color.softBeige)
+                                    .frame(maxWidth: .infinity)
+                                Rectangle()
+                                    .fill(Color.softBeige)
+                                    .frame(maxWidth: .infinity)
+                            }
+                        }
+                    }
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                }
             }
-            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .aspectRatio(0.8, contentMode: .fill) // Vertical Aspect Ratio
+            // .background(Color.white) // Removed this in favor of explicit ZStack logic logic
+            // .clipShape(RoundedRectangle(cornerRadius: 16)) // Moved inside
             
             // Meta Text
             VStack(alignment: .leading, spacing: 4) {
-                Text(title)
+                Text(cookbook.title)
                     .font(.bodyBold)
                     .foregroundColor(.textPrimary)
                     .multilineTextAlignment(.leading)
                     .lineLimit(2)
                 
-                Text("\(count) recipes")
+                Text("\(cookbook.count) items")
                     .font(.captionMeta)
                     .foregroundColor(.textSecondary)
             }
@@ -108,6 +151,8 @@ struct CollectionCard: View {
 
 struct AddCookbookSheet: View {
     @Environment(\.dismiss) private var dismiss
+    var onSave: (String) -> Void
+    
     @State private var title: String = ""
     
     // Focus state for the input field to potentially drive border color
@@ -131,8 +176,10 @@ struct AddCookbookSheet: View {
                 
                 // Full-width Save Button at bottom
                 Button(action: {
-                    // TODO: Save logic
-                    dismiss()
+                    if !title.isEmpty {
+                        onSave(title)
+                        dismiss()
+                    }
                 }) {
                     Text("Save cookbook")
                         .font(.bodyBold)
