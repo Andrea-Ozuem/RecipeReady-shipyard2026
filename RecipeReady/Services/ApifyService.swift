@@ -61,7 +61,7 @@ final class ApifyService {
     // MARK: - Configuration
     
     /// Apify API token
-    private let apiToken = "" // TODO: Add API Token securely
+    private let apiToken = Secrets.apifyApiKey
     
     /// Actor ID for Instagram scraper
     private let actorId = "shu8hvrXbJbY3Eb9W"

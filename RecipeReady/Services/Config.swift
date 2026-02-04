@@ -12,7 +12,7 @@ enum Config {
     
     /// Gemini AI API key
     /// Get yours at: https://aistudio.google.com/apikey
-    static let geminiAPIKey = "AIzaSyBmfXf3t99x4E6a4DBT9pqMbqnz6N-LwgI"
+    static let geminiAPIKey = Secrets.geminiApiKey
     
     /// Gemini API endpoint
     static let geminiBaseURL = "https://generativelanguage.googleapis.com/v1beta"

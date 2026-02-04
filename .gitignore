@@ -1,0 +1,14 @@
+.DS_Store
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj
+!*.xcodeproj/xcshareddata/
+!*.xcodeproj/l/
+xcuserdata/
+DerivedData/
+.idea/
+*.hmap
+*.xccheckout
+*.xcscmblueprint
+
+# Secrets
+RecipeReady/Services/Secrets.swift
