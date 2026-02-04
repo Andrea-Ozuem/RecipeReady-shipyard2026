@@ -19,7 +19,7 @@ struct ServingsStepper: View {
                 }
             }) {
                 Image(systemName: "minus")
-                    .font(.system(size: 14, weight: .semibold))
+                    .font(.system(size: 14, weight: .regular))
                     .foregroundColor(.textPrimary)
                     .frame(width: 32, height: 32)
             }
@@ -27,7 +27,7 @@ struct ServingsStepper: View {
             
             // Current Servings Count
             Text("\(servings)")
-                .font(.bodyBold)
+                .font(.bodyRegular)
                 .foregroundColor(.textPrimary)
                 .frame(minWidth: 24)
             
@@ -36,7 +36,7 @@ struct ServingsStepper: View {
                 servings += 1
             }) {
                 Image(systemName: "plus")
-                    .font(.system(size: 14, weight: .semibold))
+                    .font(.system(size: 14, weight: .regular))
                     .foregroundColor(.textPrimary)
                     .frame(width: 32, height: 32)
             }

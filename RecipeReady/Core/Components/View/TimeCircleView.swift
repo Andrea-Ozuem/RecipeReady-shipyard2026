@@ -23,7 +23,7 @@ struct TimeCircleView: View {
     }
     
     var body: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: 10) {
             ZStack {
                 Circle()
                     .stroke(Color.softBeige, lineWidth: 2)
