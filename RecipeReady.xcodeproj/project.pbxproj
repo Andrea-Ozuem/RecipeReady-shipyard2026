@@ -62,6 +62,7 @@
 				Services/ApifyService.swift,
 				Services/AppGroupManager.swift,
 				Services/AudioExtractor.swift,
+				Services/Secrets.swift,
 			);
 			target = 6585F0682F2DAD20000CC3F8 /* ShareExtension */;
 		};

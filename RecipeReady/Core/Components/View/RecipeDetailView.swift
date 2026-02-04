@@ -45,8 +45,6 @@ struct RecipeDetailView: View {
                                     Text(difficulty)
                                         .font(.bodyRegular)
                                         .foregroundColor(.textPrimary)
-                                    Text("👍") // Emoji as seen in screenshot
-                                        .font(.bodyRegular)
                                     Spacer()
                                 }
                             }
