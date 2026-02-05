@@ -22,6 +22,9 @@ struct RecipeReadyApp: App {
                 .onAppear {
                     extractionManager.checkForPendingExtraction()
                 }
+                .sheet(isPresented: $extractionManager.showingExtraction) {
+                    ExtractionSheet()
+                }
         }
         .modelContainer(for: Recipe.self)
     }

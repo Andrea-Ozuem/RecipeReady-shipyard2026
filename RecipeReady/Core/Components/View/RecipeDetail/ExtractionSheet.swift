@@ -20,7 +20,7 @@ struct ExtractionSheet: View {
                 case .idle, .processing:
                     processingView
                 case .success(let recipe):
-                    successView(recipe)
+                    RecipeEditView(recipe: recipe)
                 case .error(let error):
                     errorView(error)
                 }
