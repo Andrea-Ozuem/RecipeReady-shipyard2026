@@ -114,6 +114,12 @@ class ShoppingListViewModel: ObservableObject {
         }
     }
     
+    func removeRecipe(id: UUID) {
+        withAnimation {
+            recipes.removeAll { $0.id == id }
+        }
+    }
+    
     func unmarkAll() {
         for i in 0..<recipes.count {
             for j in 0..<recipes[i].ingredients.count {

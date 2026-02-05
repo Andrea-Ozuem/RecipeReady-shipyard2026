@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ShoppingListView: View {
     @StateObject private var viewModel = ShoppingListViewModel()
+    @State private var recipeForOptions: ShoppingListRecipe?
     
     var body: some View {
         NavigationStack {
@@ -71,12 +72,16 @@ struct ShoppingListView: View {
                             List {
                                 ForEach($viewModel.recipes) { $recipe in
                                     VStack(spacing: 0) {
-                                        ShoppingListRecipeRow(recipe: recipe)
-                                            .padding(.horizontal, 20)
-                                            .contentShape(Rectangle()) // Make entire row tappable
-                                            .onTapGesture {
+                                        ShoppingListRecipeRow(
+                                            recipe: recipe,
+                                            onToggleExpand: {
                                                 viewModel.toggleExpansion(for: recipe.id)
+                                            },
+                                            onMoreTap: {
+                                                recipeForOptions = recipe
                                             }
+                                        )
+                                        .padding(.horizontal, 20)
                                         
                                         if recipe.isExpanded {
                                             ShoppingListExpandedView(recipe: $recipe, viewModel: viewModel)
@@ -130,6 +135,60 @@ struct ShoppingListView: View {
                 }
             }
             .toolbar(.hidden, for: .navigationBar)
+            .sheet(item: $recipeForOptions) { recipe in
+                NavigationStack {
+                    VStack(spacing: 0) {
+                        VStack(alignment: .leading, spacing: 0) {
+                            
+                            // Open Recipe
+                            Button(action: {
+                                // TODO: Navigate to recipe
+                                recipeForOptions = nil
+                            }) {
+                                HStack(spacing: 16) {
+                                    Image(systemName: "square.and.arrow.up") // Using share icon as placeholder or external link icon if more appropriate "arrow.up.right"
+                                        .font(.system(size: 20))
+                                        .foregroundColor(.textPrimary)
+                                        .frame(width: 24)
+                                    
+                                    Text("Open the recipe")
+                                        .font(.bodyRegular)
+                                        .foregroundColor(.textPrimary)
+                                }
+                                .padding(.vertical, 16)
+                                .padding(.horizontal, 24)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                            }
+                            
+                            // Delete Recipe
+                            Button(action: {
+                                viewModel.removeRecipe(id: recipe.id)
+                                recipeForOptions = nil
+                            }) {
+                                HStack(spacing: 16) {
+                                    Image(systemName: "trash")
+                                        .font(.system(size: 20))
+                                        .foregroundColor(.textPrimary)
+                                        .frame(width: 24)
+                                    
+                                    Text("Delete recipe from the list")
+                                        .font(.bodyRegular)
+                                        .foregroundColor(.textPrimary)
+                                }
+                                .padding(.vertical, 16)
+                                .padding(.horizontal, 24)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                            }
+                        }
+                        .padding(.top, 16) // Spacing from grabber
+                        .padding(.bottom, 24)
+                        
+                        Spacer()
+                    }
+                }
+                .presentationDetents([.fraction(0.2)])
+                .presentationDragIndicator(.hidden)
+            }
         }
     }
     
