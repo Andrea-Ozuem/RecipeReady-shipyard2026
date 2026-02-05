@@ -25,7 +25,6 @@ struct CookbookDetailView: View {
     ]
     
     var body: some View {
-        NavigationStack { // Inner stack for preview/structure, though parent handles nav
             ScrollView {
                 LazyVGrid(columns: columns, spacing: 24) {
                     // Using mock data multiple times to fill the grid for demo
@@ -42,6 +41,7 @@ struct CookbookDetailView: View {
             }
             .background(Color.screenBackground)
             .navigationBarBackButtonHidden(true) // Custom back button
+            .toolbarBackground(Color.clear, for: .navigationBar) // User suggested fix for white pills
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button(action: {
@@ -65,6 +65,7 @@ struct CookbookDetailView: View {
                             Image(systemName: "magnifyingglass")
                                 .foregroundColor(.textPrimary)
                         }
+                        
                         Button(action: {
                             isShowingEditSheet = true
                         }) {
@@ -90,7 +91,6 @@ struct CookbookDetailView: View {
                 .presentationDetents([.fraction(0.75)])
                 .presentationDragIndicator(.visible)
             }
-        }
     }
 }
 

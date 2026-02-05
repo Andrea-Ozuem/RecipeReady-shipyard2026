@@ -161,8 +161,6 @@ struct RecipeDetailView: View {
                         .font(.system(size: 17, weight: .regular))
                         .foregroundColor(.textPrimary)
                         .padding(10)
-                        .background(Circle().fill(Color.white))
-                        .shadow(color: .black.opacity(0.15), radius: 4, x: 0, y: 2)
                 }
                 
                 Button(action: {
@@ -172,8 +170,6 @@ struct RecipeDetailView: View {
                         .font(.system(size: 17, weight: .regular))
                         .foregroundColor(.textPrimary)
                         .padding(10)
-                        .background(Circle().fill(Color.white))
-                        .shadow(color: .black.opacity(0.15), radius: 4, x: 0, y: 2)
                 }
             }
             .padding(.horizontal, 20)

@@ -13,8 +13,40 @@ struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     
     var body: some View {
-        // Temporarily showing CookbookView as the main screen
-        CookbookView()
+        TabView {
+            // Home Tab
+            NavigationStack {
+                CookbookView()
+            }
+            .tabItem {
+                Label("Home", systemImage: "house")
+            }
+            
+            // Search Tab (Placeholder)
+            Text("Search")
+                .tabItem {
+                    Label("Search", systemImage: "magnifyingglass")
+                }
+            
+            // Saved Tab (Placeholder)
+            Text("Saved")
+                .tabItem {
+                    Label("Saved", systemImage: "heart")
+                }
+            
+            // Shopping List Tab
+            ShoppingListView()
+                .tabItem {
+                    Label("Shopping list", systemImage: "cart")
+                }
+            
+            // Profile Tab (Placeholder)
+            Text("Profile")
+                .tabItem {
+                    Label("Profile", systemImage: "person")
+                }
+        }
+        .tint(.primaryGreen) // Use our brand color for active tab
     }
 }
 

@@ -34,6 +34,7 @@ struct RecipeEditView: View {
             }
             .navigationTitle("Edit Recipe")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(Color.clear, for: .navigationBar) // Fix for white pills
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {

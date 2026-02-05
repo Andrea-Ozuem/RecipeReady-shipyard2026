@@ -96,6 +96,7 @@ struct EditCookbookSheet: View {
             }
             .navigationTitle(isDeleting ? "" : "Edit cookbook")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(Color.clear, for: .navigationBar) // Fix for white pills
             .toolbar {
                 if !isDeleting {
                     ToolbarItem(placement: .navigationBarLeading) {
