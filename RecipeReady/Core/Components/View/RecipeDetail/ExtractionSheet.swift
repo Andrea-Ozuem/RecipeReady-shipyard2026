@@ -244,6 +244,16 @@ struct ExtractionSheet: View {
     // MARK: - Actions
     
     private func saveRecipe(_ recipe: Recipe) {
+        // Query for favorites cookbook
+        let descriptor = FetchDescriptor<Cookbook>(
+            predicate: #Predicate { $0.isFavorites == true }
+        )
+        
+        if let favoritesCookbook = try? modelContext.fetch(descriptor).first {
+            // Add recipe to favorites
+            favoritesCookbook.recipes.append(recipe)
+        }
+        
         modelContext.insert(recipe)
         extractionManager.dismiss()
         dismiss()

@@ -34,6 +34,10 @@ final class Recipe {
     var createdAt: Date
     var updatedAt: Date
     
+    // Many-to-many relationship with cookbooks
+    @Relationship(deleteRule: .nullify)
+    var cookbooks: [Cookbook]
+    
     /// Computed property to encode/decode ingredients from Data
     var ingredients: [Ingredient] {
         get {
@@ -70,7 +74,8 @@ final class Recipe {
         restingTime: Int? = nil,
         confidenceScore: Double = 0.0,
         createdAt: Date = Date(),
-        updatedAt: Date = Date()
+        updatedAt: Date = Date(),
+        cookbooks: [Cookbook] = []
     ) {
         self.id = id
         self.title = title
@@ -84,6 +89,7 @@ final class Recipe {
         self.confidenceScore = confidenceScore
         self.createdAt = createdAt
         self.updatedAt = updatedAt
+        self.cookbooks = cookbooks
         
         // Encode arrays to Data
         self.ingredientsData = try? JSONEncoder().encode(ingredients)

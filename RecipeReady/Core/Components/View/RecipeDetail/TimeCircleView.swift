@@ -29,10 +29,9 @@ struct TimeCircleView: View {
                     .stroke(Color.divider, lineWidth: 2)
                     .frame(width: 60, height: 60)
                 
-                // Orange progress arc (decorator)
-                // In screenshot, it's just a partial arc. We can hardcode ~30% for aesthetic.
+                // Orange progress arc
                 Circle()
-                    .trim(from: 0.0, to: 0.35)
+                    .trim(from: 0.0, to: min(Double(minutes) / 60.0, 1.0))
                     .stroke(Color.orange, style: StrokeStyle(lineWidth: 2, lineCap: .round))
                     .frame(width: 60, height: 60)
                     .rotationEffect(.degrees(-90))

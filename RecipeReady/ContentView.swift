@@ -22,22 +22,16 @@ struct ContentView: View {
                 Label("Home", systemImage: "house")
             }
             
-            // Search Tab (Placeholder)
-            Text("Search")
-                .tabItem {
-                    Label("Search", systemImage: "magnifyingglass")
-                }
-            
             // Saved Tab (Placeholder)
             Text("Saved")
                 .tabItem {
-                    Label("Saved", systemImage: "heart")
+                    Label("Cookbooks", systemImage: "heart")
                 }
             
             // Shopping List Tab
             ShoppingListView()
                 .tabItem {
-                    Label("Shopping list", systemImage: "cart")
+                    Label("Grocery list", systemImage: "cart")
                 }
             
             // Profile Tab (Placeholder)
@@ -46,11 +40,11 @@ struct ContentView: View {
                     Label("Profile", systemImage: "person")
                 }
         }
-        .tint(.primaryGreen) // Use our brand color for active tab
+        .tint(.primaryOrange) // Use our brand color for active tab
     }
 }
 
 #Preview {
     ContentView()
-        .modelContainer(for: Recipe.self, inMemory: true)
+        .modelContainer(for: [Recipe.self, Cookbook.self], inMemory: true)
 }

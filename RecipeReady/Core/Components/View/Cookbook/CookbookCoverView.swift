@@ -8,7 +8,12 @@
 import SwiftUI
 
 struct CookbookCoverView: View {
-    let cookbook: CookbookItem
+    let cookbook: Cookbook
+    
+    // Get image URLs from recipes in this cookbook
+    private var imageURLs: [String] {
+        cookbook.recipes.compactMap { $0.imageURL }.prefix(3).map { $0 }
+    }
     
     var body: some View {
         ZStack {
@@ -37,7 +42,7 @@ struct CookbookCoverView: View {
                     VStack(spacing: spacing) {
                         // Top Half
                         Group {
-                            if let urlString = cookbook.imageURLs.first, let url = URL(string: urlString) {
+                            if let urlString = imageURLs.first, let url = URL(string: urlString) {
                                 AsyncImage(url: url) { phase in
                                     if let image = phase.image {
                                         image
@@ -60,7 +65,7 @@ struct CookbookCoverView: View {
                         HStack(spacing: spacing) {
                             // Bottom Left
                             Group {
-                                if cookbook.imageURLs.count > 1, let url = URL(string: cookbook.imageURLs[1]) {
+                                if imageURLs.count > 1, let url = URL(string: imageURLs[1]) {
                                     AsyncImage(url: url) { phase in
                                         if let image = phase.image {
                                             image
@@ -81,7 +86,7 @@ struct CookbookCoverView: View {
                             
                             // Bottom Right
                             Group {
-                                if cookbook.imageURLs.count > 2, let url = URL(string: cookbook.imageURLs[2]) {
+                                if imageURLs.count > 2, let url = URL(string: imageURLs[2]) {
                                     AsyncImage(url: url) { phase in
                                         if let image = phase.image {
                                             image

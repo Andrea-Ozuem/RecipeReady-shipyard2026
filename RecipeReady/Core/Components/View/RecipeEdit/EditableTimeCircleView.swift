@@ -49,7 +49,8 @@ struct EditableTimeCircleView: View {
                     
                     if isSet {
                         Circle()
-                            .trim(from: 0.0, to: 0.35)
+                            // Progress: 1.0 if >= 60 mins, else fraction of hour
+                            .trim(from: 0.0, to: min(Double(minutes ?? 0) / 60.0, 1.0))
                             .stroke(Color.orange, style: StrokeStyle(lineWidth: 2, lineCap: .round))
                             .frame(width: 60, height: 60)
                             .rotationEffect(.degrees(-90))

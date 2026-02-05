@@ -10,11 +10,7 @@ import SwiftData
 
 struct CookbookDetailView: View {
     @Environment(\.dismiss) private var dismiss
-    let cookbook: CookbookItem
-    
-    // In a real app, we'd query recipes filtered by this cookbook.
-    // For now, we show all mock recipes.
-    @Query(sort: \Recipe.createdAt, order: .reverse) private var recipes: [Recipe]
+    let cookbook: Cookbook
     
     @State private var isShowingEditSheet = false
     
@@ -27,13 +23,12 @@ struct CookbookDetailView: View {
     var body: some View {
             ScrollView {
                 LazyVGrid(columns: columns, spacing: 24) {
-                    // Using mock data multiple times to fill the grid for demo
-                    ForEach(0..<4, id: \.self) { _ in
-                         RecipeCardView(recipe: .mock)
-                    }
-                    // Also show any real persisted recipes
-                    ForEach(recipes) { recipe in
-                        RecipeCardView(recipe: recipe)
+                    // Show recipes in this cookbook
+                    ForEach(cookbook.recipes) { recipe in
+                        NavigationLink(destination: RecipeDetailView(recipe: recipe)) {
+                            RecipeCardView(recipe: recipe)
+                        }
+                        .buttonStyle(.plain)
                     }
                 }
                 .padding(.horizontal, 20)
@@ -76,18 +71,7 @@ struct CookbookDetailView: View {
                 }
             }
             .sheet(isPresented: $isShowingEditSheet) {
-                EditCookbookSheet(
-                    cookbook: cookbook,
-                    onSave: { newTitle in
-                        // TODO: Update title in parent/model
-                        print("Saved title: \(newTitle)")
-                    },
-                    onDelete: {
-                        // TODO: Delete action
-                        print("Deleted cookbook")
-                        dismiss()
-                    }
-                )
+                EditCookbookSheet(cookbook: cookbook)
                 .presentationDetents([.fraction(0.75)])
                 .presentationDragIndicator(.visible)
             }
@@ -95,10 +79,6 @@ struct CookbookDetailView: View {
 }
 
 #Preview {
-    CookbookDetailView(cookbook: CookbookItem(title: "Salad", count: 4, imageURLs: [
-        "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=500&q=80",
-        "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=500&q=80",
-        "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&q=80"
-    ]))
-        .modelContainer(for: Recipe.self, inMemory: true)
+    CookbookDetailView(cookbook: Cookbook(title: "Salad", isFavorites: false))
+        .modelContainer(for: [Recipe.self, Cookbook.self], inMemory: true)
 }

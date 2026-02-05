@@ -6,22 +6,20 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct EditCookbookSheet: View {
     @Environment(\.dismiss) private var dismiss
-    let cookbook: CookbookItem
-    var onSave: (String) -> Void
-    var onDelete: () -> Void
+    @Environment(\.modelContext) private var modelContext
+    let cookbook: Cookbook
     
     @State private var title: String
     
     @State private var showDeleteAlert = false
     @State private var isDeleting = false
     
-    init(cookbook: CookbookItem, onSave: @escaping (String) -> Void, onDelete: @escaping () -> Void) {
+    init(cookbook: Cookbook) {
         self.cookbook = cookbook
-        self.onSave = onSave
-        self.onDelete = onDelete
         _title = State(initialValue: cookbook.title)
     }
     
@@ -112,7 +110,8 @@ struct EditCookbookSheet: View {
                     ToolbarItem(placement: .navigationBarTrailing) {
                         Button(action: {
                             if !title.isEmpty {
-                                onSave(title)
+                                cookbook.title = title
+                                try? modelContext.save()
                                 dismiss()
                             }
                         }) {
@@ -142,7 +141,8 @@ struct EditCookbookSheet: View {
         
         // Simulate delay
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-            onDelete()
+            modelContext.delete(cookbook)
+            try? modelContext.save()
             dismiss()
         }
     }

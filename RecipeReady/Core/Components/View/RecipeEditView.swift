@@ -161,14 +161,16 @@ struct RecipeEditView: View {
             
             // Custom Floating Header (Cancel / Save)
             HStack {
-                Button("Cancel") {
+                Button(action: {
                     dismiss()
+                }) {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(.white)
+                        .padding(10)
+                        .background(Color.black.opacity(0.3)) // Background for contrast
+                        .clipShape(Circle())
                 }
-                .fontWeight(.medium)
-                .foregroundColor(.white)
-                .padding(10)
-                .background(Color.black.opacity(0.3)) // Background for contrast
-                .clipShape(Capsule())
                 
                 Spacer()
                 
@@ -228,12 +230,19 @@ struct RecipeEditView: View {
         
         // If recipe is not in context (e.g., newly extracted), insert it now.
         if recipe.modelContext == nil {
+            // Query for favorites cookbook
+            let descriptor = FetchDescriptor<Cookbook>(
+                predicate: #Predicate { $0.isFavorites == true }
+            )
+            
+            if let favoritesCookbook = try? modelContext.fetch(descriptor).first {
+                // Add recipe to favorites
+                favoritesCookbook.recipes.append(recipe)
+            }
+            
             modelContext.insert(recipe)
         }
         
-        // If we are in a sheet managed by ExtractionManager, we might want to notify it to dismiss too?
-        // But `dismiss()` dismisses the View.
-        // If ExtractionSheet presents this View, `dismiss()` closes the sheet.
         dismiss()
     }
 }
