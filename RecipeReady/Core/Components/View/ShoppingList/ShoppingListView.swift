@@ -60,7 +60,7 @@ struct ShoppingListView: View {
                 
                 Text("When you add ingredients to your shopping list, you'll see them here! Happy shopping!")
                     .font(.bodyRegular)
-                    .foregroundStyle(Color.textSecondary)
+                    .foregroundStyle(Color.textPrimary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 32)
             }
