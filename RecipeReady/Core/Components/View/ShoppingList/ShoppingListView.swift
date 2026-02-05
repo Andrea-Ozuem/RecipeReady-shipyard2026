@@ -12,31 +12,147 @@ struct ShoppingListView: View {
     
     var body: some View {
         NavigationStack {
-            VStack {
+            VStack(spacing: 0) {
+                // Custom Header
+                HStack {
+                    Text("Shopping List")
+                        .font(.largeTitle)
+                        .foregroundColor(.textPrimary)
+                    
+                    Spacer()
+                    
+                    HStack(spacing: 16) {
+                        // Temporary button to toggle state for testing
+                        Button(action: {
+                            withAnimation {
+                                viewModel.toggleMockData()
+                            }
+                        }) {
+                            Image(systemName: "flask") // Science flask for "Testing"
+                                .font(.system(size: 20))
+                                .foregroundColor(.textSecondary)
+                        }
+                        
+                        // Trash Button
+                        Button(action: {
+                            // TODO: Clear list action
+                            withAnimation {
+                                viewModel.recipes.removeAll()
+                            }
+                        }) {
+                            Image(systemName: "trash")
+                                .font(.system(size: 20))
+                                .foregroundColor(.textPrimary)
+                        }
+                    }
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 16)
+                .padding(.bottom, 24) // Spacing between header and content
+                
                 if viewModel.isEmpty {
+                    Spacer()
                     emptyStateView
+                    Spacer()
                 } else {
-                    List(viewModel.ingredients, id: \.self) { ingredient in
-                        Text(ingredient)
-                            .font(.bodyRegular)
-                            .foregroundStyle(Color.textPrimary)
+                    // Populated State
+                    VStack(spacing: 0) {
+                        // Tab Switcher
+                        HStack(spacing: 0) {
+                            tabButton(title: "Recipes (\(viewModel.recipes.count))", tab: .recipes)
+                            tabButton(title: "All items", tab: .allItems)
+                        }
+                        
+                        Divider()
+                            .overlay(Color.divider)
+                        
+                        // List Content
+                        if viewModel.selectedTab == .recipes {
+                            List {
+                                ForEach($viewModel.recipes) { $recipe in
+                                    VStack(spacing: 0) {
+                                        ShoppingListRecipeRow(recipe: recipe)
+                                            .padding(.horizontal, 20)
+                                            .contentShape(Rectangle()) // Make entire row tappable
+                                            .onTapGesture {
+                                                viewModel.toggleExpansion(for: recipe.id)
+                                            }
+                                        
+                                        if recipe.isExpanded {
+                                            ShoppingListExpandedView(recipe: $recipe, viewModel: viewModel)
+                                                .padding(.bottom, 12)
+                                        }
+                                        
+                                        if viewModel.recipes.last?.id != recipe.id {
+                                             Divider()
+                                        }
+                                    }
+                                    .listRowSeparator(.hidden)
+                                    .listRowInsets(EdgeInsets()) // Padding handled internally now because expanded view needs full width
+                                }
+                            }
+                            .listStyle(.plain)
+                        } else {
+                            // All Items Tab
+                            ZStack(alignment: .bottom) {
+                                List {
+                                    ForEach(viewModel.allIngredients) { ingredient in
+                                        ShoppingListIngredientRow(ingredient: ingredient) {
+                                            viewModel.toggleAllIngredientsItem(id: ingredient.id)
+                                        }
+                                        .listRowSeparator(.hidden)
+                                    }
+                                }
+                                .listStyle(.plain)
+                                
+                                // Floating Action Button
+                                Button(action: {
+                                    withAnimation {
+                                        viewModel.unmarkAll()
+                                    }
+                                }) {
+                                    Text("Unmark all items")
+                                        .font(.bodyRegular)
+                                        .foregroundColor(Color.primaryGreen)
+                                        .padding(.horizontal, 24)
+                                        .padding(.vertical, 12)
+                                        .background(
+                                            Capsule()
+                                                .stroke(Color.primaryGreen, lineWidth: 1)
+                                                .background(Color.white.clipShape(Capsule()))
+                                        )
+                                        .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
+                                }
+                                .padding(.bottom, 24)
+                            }
+                        }
                     }
                 }
             }
-            .navigationTitle("Shopping List")
-            .toolbar {
-                // Temporary button to toggle state for testing
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button(action: {
-                        withAnimation {
-                            viewModel.toggleMockData()
-                        }
-                    }) {
-                        Image(systemName: "flask") // Science flask for "Testing"
-                    }
-                }
+            .toolbar(.hidden, for: .navigationBar)
+        }
+    }
+    
+    // MARK: - Components or Helpers
+    
+    private func tabButton(title: String, tab: ShoppingListViewModel.Tab) -> some View {
+        Button(action: {
+            withAnimation {
+                viewModel.selectedTab = tab
+            }
+        }) {
+            VStack(spacing: 8) {
+                Text(title)
+                    .font(.bodyRegular)
+                    .foregroundStyle(viewModel.selectedTab == tab ? Color.primaryOrange : Color.textPrimary)
+                
+                // Active Indicator
+                Rectangle()
+                    .fill(viewModel.selectedTab == tab ? Color.primaryOrange : Color.clear)
+                    .frame(height: 2)
             }
         }
+        .frame(maxWidth: .infinity)
     }
     
     private var emptyStateView: some View {
@@ -57,18 +173,19 @@ struct ShoppingListView: View {
                     .font(.heading1)
                     .foregroundStyle(Color.textPrimary)
                     .multilineTextAlignment(.center)
+                    .padding(.horizontal,30) // More padding for title
                 
                 Text("When you add ingredients to your shopping list, you'll see them here! Happy shopping!")
                     .font(.bodyRegular)
-                    .foregroundStyle(Color.textPrimary)
+                    .foregroundStyle(Color.textSecondary)
                     .multilineTextAlignment(.center)
-                    .padding(.horizontal, 32)
+                    .padding(.horizontal, 15) // Less padding for body
             }
             
             Spacer()
             Spacer() // Push content slightly up
         }
-        .padding()
+        .padding() // Default padding for container
     }
 }
 

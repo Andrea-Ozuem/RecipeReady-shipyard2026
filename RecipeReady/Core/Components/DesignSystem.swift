@@ -59,6 +59,14 @@ extension Font {
         .system(size: 24, weight: .bold, design: .default)
     }
     
+    static var heading2: Font {
+        .system(size: 20, weight: .bold, design: .default)
+    }
+    
+    static var heading3: Font {
+        .system(size: 18, weight: .semibold, design: .default)
+    }
+    
     static var bodyBold: Font {
         .system(size: 16, weight: .semibold, design: .default)
     }

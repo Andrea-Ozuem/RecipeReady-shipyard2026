@@ -9,6 +9,7 @@ DerivedData/
 *.hmap
 *.xccheckout
 *.xcscmblueprint
+.agent/
 
 # Secrets
 RecipeReady/Services/Secrets.swift
