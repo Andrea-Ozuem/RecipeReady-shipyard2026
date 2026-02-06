@@ -6,10 +6,11 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct CookbookView: View {
     @Environment(\.modelContext) private var modelContext
-    @Query(sort: \Cookbook.createdAt, order: .forward) private var cookbooks: [Cookbook]
+    @Query(sort: \Cookbook.createdAt, order: .forward) var cookbooks: [Cookbook]
     
     // Grid Setup: 2 columns with spacing
     private let columns = [
@@ -18,6 +19,8 @@ struct CookbookView: View {
     ]
     
     @State private var isShowingAddCookbook = false
+    
+    public init() {}
     
     var body: some View {
         NavigationStack {

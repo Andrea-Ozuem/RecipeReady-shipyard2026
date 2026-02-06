@@ -69,7 +69,7 @@ struct CookbookDetailView: View {
                     HStack(spacing: 16) {
                         Button(action: {}) {
                             Image(systemName: "magnifyingglass")
-                                .foregroundColor(.textPrimary)
+                            .foregroundColor(.textPrimary)
                         }
                         
                         Button(action: {
@@ -99,10 +99,6 @@ struct CookbookDetailView: View {
 }
 
 #Preview {
-    CookbookDetailView(cookbook: CookbookItem(title: "Salad", count: 4, imageURLs: [
-        "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=500&q=80",
-        "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=500&q=80",
-        "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&q=80"
-    ]))
-        .modelContainer(for: Recipe.self, inMemory: true)
+    CookbookDetailView(cookbook: Cookbook(name: "Salad", recipes: []))
+        .modelContainer(for: [Recipe.self, Cookbook.self], inMemory: true)
 }
