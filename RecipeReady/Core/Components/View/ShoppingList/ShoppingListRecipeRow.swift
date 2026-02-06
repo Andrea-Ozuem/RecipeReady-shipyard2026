@@ -17,20 +17,40 @@ struct ShoppingListRecipeRow: View {
         HStack(alignment: .top, spacing: 0) {
             // Main clickable content area
             HStack(alignment: .top, spacing: 16) {
-                // Thumbnail
-                AsyncImage(url: URL(string: recipe.imageURL ?? "")) { phase in
-                    if let image = phase.image {
-                        image
+                if let imageURLString = recipe.imageURL {
+                    if imageURLString.hasPrefix("http") || imageURLString.hasPrefix("https"), let url = URL(string: imageURLString) {
+                        AsyncImage(url: url) { phase in
+                            if let image = phase.image {
+                                image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                            } else {
+                                Rectangle()
+                                    .fill(Color.gray.opacity(0.3))
+                            }
+                        }
+                        .frame(width: 80, height: 80)
+                        .cornerRadius(8)
+                        .clipped()
+                    } else if let uiImage = loadLocalImage(named: imageURLString) {
+                        Image(uiImage: uiImage)
                             .resizable()
                             .aspectRatio(contentMode: .fill)
+                            .frame(width: 80, height: 80)
+                            .cornerRadius(8)
+                            .clipped()
                     } else {
                         Rectangle()
                             .fill(Color.gray.opacity(0.3))
+                            .frame(width: 80, height: 80)
+                            .cornerRadius(8)
                     }
+                } else {
+                    Rectangle()
+                        .fill(Color.gray.opacity(0.3))
+                        .frame(width: 80, height: 80)
+                        .cornerRadius(8)
                 }
-                .frame(width: 80, height: 80)
-                .cornerRadius(8)
-                .clipped()
                 
                 // Text Content
                 VStack(alignment: .leading, spacing: 4) {
@@ -63,6 +83,11 @@ struct ShoppingListRecipeRow: View {
         }
         .padding(.vertical, 12)
         .background(Color.white) // Ensure tap area
+    }
+    
+    private func loadLocalImage(named filename: String) -> UIImage? {
+        let fileURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent(filename)
+        return UIImage(contentsOfFile: fileURL.path)
     }
 }
 

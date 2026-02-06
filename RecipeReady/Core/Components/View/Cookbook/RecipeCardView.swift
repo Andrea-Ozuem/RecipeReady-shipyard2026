@@ -15,36 +15,50 @@ struct RecipeCardView: View {
             // MARK: - Image & Badges
             ZStack(alignment: .topLeading) {
                 // Async Image
-                if let urlString = recipe.imageURL, let url = URL(string: urlString) {
-                    AsyncImage(url: url) { phase in
-                        switch phase {
-                        case .empty:
-                            Rectangle()
-                                .fill(Color.gray.opacity(0.1))
-                                .overlay(ProgressView())
-                        case .success(let image):
-                            image
-                                .resizable()
-                                .aspectRatio(contentMode: .fill)
-                                .frame(minWidth: 0, maxWidth: .infinity)
-                        case .failure:
-                            Rectangle()
-                                .fill(Color.gray.opacity(0.1))
-                                .overlay(Image(systemName: "photo").foregroundColor(.gray))
-                        @unknown default:
-                            EmptyView()
+                if let imageURLString = recipe.imageURL {
+                    if imageURLString.hasPrefix("http") || imageURLString.hasPrefix("https"), let url = URL(string: imageURLString) {
+                        AsyncImage(url: url) { phase in
+                            switch phase {
+                            case .empty:
+                                Rectangle()
+                                    .fill(Color.gray.opacity(0.1))
+                                    .overlay(ProgressView())
+                            case .success(let image):
+                                image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                                    .frame(minWidth: 0, maxWidth: .infinity)
+                            case .failure:
+                                Rectangle()
+                                    .fill(Color.gray.opacity(0.1))
+                                    .overlay(Image(systemName: "photo").foregroundColor(.gray))
+                            @unknown default:
+                                EmptyView()
+                            }
                         }
+                        .frame(height: 200)
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                    } else if let uiImage = loadLocalImage(named: imageURLString) {
+                         Image(uiImage: uiImage)
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(minWidth: 0, maxWidth: .infinity)
+                            .frame(height: 200)
+                            .clipShape(RoundedRectangle(cornerRadius: 16))
+                    } else {
+                        // Placeholder for failed local load
+                        Rectangle()
+                            .fill(Color.gray.opacity(0.1))
+                            .overlay(Image(systemName: "photo").foregroundColor(.gray))
+                            .frame(height: 200)
+                            .clipShape(RoundedRectangle(cornerRadius: 16))
                     }
-                    .frame(height: 200)
-                    .clipShape(RoundedRectangle(cornerRadius: 16))
                 } else {
                     Rectangle()
                         .fill(Color.gray.opacity(0.1))
                         .frame(height: 200)
                         .clipShape(RoundedRectangle(cornerRadius: 16))
                 }
-                
-                
             }
             .frame(height: 200) // Fixed height for masonry-like grid feeling
             
@@ -71,6 +85,11 @@ struct RecipeCardView: View {
                 }
             }
         }
+    }
+    
+    private func loadLocalImage(named filename: String) -> UIImage? {
+        let fileURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent(filename)
+        return UIImage(contentsOfFile: fileURL.path)
     }
 }
 

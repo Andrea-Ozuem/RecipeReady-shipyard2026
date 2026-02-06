@@ -27,28 +27,52 @@ struct RecipeDetailView: View {
                 VStack(alignment: .leading, spacing: 0) {
                     // MARK: - Hero Image
                     // Placeholder or AsyncImage
-                    // MARK: - Hero Image
-                    if let imageURL = recipe.imageURL, let url = URL(string: imageURL) {
-                        AsyncImage(url: url) { phase in
-                            switch phase {
-                            case .empty:
-                                Rectangle()
-                                    .fill(Color.gray.opacity(0.3))
-                                    .overlay(ProgressView())
-                            case .success(let image):
-                                image
+                    if let imageURLString = recipe.imageURL {
+                        // Check if it's a remote URL
+                        if imageURLString.hasPrefix("http") || imageURLString.hasPrefix("https"), let url = URL(string: imageURLString) {
+                            AsyncImage(url: url) { phase in
+                                switch phase {
+                                case .empty:
+                                    Rectangle()
+                                        .fill(Color.gray.opacity(0.3))
+                                        .overlay(ProgressView())
+                                case .success(let image):
+                                    image
+                                        .resizable()
+                                        .scaledToFill()
+                                case .failure:
+                                    Rectangle()
+                                        .fill(Color.gray.opacity(0.3))
+                                        .overlay(Image(systemName: "fork.knife").foregroundColor(.gray))
+                                @unknown default:
+                                    EmptyView()
+                                }
+                            }
+                            .frame(height: 300)
+                            .clipped()
+                        } else {
+                            // Assume local file path
+                            if let uiImage = loadLocalImage(named: imageURLString) {
+                                Image(uiImage: uiImage)
                                     .resizable()
                                     .scaledToFill()
-                            case .failure:
+                                    .frame(height: 300)
+                                    .clipped()
+                            } else {
+                                // Fallback / Placeholder for failed load
                                 Rectangle()
                                     .fill(Color.gray.opacity(0.3))
-                                    .overlay(Image(systemName: "fork.knife").foregroundColor(.gray))
-                            @unknown default:
-                                EmptyView()
+                                    .overlay(
+                                        Image(systemName: "fork.knife")
+                                            .resizable()
+                                            .scaledToFit()
+                                            .frame(width: 60)
+                                            .foregroundColor(.gray)
+                                    )
+                                    .frame(height: 300)
+                                    .clipped()
                             }
                         }
-                        .frame(height: 300)
-                        .clipped()
                     } else {
                         Rectangle()
                             .fill(Color.gray.opacity(0.3))
@@ -340,6 +364,11 @@ struct RecipeDetailView: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
             withAnimation { showToast = false }
         }
+    }
+    
+    private func loadLocalImage(named filename: String) -> UIImage? {
+        let fileURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent(filename)
+        return UIImage(contentsOfFile: fileURL.path)
     }
 }
 

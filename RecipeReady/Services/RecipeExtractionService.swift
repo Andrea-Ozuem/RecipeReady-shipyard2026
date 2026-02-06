@@ -89,12 +89,12 @@ final class RecipeExtractionService: RecipeExtractionServiceProtocol {
         if let result = captionResult {
             // Golden path: Caption has both ingredients and steps
             if !result.ingredients.isEmpty && !result.steps.isEmpty {
-                return mapToResponse(result, imageURL: thumbnailURL)
+                return await createResponse(from: result, originalThumbnailURL: thumbnailURL)
             }
             
             // If caption has ingredients but no video available -> Return what we have
             if !result.ingredients.isEmpty && remoteVideoURL == nil {
-                return mapToResponse(result, imageURL: thumbnailURL)
+                return await createResponse(from: result, originalThumbnailURL: thumbnailURL)
             }
         }
         
@@ -104,7 +104,7 @@ final class RecipeExtractionService: RecipeExtractionServiceProtocol {
               let videoURL = URL(string: videoURLString) else {
              // If we have a partial caption result, return it. Otherwise fail.
             if let result = captionResult, result.hasRecipe {
-                return mapToResponse(result, imageURL: thumbnailURL)
+                return await createResponse(from: result, originalThumbnailURL: thumbnailURL)
             }
             throw RecipeExtractionError.parsingError("No recipe found in caption and no video URL available.")
         }
@@ -148,11 +148,14 @@ final class RecipeExtractionService: RecipeExtractionServiceProtocol {
         // Calculate combined confidence
         let confidence = max(captionResult?.confidenceScore ?? 0, audioResult.confidenceScore)
         
+        // Download Image if available
+        let localImagePath = await downloadImage(from: thumbnailURL)
+        
         return RecipeExtractionResponse(
             ingredients: finalIngredients,
             steps: finalSteps,
             sourceLink: nil,
-            imageURL: thumbnailURL,
+            imageURL: localImagePath,
             confidenceScore: confidence,
             title: title,
             servings: serv,
@@ -163,12 +166,16 @@ final class RecipeExtractionService: RecipeExtractionServiceProtocol {
         )
     }
     
-    private func mapToResponse(_ result: GeminiRecipeResult, imageURL: String?) -> RecipeExtractionResponse {
+    // MARK: - Helpers
+    
+    private func createResponse(from result: GeminiRecipeResult, originalThumbnailURL: String?) async -> RecipeExtractionResponse {
+        let localImagePath = await downloadImage(from: originalThumbnailURL)
+        
         return RecipeExtractionResponse(
             ingredients: result.ingredients,
             steps: result.steps,
             sourceLink: nil,
-            imageURL: imageURL,
+            imageURL: localImagePath,
             confidenceScore: result.confidenceScore,
             title: result.title,
             servings: result.servings,
@@ -177,6 +184,18 @@ final class RecipeExtractionService: RecipeExtractionServiceProtocol {
             restingTime: result.restingTime,
             difficulty: result.difficulty
         )
+    }
+    
+    private func downloadImage(from urlString: String?) async -> String? {
+        guard let urlString = urlString, let url = URL(string: urlString) else { return nil }
+        
+        do {
+            return try await ImageStorageService.shared.saveImage(from: url)
+        } catch {
+            print("⚠️ Failed to download/save image: \(error)")
+            // Fallback to remote URL
+            return urlString
+        }
     }
     
     // MARK: - Private Helpers

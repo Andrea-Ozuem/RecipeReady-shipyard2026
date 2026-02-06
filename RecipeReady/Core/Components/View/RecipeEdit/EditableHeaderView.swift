@@ -14,25 +14,40 @@ struct EditableHeaderView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             // MARK: - Hero Image
-            if let imageURLString = imageURL, let url = URL(string: imageURLString) {
-                AsyncImage(url: url) { phase in
-                    switch phase {
-                    case .empty:
-                        Rectangle()
-                            .fill(Color.gray.opacity(0.3))
-                            .overlay(ProgressView())
-                    case .success(let image):
-                        image
+            // MARK: - Hero Image
+            if let imageURLString = imageURL {
+                // Check if it's a remote URL
+                if imageURLString.hasPrefix("http") || imageURLString.hasPrefix("https"), let url = URL(string: imageURLString) {
+                    AsyncImage(url: url) { phase in
+                        switch phase {
+                        case .empty:
+                            Rectangle()
+                                .fill(Color.gray.opacity(0.3))
+                                .overlay(ProgressView())
+                        case .success(let image):
+                            image
+                                .resizable()
+                                .scaledToFill()
+                        case .failure:
+                            placeholderImage
+                        @unknown default:
+                            EmptyView()
+                        }
+                    }
+                    .frame(height: 300)
+                    .clipped()
+                } else {
+                    // Assume local file path
+                    if let uiImage = loadLocalImage(named: imageURLString) {
+                        Image(uiImage: uiImage)
                             .resizable()
                             .scaledToFill()
-                    case .failure:
+                            .frame(height: 300)
+                            .clipped()
+                    } else {
                         placeholderImage
-                    @unknown default:
-                        EmptyView()
                     }
                 }
-                .frame(height: 300)
-                .clipped()
             } else {
                 placeholderImage
             }
@@ -63,5 +78,10 @@ struct EditableHeaderView: View {
             )
             .frame(height: 300)
             .clipped()
+    }
+    
+    private func loadLocalImage(named filename: String) -> UIImage? {
+        let fileURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent(filename)
+        return UIImage(contentsOfFile: fileURL.path)
     }
 }
