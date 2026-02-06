@@ -6,9 +6,10 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct ShoppingListIngredientRow: View {
-    let ingredient: ShoppingListIngredient
+    let ingredient: ShoppingListItem
     let onToggle: () -> Void
     
     var body: some View {
@@ -54,12 +55,13 @@ struct ShoppingListIngredientRow: View {
 
 #Preview {
     VStack {
+        // Mock data for preview
         ShoppingListIngredientRow(
-            ingredient: ShoppingListIngredient(name: "lamb's lettuce", quantity: "200 g", isChecked: false),
+            ingredient: ShoppingListItem(name: "lamb's lettuce", quantity: "200 g", isChecked: false),
             onToggle: {}
         )
         ShoppingListIngredientRow(
-            ingredient: ShoppingListIngredient(name: "waxy potatoes", quantity: "300 g", isChecked: true),
+            ingredient: ShoppingListItem(name: "waxy potatoes", quantity: "300 g", isChecked: true),
             onToggle: {}
         )
     }

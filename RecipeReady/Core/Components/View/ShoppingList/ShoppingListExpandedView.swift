@@ -6,10 +6,10 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct ShoppingListExpandedView: View {
-    @Binding var recipe: ShoppingListRecipe
-    @ObservedObject var viewModel: ShoppingListViewModel
+    @Bindable var recipe: ShoppingListRecipe
     
     var body: some View {
         VStack(spacing: 0) {
@@ -21,13 +21,7 @@ struct ShoppingListExpandedView: View {
                 
                 Spacer()
                 
-                ServingsStepper(servings: Binding(
-                    get: { recipe.servings },
-                    set: { newValue in
-                        // Call ViewModel to update and re-calculate quantities if implemented
-                        viewModel.updateServings(for: recipe.id, newCount: newValue)
-                    }
-                ))
+                ServingsStepper(servings: $recipe.servings)
             }
             .padding(.vertical, 16)
             
@@ -35,12 +29,12 @@ struct ShoppingListExpandedView: View {
             
             // Ingredients List
             VStack(spacing: 0) {
-                ForEach(recipe.ingredients) { ingredient in
-                    ShoppingListIngredientRow(ingredient: ingredient) {
-                        viewModel.toggleIngredient(recipeID: recipe.id, ingredientID: ingredient.id)
+                ForEach(recipe.items) { item in
+                    ShoppingListIngredientRow(ingredient: item) {
+                        item.isChecked.toggle()
                     }
                     
-                    if ingredient.id != recipe.ingredients.last?.id {
+                    if item.id != recipe.items.last?.id {
                         Divider()
                             .opacity(0.5)
                     }

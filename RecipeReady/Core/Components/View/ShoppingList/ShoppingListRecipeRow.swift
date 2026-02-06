@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct ShoppingListRecipeRow: View {
     let recipe: ShoppingListRecipe
@@ -66,13 +67,10 @@ struct ShoppingListRecipeRow: View {
 }
 
 #Preview {
-    ShoppingListRecipeRow(
-        recipe: ShoppingListRecipe(
-            title: "Lamb's lettuce salad with crispy potatoes",
-            imageURL: "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=500&q=80",
-            totalItems: 14,
-            missingItems: 14
-        )
-    )
-    .padding()
+    let config = ModelConfiguration(isStoredInMemoryOnly: true)
+    let container = try! ModelContainer(for: ShoppingListRecipe.self, ShoppingListItem.self, configurations: config)
+    let recipe = ShoppingListRecipe(title: "Test Recipe", imageURL: nil)
+    
+    return ShoppingListRecipeRow(recipe: recipe)
+        .padding()
 }

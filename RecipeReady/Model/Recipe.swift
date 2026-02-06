@@ -10,6 +10,7 @@ import SwiftData
 
 @Model
 final class Recipe {
+    @Attribute(.unique) var id: UUID
     var title: String
     var ingredients: [Ingredient]
     var steps: [CookingStep]
@@ -31,6 +32,7 @@ final class Recipe {
     var updatedAt: Date
     
     init(
+        id: UUID = UUID(),
         title: String,
         ingredients: [Ingredient] = [],
         steps: [CookingStep] = [],
@@ -47,6 +49,7 @@ final class Recipe {
         createdAt: Date = Date(),
         updatedAt: Date = Date()
     ) {
+        self.id = id
         self.title = title
         self.ingredients = ingredients
         self.steps = steps

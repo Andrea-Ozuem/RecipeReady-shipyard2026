@@ -6,13 +6,19 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct RecipeDetailView: View {
     let recipe: Recipe
     
     // State for local interactions
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
+    @Query private var shoppingListRecipes: [ShoppingListRecipe]
+    
     @State private var currentServings: Int = 4
+    @State private var showToast = false
+    @State private var toastMessage = ""
     
     var body: some View {
         ZStack(alignment: .topTrailing) {
@@ -79,19 +85,11 @@ struct RecipeDetailView: View {
                             
                             // Time Circles Row
                             HStack(spacing: 0) {
-                                if let prep = recipe.prepTime {
-                                    TimeCircleView(title: "Preparation", minutes: prep)
-                                    Spacer()
-                                }
-                                
-                                if let bake = recipe.bakingTime {
-                                    TimeCircleView(title: "Baking", minutes: bake)
-                                    Spacer()
-                                }
-                                
-                                if let rest = recipe.restingTime {
-                                    TimeCircleView(title: "Resting", minutes: rest)
-                                }
+                                TimeCircleView(title: "Preparation", minutes: recipe.prepTime)
+                                Spacer()
+                                TimeCircleView(title: "Baking", minutes: recipe.bakingTime)
+                                Spacer()
+                                TimeCircleView(title: "Resting", minutes: recipe.restingTime)
                             }
                             .padding(.horizontal, 16)
                         }
@@ -155,18 +153,32 @@ struct RecipeDetailView: View {
                             
                             // Add to shopping list Button
                             Button(action: {
-                                // TODO: Shopping list action
+                                if isInShoppingList {
+                                    // TODO: Navigate to Shopping List tab
+                                    // For now, we just give feedback or do nothing as the user requested UI update
+                                } else {
+                                    addToShoppingList()
+                                }
                             }) {
                                 HStack {
-                                    Image(systemName: "cart")
-                                    Text("Add to shopping list")
+                                    if isInShoppingList {
+                                        Image(systemName: "checkmark.circle.fill")
+                                        Text("View in shopping list")
+                                    } else {
+                                        Image(systemName: "cart")
+                                        Text("Add to shopping list")
+                                    }
                                 }
                                 .font(.bodyBold)
-                                .foregroundColor(.white)
+                                .foregroundColor(isInShoppingList ? .primaryGreen : .white)
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 50)
-                                .background(Color.primaryGreen)
+                                .background(isInShoppingList ? Color.white : Color.primaryGreen)
                                 .cornerRadius(25) // Pill shape
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 25)
+                                        .stroke(Color.primaryGreen, lineWidth: isInShoppingList ? 1 : 0)
+                                )
                             }
                             .padding(.top, 16)
                         }
@@ -194,12 +206,12 @@ struct RecipeDetailView: View {
                                 // TODO: Start cooking mode
                             }) {
                                 Text("Start cooking!")
-                                    .font(.bodyBold)
-                                    .foregroundColor(.white)
-                                    .frame(maxWidth: .infinity)
-                                    .frame(height: 50)
-                                    .background(Color.primaryGreen)
-                                    .cornerRadius(25)
+                                .font(.bodyBold)
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 50)
+                                .background(Color.primaryGreen)
+                                .cornerRadius(25)
                             }
                             .padding(.horizontal, 20)
                             .padding(.top, 16)
@@ -250,8 +262,78 @@ struct RecipeDetailView: View {
             }
             .padding(.horizontal, 20)
             // No top padding: ZStack content respects safe area by default, putting this in standard Toolbar position.
+            
+            // Toast Overlay
+            if showToast {
+                VStack {
+                    Spacer()
+                    Text(toastMessage)
+                        .foregroundColor(.white)
+                        .padding()
+                        .background(Color.black.opacity(0.8))
+                        .cornerRadius(10)
+                        .padding(.bottom, 50)
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
+                .zIndex(1)
+            }
         }
         .toolbar(.hidden, for: .navigationBar) // Completely hide system nav bar
+    }
+    
+    // MARK: - Actions
+    
+    private var isInShoppingList: Bool {
+        shoppingListRecipes.contains { $0.originalRecipeID == recipe.id }
+    }
+    
+    private func addToShoppingList() {
+        // Check if already exists by ID linkage
+        // Since we didn't link IDs before, we can check by title or assume new entry.
+        // Better: Use recipe.id to check if we already added this specific recipe.
+        // We added `originalRecipeID` to ShoppingListRecipe for this purpose.
+        
+        if let existing = shoppingListRecipes.first(where: { $0.originalRecipeID == recipe.id }) {
+            toastMessage = "Recipe already in shopping list"
+            withAnimation { showToast = true }
+             DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                withAnimation { showToast = false }
+            }
+            return
+        }
+        
+        // Create new ShoppingListRecipe
+        let newListRecipe = ShoppingListRecipe(
+            originalRecipeID: recipe.id,
+            title: recipe.title,
+            imageURL: recipe.imageURL,
+            servings: currentServings, // Use the *current* servings selected in UI
+            isExpanded: true
+        )
+        
+        // Map ingredients
+        // Note: Logic for scaling ingredients based on servings is generic here.
+        // Ideally we'd scale them. For now, we copy raw strings.
+        // If the Ingredient struct has 'amount' as String, scaling is hard without parsing.
+        // Proceeding with direct copy for MVP.
+        
+        for ingredient in recipe.ingredients {
+            let item = ShoppingListItem(
+                name: ingredient.name,
+                quantity: ingredient.amount ?? "",
+                isChecked: false,
+                section: ingredient.section
+            )
+            newListRecipe.items.append(item)
+        }
+        
+        modelContext.insert(newListRecipe)
+        
+        toastMessage = "Added to shopping list"
+        withAnimation { showToast = true }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            withAnimation { showToast = false }
+        }
     }
 }
 

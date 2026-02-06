@@ -82,14 +82,16 @@ struct EditCookbookSheet: View {
                         Spacer()
                         
                         // Delete Button
-                        Button(action: {
-                            showDeleteAlert = true
-                        }) {
-                            Text("Delete cookbook")
-                                .font(.bodyRegular)
-                                .foregroundColor(.red)
+                        if !cookbook.isFavorites {
+                            Button(action: {
+                                showDeleteAlert = true
+                            }) {
+                                Text("Delete cookbook")
+                                    .font(.bodyRegular)
+                                    .foregroundColor(.red)
+                            }
+                            .padding(.bottom, 8)
                         }
-                        .padding(.bottom, 8)
                     }
                     .padding(20)
                 }

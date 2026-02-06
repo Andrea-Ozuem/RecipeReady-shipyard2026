@@ -21,16 +21,9 @@ struct RecipeReadyApp: App {
                 }
                 .onAppear {
                     extractionManager.checkForPendingExtraction()
-                    seedDefaultCookbook()
                 }
         }
-        .modelContainer(for: [Recipe.self, Cookbook.self])
+        .modelContainer(for: [Recipe.self, Cookbook.self, ShoppingListRecipe.self, ShoppingListItem.self])
     }
     
-    private func seedDefaultCookbook() {
-        // We need a separate context or query here, but inside a View we usually rely on @Query.
-        // However, for seeding once, we can use the main context if available environment.
-        // But better pattern: checking via query in onAppear.
-        // Let's do a simple check.
-    }
 }

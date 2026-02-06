@@ -6,10 +6,19 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct ShoppingListView: View {
-    @StateObject private var viewModel = ShoppingListViewModel()
+    @Environment(\.modelContext) private var modelContext
+    @Query private var recipes: [ShoppingListRecipe]
+    
     @State private var recipeForOptions: ShoppingListRecipe?
+    @State private var selectedTab: Tab = .recipes
+    
+    enum Tab {
+        case recipes
+        case allItems
+    }
     
     var body: some View {
         NavigationStack {
@@ -23,27 +32,17 @@ struct ShoppingListView: View {
                     Spacer()
                     
                     HStack(spacing: 16) {
-                        // Temporary button to toggle state for testing
-                        Button(action: {
-                            withAnimation {
-                                viewModel.toggleMockData()
+                        // Trash Button (Clear All)
+                        if !recipes.isEmpty {
+                            Button(action: {
+                                withAnimation {
+                                    clearAll()
+                                }
+                            }) {
+                                Image(systemName: "trash")
+                                    .font(.system(size: 20))
+                                    .foregroundColor(.textPrimary)
                             }
-                        }) {
-                            Image(systemName: "flask") // Science flask for "Testing"
-                                .font(.system(size: 20))
-                                .foregroundColor(.textSecondary)
-                        }
-                        
-                        // Trash Button
-                        Button(action: {
-                            // TODO: Clear list action
-                            withAnimation {
-                                viewModel.recipes.removeAll()
-                            }
-                        }) {
-                            Image(systemName: "trash")
-                                .font(.system(size: 20))
-                                .foregroundColor(.textPrimary)
                         }
                     }
                 }
@@ -51,7 +50,7 @@ struct ShoppingListView: View {
                 .padding(.top, 16)
                 .padding(.bottom, 24) // Spacing between header and content
                 
-                if viewModel.isEmpty {
+                if recipes.isEmpty {
                     Spacer()
                     emptyStateView
                     Spacer()
@@ -60,7 +59,7 @@ struct ShoppingListView: View {
                     VStack(spacing: 0) {
                         // Tab Switcher
                         HStack(spacing: 0) {
-                            tabButton(title: "Recipes (\(viewModel.recipes.count))", tab: .recipes)
+                            tabButton(title: "Recipes (\(recipes.count))", tab: .recipes)
                             tabButton(title: "All items", tab: .allItems)
                         }
                         
@@ -68,14 +67,16 @@ struct ShoppingListView: View {
                             .overlay(Color.divider)
                         
                         // List Content
-                        if viewModel.selectedTab == .recipes {
+                        if selectedTab == .recipes {
                             List {
-                                ForEach($viewModel.recipes) { $recipe in
+                                ForEach(recipes) { recipe in
                                     VStack(spacing: 0) {
                                         ShoppingListRecipeRow(
                                             recipe: recipe,
                                             onToggleExpand: {
-                                                viewModel.toggleExpansion(for: recipe.id)
+                                                withAnimation {
+                                                    recipe.isExpanded.toggle()
+                                                }
                                             },
                                             onMoreTap: {
                                                 recipeForOptions = recipe
@@ -84,16 +85,23 @@ struct ShoppingListView: View {
                                         .padding(.horizontal, 20)
                                         
                                         if recipe.isExpanded {
-                                            ShoppingListExpandedView(recipe: $recipe, viewModel: viewModel)
+                                            ShoppingListExpandedView(recipe: recipe)
                                                 .padding(.bottom, 12)
                                         }
                                         
-                                        if viewModel.recipes.last?.id != recipe.id {
+                                        if recipes.last?.id != recipe.id {
                                              Divider()
                                         }
                                     }
                                     .listRowSeparator(.hidden)
-                                    .listRowInsets(EdgeInsets()) // Padding handled internally now because expanded view needs full width
+                                    .listRowInsets(EdgeInsets())
+                                    .swipeActions(edge: .trailing) {
+                                        Button(role: .destructive) {
+                                            deleteRecipe(recipe)
+                                        } label: {
+                                            Label("Delete", systemImage: "trash")
+                                        }
+                                    }
                                 }
                             }
                             .listStyle(.plain)
@@ -101,9 +109,9 @@ struct ShoppingListView: View {
                             // All Items Tab
                             ZStack(alignment: .bottom) {
                                 List {
-                                    ForEach(viewModel.allIngredients) { ingredient in
-                                        ShoppingListIngredientRow(ingredient: ingredient) {
-                                            viewModel.toggleAllIngredientsItem(id: ingredient.id)
+                                    ForEach(allIngredients) { item in
+                                        ShoppingListIngredientRow(ingredient: item) {
+                                            item.isChecked.toggle()
                                         }
                                         .listRowSeparator(.hidden)
                                     }
@@ -113,7 +121,7 @@ struct ShoppingListView: View {
                                 // Floating Action Button
                                 Button(action: {
                                     withAnimation {
-                                        viewModel.unmarkAll()
+                                        unmarkAll()
                                     }
                                 }) {
                                     Text("Unmark all items")
@@ -140,13 +148,13 @@ struct ShoppingListView: View {
                     VStack(spacing: 0) {
                         VStack(alignment: .leading, spacing: 0) {
                             
-                            // Open Recipe
+                            // Open Recipe (Placeholder for navigation)
                             Button(action: {
                                 // TODO: Navigate to recipe
                                 recipeForOptions = nil
                             }) {
                                 HStack(spacing: 16) {
-                                    Image(systemName: "square.and.arrow.up") // Using share icon as placeholder or external link icon if more appropriate "arrow.up.right"
+                                    Image(systemName: "square.and.arrow.up")
                                         .font(.system(size: 20))
                                         .foregroundColor(.textPrimary)
                                         .frame(width: 24)
@@ -162,7 +170,7 @@ struct ShoppingListView: View {
                             
                             // Delete Recipe
                             Button(action: {
-                                viewModel.removeRecipe(id: recipe.id)
+                                deleteRecipe(recipe)
                                 recipeForOptions = nil
                             }) {
                                 HStack(spacing: 16) {
@@ -192,22 +200,44 @@ struct ShoppingListView: View {
         }
     }
     
-    // MARK: - Components or Helpers
+    // MARK: - Helpers
     
-    private func tabButton(title: String, tab: ShoppingListViewModel.Tab) -> some View {
+    private var allIngredients: [ShoppingListItem] {
+        recipes.flatMap { $0.items }
+    }
+    
+    private func deleteRecipe(_ recipe: ShoppingListRecipe) {
+        modelContext.delete(recipe)
+    }
+    
+    private func clearAll() {
+        for recipe in recipes {
+            modelContext.delete(recipe)
+        }
+    }
+    
+    private func unmarkAll() {
+        for recipe in recipes {
+            for item in recipe.items {
+                item.isChecked = false
+            }
+        }
+    }
+    
+    private func tabButton(title: String, tab: Tab) -> some View {
         Button(action: {
             withAnimation {
-                viewModel.selectedTab = tab
+                selectedTab = tab
             }
         }) {
             VStack(spacing: 8) {
                 Text(title)
                     .font(.bodyRegular)
-                    .foregroundStyle(viewModel.selectedTab == tab ? Color.primaryOrange : Color.textPrimary)
+                    .foregroundStyle(selectedTab == tab ? Color.primaryOrange : Color.textPrimary)
                 
                 // Active Indicator
                 Rectangle()
-                    .fill(viewModel.selectedTab == tab ? Color.primaryOrange : Color.clear)
+                    .fill(selectedTab == tab ? Color.primaryOrange : Color.clear)
                     .frame(height: 2)
             }
         }
@@ -219,7 +249,6 @@ struct ShoppingListView: View {
             Spacer()
             
             // Illustration
-            // Using a system image as a placeholder for now as discussed
             Image(systemName: "cart.badge.plus")
                 .resizable()
                 .aspectRatio(contentMode: .fit)
@@ -232,22 +261,23 @@ struct ShoppingListView: View {
                     .font(.heading3)
                     .foregroundStyle(Color.textPrimary)
                     .multilineTextAlignment(.center)
-                    .padding(.horizontal,30) // More padding for title
+                    .padding(.horizontal,30)
                 
                 Text("When you add ingredients to your shopping list, you'll see them here! Happy shopping!")
                     .font(.bodyRegular)
                     .foregroundStyle(Color.textSecondary)
                     .multilineTextAlignment(.center)
-                    .padding(.horizontal, 15) // Less padding for body
+                    .padding(.horizontal, 15)
             }
             
             Spacer()
-            Spacer() // Push content slightly up
+            Spacer()
         }
-        .padding() // Default padding for container
+        .padding()
     }
 }
 
 #Preview {
     ShoppingListView()
+        // Provide example model container for preview if possible
 }
