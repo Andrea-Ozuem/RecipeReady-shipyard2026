@@ -22,11 +22,18 @@ class RecipeSearchViewModel: ObservableObject {
     
     // MARK: - Computed Properties
     var filteredIngredients: [String] {
+        let available = suggestedIngredients.filter { !selectedIngredients.contains($0) }
+        
         if searchText.isEmpty {
-            return suggestedIngredients
+            return available
         } else {
-            return suggestedIngredients.filter { $0.localizedCaseInsensitiveContains(searchText) }
+            return available.filter { $0.localizedCaseInsensitiveContains(searchText) }
         }
+    }
+    
+    // Sort selected ingredients to keep order stable (optional, or use array if order matters)
+    var sortedSelectedIngredients: [String] {
+        selectedIngredients.sorted()
     }
     
     // MARK: - Actions

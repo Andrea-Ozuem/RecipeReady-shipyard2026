@@ -14,19 +14,26 @@ struct IngredientTag: View {
     
     var body: some View {
         Button(action: action) {
-            Text(name)
-                .font(.bodyRegular)
-                .foregroundColor(isSelected ? .white : .textPrimary)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
-                .background(
-                    Capsule()
-                        .fill(isSelected ? Color.primaryGreen : Color.white)
-                )
-                .overlay(
-                    Capsule()
-                        .stroke(isSelected ? Color.primaryGreen : Color.divider, lineWidth: 1)
-                )
+            HStack(spacing: 6) {
+                Text(name)
+                    .font(.bodyRegular)
+                
+                if isSelected {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 12, weight: .bold))
+                }
+            }
+            .foregroundColor(.textPrimary)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
+            .background(
+                Capsule()
+                    .fill(isSelected ? Color.softBeige : Color.white)
+            )
+            .overlay(
+                Capsule()
+                    .stroke(isSelected ? Color.clear : Color.divider, lineWidth: 1)
+            )
         }
     }
 }

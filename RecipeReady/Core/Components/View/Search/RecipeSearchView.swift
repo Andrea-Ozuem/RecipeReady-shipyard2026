@@ -30,125 +30,194 @@ struct RecipeSearchView: View {
                         }
                         
                         Spacer()
-                        
-                        // Illustration placeholder
-                        Image(systemName: "basket.fill") // Placeholder for illustration
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 40, height: 40)
-                            .foregroundColor(.primaryOrange)
-                            .opacity(0.8)
                     }
                     .padding(.horizontal)
                     .padding(.top, 10)
                     
-                    // Title
-                    HStack {
+                    // Title and Illustration
+                    HStack(alignment: .bottom) {
                         Text("Search by ingredients")
                             .font(.heading1)
                             .foregroundColor(.textPrimary)
+                            .multilineTextAlignment(.leading)
+                            .padding(.bottom, 10) // Align roughly with image bottom
+                        
                         Spacer()
+                        
+                        Image(systemName: "takeoutbag.and.cup.and.straw.fill") // Closest SF Symbol to "jar & cup with straw" / food containers
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 60, height: 60) // Larger size for illustration
+                            .foregroundColor(.primaryOrange)
+                            .opacity(0.9)
+                            .padding(.bottom, -10) // Slight overlap or alignment fix
                     }
                     .padding(.horizontal)
-                    .padding(.vertical, 8)
-                    .padding(.bottom, 10)
+                    .padding(.top, 20)
+                    .padding(.bottom, 60) // Increased space for larger header height
+                }
+                .background(Color.softBeige.ignoresSafeArea(edges: .top))
+                .zIndex(0)
+                
+                // MARK: - Search Bar (Overlapping)
+                HStack {
+                    Image(systemName: "magnifyingglass")
+                        .foregroundColor(.textSecondary)
                     
-                    // Search Bar
-                    HStack {
-                        Image(systemName: "magnifyingglass")
-                            .foregroundColor(.textSecondary)
-                        
-                        TextField("Type an ingredient", text: $viewModel.searchText)
-                            .font(.bodyRegular)
-                            .foregroundColor(.textPrimary)
-                        
-                        if !viewModel.searchText.isEmpty {
-                            Button(action: { viewModel.searchText = "" }) {
-                                Image(systemName: "xmark.circle.fill")
-                                    .foregroundColor(.textSecondary)
-                            }
-                        }
-                        
-                        // Heart icon inside search bar (right side)
-                        Button(action: {
-                            // Action for favourites
-                        }) {
-                            Image(systemName: "heart")
-                                .font(.system(size: 20))
+                    TextField("Type an ingredient", text: $viewModel.searchText)
+                        .font(.bodyRegular)
+                        .foregroundColor(.textPrimary)
+                    
+                    if !viewModel.searchText.isEmpty {
+                        Button(action: { viewModel.searchText = "" }) {
+                            Image(systemName: "xmark.circle.fill")
                                 .foregroundColor(.textSecondary)
                         }
                     }
-                    .padding()
-                    .background(Color.white)
-                    .cornerRadius(12)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.gray.opacity(0.2), lineWidth: 1)
-                    )
-                    .padding(.horizontal)
-                    .padding(.bottom, -26) // Half-overlap effect or just resting on edge
-                    .zIndex(1) // Ensure search bar sits on top
+                    
+                    // Heart icon inside search bar
+                    Button(action: {
+                        // Action for favourites
+                    }) {
+                        Image(systemName: "heart")
+                            .font(.system(size: 20))
+                            .foregroundColor(.textSecondary)
+                    }
                 }
-                .padding(.bottom, 26) // Space for the overlapping search bar
-                .background(Color.softBeige.ignoresSafeArea(edges: .top))
+                .padding()
+                .background(Color.white)
+                .cornerRadius(12)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+                )
+                .padding(.horizontal)
+                .frame(height: 56) // Fixed height to ensure consistent overlap calculation
+                .offset(y: -28) // Pull up by half height
+                .padding(.bottom, -28) // Remove the space it occupied in the flow
+                .zIndex(1) // Ensure it sits on top of both backgrounds
                 
                 // MARK: - Content Section (White)
                 ScrollView {
                     VStack(alignment: .leading, spacing: 24) {
-                        // Ingredient Tags
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            VStack(alignment: .leading, spacing: 8) {
-                                // Split ingredients into two rows
-                                let ingredients = viewModel.filteredIngredients
-                                let firstRow = ingredients.enumerated().filter { $0.offset % 2 == 0 }.map { $0.element }
-                                let secondRow = ingredients.enumerated().filter { $0.offset % 2 != 0 }.map { $0.element }
-                                
+                        
+                        // 1. Selected Ingredients Row (if any)
+                        if !viewModel.selectedIngredients.isEmpty {
+                            ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 8) {
-                                    ForEach(firstRow, id: \.self) { ingredient in
+                                    ForEach(viewModel.sortedSelectedIngredients, id: \.self) { ingredient in
                                         IngredientTag(
                                             name: ingredient,
-                                            isSelected: viewModel.isSelected(ingredient),
+                                            isSelected: true,
                                             action: {
                                                 viewModel.toggleIngredient(ingredient)
                                             }
                                         )
                                     }
                                 }
-                                
-                                HStack(spacing: 8) {
-                                    ForEach(secondRow, id: \.self) { ingredient in
-                                        IngredientTag(
-                                            name: ingredient,
-                                            isSelected: viewModel.isSelected(ingredient),
-                                            action: {
-                                                viewModel.toggleIngredient(ingredient)
+                                .padding(.horizontal)
+                            }
+                        }
+                        
+                        // 2. Suggested Ingredients (Scrollable Grid)
+                        // Only show if we haven't selected everything or if design always shows suggestions below
+                        if !viewModel.filteredIngredients.isEmpty {
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                VStack(alignment: .leading, spacing: 8) {
+                                    let ingredients = viewModel.filteredIngredients
+                                    // simple chunking
+                                    let firstRow = ingredients.enumerated().filter { $0.offset % 2 == 0 }.map { $0.element }
+                                    let secondRow = ingredients.enumerated().filter { $0.offset % 2 != 0 }.map { $0.element }
+                                    
+                                    HStack(spacing: 8) {
+                                        ForEach(firstRow, id: \.self) { ingredient in
+                                            IngredientTag(
+                                                name: ingredient,
+                                                isSelected: false,
+                                                action: {
+                                                    viewModel.toggleIngredient(ingredient)
+                                                }
+                                            )
+                                        }
+                                    }
+                                    
+                                    if !secondRow.isEmpty {
+                                        HStack(spacing: 8) {
+                                            ForEach(secondRow, id: \.self) { ingredient in
+                                                IngredientTag(
+                                                    name: ingredient,
+                                                    isSelected: false,
+                                                    action: {
+                                                        viewModel.toggleIngredient(ingredient)
+                                                    }
+                                                )
                                             }
-                                        )
+                                        }
                                     }
                                 }
+                                .padding(.horizontal)
+                            }
+                            .frame(height: 100) // Keep the constraint for the grid area
+                        }
+                        
+                        // 3. Results Section (Show only if ingredients selected)
+                        if !viewModel.selectedIngredients.isEmpty {
+                            VStack(alignment: .leading, spacing: 16) {
+                                HStack {
+                                    Text("\(viewModel.selectedIngredients.count) out of 4 ingredients") // Mock count
+                                        .font(.heading2)
+                                        .foregroundColor(.textPrimary)
+                                    Spacer()
+                                    Button("See all") {
+                                        // See all action
+                                    }
+                                    .font(.bodyRegular)
+                                    .foregroundColor(.primaryOrange)
+                                }
+                                .padding(.horizontal)
+                                
+                                // Chips for matched ingredients (Mock for now, or reuse selected)
+                                // The design shows them here too? Or maybe just recipe cards. 
+                                // Let's stick to the Recipe Cards scroll for now as per plan.
+                                
+                                ScrollView(.horizontal, showsIndicators: false) {
+                                    HStack(spacing: 16) {
+                                        // Mock Results
+                                        RecipeResultCard(
+                                            recipeTitle: "Homemade Lasagna",
+                                            time: "70 min.",
+                                            imageURL: nil
+                                        )
+                                        
+                                        RecipeResultCard(
+                                            recipeTitle: "Pan-Seared Salmon",
+                                            time: "30 min.",
+                                            imageURL: nil
+                                        )
+                                    }
+                                    .padding(.horizontal)
+                                }
+                            }
+                        } else {
+                            // 4. Default / Favourites Section (when nothing selected)
+                            VStack(alignment: .leading, spacing: 12) {
+                                Text("My favourite ingredients")
+                                    .font(.bodyBold)
+                                    .foregroundColor(.textPrimary)
+                                
+                                Text("Access your favourites easily! Click the ♡-icon in the search field to save your favourite ingredients.")
+                                    .font(.captionMeta)
+                                    .foregroundColor(.textSecondary)
+                                    .lineSpacing(4)
                             }
                             .padding(.horizontal)
                         }
-                        // Constrain height loosely to fit 2 rows + spacing (approx 36-40 per tag + 8 spacing = ~90)
-                        .frame(height: 100)
-                        
-                        // Favourites Section
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text("My favourite ingredients")
-                                .font(.bodyBold)
-                                .foregroundColor(.textPrimary)
-                            
-                            Text("Access your favourites easily! Click the ♡-icon in the search field to save your favourite ingredients.")
-                                .font(.captionMeta)
-                                .foregroundColor(.textSecondary)
-                                .lineSpacing(4)
-                        }
-                        .padding(.horizontal)
                     }
-                    .padding(.top, 20) // Space from the search bar
+                    .padding(.top, 10)
                     .padding(.bottom, 20)
                 }
                 .background(Color.white)
+                .zIndex(0)
             }
             .navigationBarHidden(true)
         }
