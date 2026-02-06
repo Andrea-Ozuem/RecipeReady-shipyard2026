@@ -12,6 +12,7 @@ import SwiftData
 struct RecipeEditView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
+    @Environment(ExtractionManager.self) private var extractionManager
     
     // We bind to the recipe object directly if we want live updates,
     // OR we use local state and save on "Save".
@@ -48,7 +49,7 @@ struct RecipeEditView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
                     // MARK: - Editable Header (Image + Title)
-                    EditableHeaderView(title: $title)
+                    EditableHeaderView(title: $title, imageURL: recipe.imageURL)
                     
                     VStack(alignment: .leading, spacing: 24) {
                         
@@ -98,20 +99,58 @@ struct RecipeEditView: View {
                                 ServingsStepper(servings: $servings)
                             }
                             
-                            VStack(spacing: 8) {
-                                ForEach($ingredients) { $ingredient in
-                                    EditableIngredientRow(
-                                        ingredient: $ingredient,
-                                        onDelete: {
-                                            if let idx = ingredients.firstIndex(where: { $0.id == ingredient.id }) {
-                                                ingredients.remove(at: idx)
-                                            }
+                            // Grouping Logic
+                            let sectionKeys = ingredients.reduce(into: [String?]()) { keys, ingredient in
+                                if keys.last != ingredient.section {
+                                    keys.append(ingredient.section)
+                                }
+                            }
+                            
+                            VStack(spacing: 24) {
+                                ForEach(Array(sectionKeys.enumerated()), id: \.offset) { index, sectionName in
+                                    VStack(alignment: .leading, spacing: 8) {
+                                        // Section Header
+                                        HStack {
+                                            TextField("Section Name (e.g. Sauce)", text: Binding(
+                                                get: { sectionName ?? "" },
+                                                set: { newName in
+                                                    updateSectionName(oldName: sectionName, newName: newName)
+                                                }
+                                            ))
+                                            .font(.headline)
+                                            .foregroundColor(.primaryGreen)
+                                            
+                                            Spacer()
+                                            
+                                            // Delete Section Button (optional, maybe just delete all ingredients?)
                                         }
-                                    )
+                                        
+                                        // Ingredients in this section
+                                        // We need indices to bind correctly
+                                        let indices = ingredients.indices.filter { ingredients[$0].section == sectionName }
+                                        
+                                        ForEach(indices, id: \.self) { ingredientIndex in
+                                            EditableIngredientRow(
+                                                ingredient: $ingredients[ingredientIndex],
+                                                onDelete: {
+                                                    ingredients.remove(at: ingredientIndex)
+                                                }
+                                            )
+                                        }
+                                        
+                                        // Add Ingredient to THIS section
+                                        Button(action: { addIngredient(to: sectionName) }) {
+                                            Label("Add Item to \(sectionName?.isEmpty == false ? sectionName! : "Main")", systemImage: "plus")
+                                                .font(.caption)
+                                                .foregroundColor(.gray)
+                                        }
+                                        .padding(.top, 4)
+                                    }
                                 }
                                 
-                                Button(action: addIngredient) {
-                                    Label("Add Ingredient", systemImage: "plus.circle")
+                                // Add New Section Button
+                                Button(action: addSection) {
+                                    Label("Add New Section", systemImage: "folder.badge.plus")
                                         .font(.bodyBold)
                                         .foregroundColor(.primaryGreen)
                                         .padding(.vertical, 8)
@@ -201,8 +240,33 @@ struct RecipeEditView: View {
         }
     }
     
-    private func addIngredient() {
-        ingredients.append(Ingredient(name: "New Ingredient", amount: ""))
+    private func updateSectionName(oldName: String?, newName: String?) {
+        let finalName = (newName?.isEmpty ?? true) ? nil : newName
+        // Update all ingredients in this matching block
+        // Note: This replaces ALL ingredients with this section name, globally. 
+        // If we supported non-contiguous sections with same name, this might be side-effecty, 
+        // but for now it's desired behavior (renaming the Group).
+        for i in ingredients.indices {
+            if ingredients[i].section == oldName {
+                ingredients[i].section = finalName
+            }
+        }
+    }
+
+    private func addIngredient(to section: String? = nil) {
+        // Find insertion index: after the last item of this section
+        if let lastIndex = ingredients.lastIndex(where: { $0.section == section }) {
+            ingredients.insert(Ingredient(name: "", amount: "", section: section), at: lastIndex + 1)
+        } else {
+            // Append if section not found (or empty list)
+            ingredients.append(Ingredient(name: "", amount: "", section: section))
+        }
+    }
+    
+    private func addSection() {
+        // Add a new ingredient with a placeholder section
+        // user can then rename it.
+        ingredients.append(Ingredient(name: "", amount: "", section: "New Section"))
     }
     
     private func addStep() {
@@ -242,6 +306,10 @@ struct RecipeEditView: View {
             
             modelContext.insert(recipe)
         }
+        
+        // If we are in extraction flow, notify manager we are done
+        extractionManager.dismiss()
+        print("💾 RecipeEditView: Saved recipe \(recipe.title), dismissing...")
         
         dismiss()
     }

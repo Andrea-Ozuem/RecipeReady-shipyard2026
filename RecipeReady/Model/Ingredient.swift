@@ -13,10 +13,12 @@ struct Ingredient: Codable, Hashable, Identifiable {
     var name: String
     var amount: String?
     var link: String?
+    var section: String?
     
-    init(name: String, amount: String? = nil, link: String? = nil) {
+    init(name: String, amount: String? = nil, link: String? = nil, section: String? = nil) {
         self.name = name
         self.amount = amount
         self.link = link
+        self.section = section
     }
 }

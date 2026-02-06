@@ -346,17 +346,18 @@ class ShareViewController: UIViewController {
         
         Task {
             do {
-                let (caption, videoUrl) = try await ApifyService.shared.extractCaption(from: url)
+                let (caption, videoUrl, thumbnailUrl) = try await ApifyService.shared.extractCaption(from: url)
                 
                 // Debug logging
-                print("[ShareExtension] 📥 Apify returned - caption: \(caption?.prefix(50) ?? "nil")..., videoUrl: \(videoUrl ?? "nil")")
+                print("[ShareExtension] 📥 Apify returned - caption: \(caption?.prefix(50) ?? "nil")..., videoUrl: \(videoUrl ?? "nil"), thumb: \(thumbnailUrl ?? "nil")")
                 
                 // Create payload with caption and video URL for fallback
                 let payload = ExtractionPayload(
                     audioFileName: nil,  // No audio for caption-only mode
                     caption: caption ?? "No caption available for this video.",
                     sourceURL: url.absoluteString,
-                    remoteVideoURL: videoUrl  // Pass video URL for audio fallback
+                    remoteVideoURL: videoUrl,  // Pass video URL for audio fallback
+                    thumbnailURL: thumbnailUrl // Pass thumbnail URL
                 )
                 
                 print("[ShareExtension] 💾 Saving payload with remoteVideoURL: \(payload.remoteVideoURL ?? "nil")")

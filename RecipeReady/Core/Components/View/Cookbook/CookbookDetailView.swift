@@ -10,6 +10,7 @@ import SwiftData
 
 struct CookbookDetailView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
     let cookbook: Cookbook
     
     @State private var isShowingEditSheet = false
@@ -23,12 +24,22 @@ struct CookbookDetailView: View {
     var body: some View {
             ScrollView {
                 LazyVGrid(columns: columns, spacing: 24) {
-                    // Show recipes in this cookbook
-                    ForEach(cookbook.recipes) { recipe in
-                        NavigationLink(destination: RecipeDetailView(recipe: recipe)) {
-                            RecipeCardView(recipe: recipe)
+                    if cookbook.recipes.isEmpty {
+                        // Optional empty state
+                        Text("No recipes yet")
+                            .font(.bodyRegular)
+                            .foregroundColor(.textSecondary)
+                            .gridCellColumns(2)
+                            .padding(.top, 40)
+                    } else {
+                        // Sort by createdAt descending
+                        let sortedRecipes = cookbook.recipes.sorted(by: { $0.createdAt > $1.createdAt })
+                        
+                        ForEach(sortedRecipes) { recipe in
+                            NavigationLink(destination: RecipeDetailView(recipe: recipe)) {
+                                RecipeCardView(recipe: recipe)
+                            }
                         }
-                        .buttonStyle(.plain)
                     }
                 }
                 .padding(.horizontal, 20)
@@ -49,7 +60,7 @@ struct CookbookDetailView: View {
                 }
                 
                 ToolbarItem(placement: .principal) {
-                    Text(cookbook.title)
+                    Text(cookbook.name)
                         .font(.heading1)
                         .foregroundColor(.textPrimary)
                 }
@@ -71,7 +82,16 @@ struct CookbookDetailView: View {
                 }
             }
             .sheet(isPresented: $isShowingEditSheet) {
-                EditCookbookSheet(cookbook: cookbook)
+                EditCookbookSheet(
+                    cookbook: cookbook,
+                    onSave: { newTitle in
+                        cookbook.name = newTitle
+                    },
+                    onDelete: {
+                        modelContext.delete(cookbook)
+                        dismiss()
+                    }
+                )
                 .presentationDetents([.fraction(0.75)])
                 .presentationDragIndicator(.visible)
             }
@@ -79,6 +99,10 @@ struct CookbookDetailView: View {
 }
 
 #Preview {
-    CookbookDetailView(cookbook: Cookbook(title: "Salad", isFavorites: false))
-        .modelContainer(for: [Recipe.self, Cookbook.self], inMemory: true)
+    CookbookDetailView(cookbook: CookbookItem(title: "Salad", count: 4, imageURLs: [
+        "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=500&q=80",
+        "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=500&q=80",
+        "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&q=80"
+    ]))
+        .modelContainer(for: Recipe.self, inMemory: true)
 }

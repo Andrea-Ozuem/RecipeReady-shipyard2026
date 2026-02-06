@@ -229,7 +229,7 @@ struct ShoppingListView: View {
             
             VStack(spacing: 12) {
                 Text("You don't have recipes on your shopping list yet.")
-                    .font(.heading1)
+                    .font(.heading3)
                     .foregroundStyle(Color.textPrimary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal,30) // More padding for title

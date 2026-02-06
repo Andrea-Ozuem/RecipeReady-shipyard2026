@@ -26,6 +26,7 @@ struct ExtractionPayload: Codable {
     let caption: String?
     let sourceURL: String?
     let remoteVideoURL: String?  // Video download URL from Apify for audio fallback
+    let thumbnailURL: String?    // Extracted thumbnail/cover image URL
     let createdAt: Date
     
     init(
@@ -34,6 +35,7 @@ struct ExtractionPayload: Codable {
         caption: String? = nil,
         sourceURL: String? = nil,
         remoteVideoURL: String? = nil,
+        thumbnailURL: String? = nil,
         createdAt: Date = Date()
     ) {
         self.id = id
@@ -41,6 +43,7 @@ struct ExtractionPayload: Codable {
         self.caption = caption
         self.sourceURL = sourceURL
         self.remoteVideoURL = remoteVideoURL
+        self.thumbnailURL = thumbnailURL
         self.createdAt = createdAt
     }
 }

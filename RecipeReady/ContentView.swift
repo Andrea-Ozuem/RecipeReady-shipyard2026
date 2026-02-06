@@ -11,22 +11,22 @@ import SwiftData
 struct ContentView: View {
     // We keep the environments to avoid breaking the App entry point if it injects them
     @Environment(\.modelContext) private var modelContext
+    @Environment(ExtractionManager.self) private var extractionManager
     
     var body: some View {
         TabView {
             // Home Tab
-            NavigationStack {
-                CookbookView()
-            }
+            Text("Home")
             .tabItem {
                 Label("Home", systemImage: "house")
             }
             
-            // Saved Tab (Placeholder)
-            Text("Saved")
-                .tabItem {
-                    Label("Cookbooks", systemImage: "heart")
-                }
+            NavigationStack {
+                CookbookView()
+            }
+            .tabItem {
+                Label("Cookbooks", systemImage: "heart")
+            }
             
             // Shopping List Tab
             ShoppingListView()
@@ -40,11 +40,39 @@ struct ContentView: View {
                     Label("Profile", systemImage: "person")
                 }
         }
-        .tint(.primaryOrange) // Use our brand color for active tab
+        .tint(.primaryOrange)
+        .sheet(isPresented: Binding(
+            get: { extractionManager.state != .idle },
+            set: { if !$0 { extractionManager.dismiss() } }
+        )) {
+            ExtractionSheet()
+        }
+        .onAppear {
+            seedDefaultCookbook()
+        }
+    }
+    
+    private func seedDefaultCookbook() {
+        // Check if "Favorites" exists
+        let descriptor = FetchDescriptor<Cookbook>(
+            predicate: #Predicate { $0.isFavorites == true }
+        )
+        
+        do {
+            let count = try modelContext.fetchCount(descriptor)
+            if count == 0 {
+                print("✨ Seeding default 'Favorites' cookbook...")
+                let favorites = Cookbook(name: "My favourite recipes", isFavorites: true)
+                modelContext.insert(favorites)
+            }
+        } catch {
+            print("❌ Failed to check for existing cookbooks: \(error)")
+        }
     }
 }
 
 #Preview {
     ContentView()
         .modelContainer(for: [Recipe.self, Cookbook.self], inMemory: true)
+        .environment(ExtractionManager())
 }

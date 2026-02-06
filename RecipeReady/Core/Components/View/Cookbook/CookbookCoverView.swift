@@ -10,11 +10,6 @@ import SwiftUI
 struct CookbookCoverView: View {
     let cookbook: Cookbook
     
-    // Get image URLs from recipes in this cookbook
-    private var imageURLs: [String] {
-        cookbook.recipes.compactMap { $0.imageURL }.prefix(3).map { $0 }
-    }
-    
     var body: some View {
         ZStack {
             // Background varies: Favorites uses softBeige, Collage uses White (gap color)
@@ -33,16 +28,23 @@ struct CookbookCoverView: View {
                     .foregroundColor(.primaryOrange)
             } else {
                 // Collage Style: 1 Top, 2 Bottom
-                // Collage Style: 1 Top, 2 Bottom
                 GeometryReader { geo in
-                    let spacing: CGFloat = 5 // Reduced spacing for small sizes? Or keep proportional? keeping constant 2
+                    let spacing: CGFloat = 5
                     let halfHeight = max(0, (geo.size.height - spacing) / 2)
                     let halfWidth = max(0, (geo.size.width - spacing) / 2)
+                    
+                    // Get first 3 recipes with images
+                    let recipesWithImages = cookbook.recipes
+                        .filter { $0.imageURL != nil }
+                        .sorted(by: { $0.createdAt > $1.createdAt })
+                        .prefix(3)
+                    
+                    let imageUrls = recipesWithImages.compactMap { $0.imageURL }
                     
                     VStack(spacing: spacing) {
                         // Top Half
                         Group {
-                            if let urlString = imageURLs.first, let url = URL(string: urlString) {
+                            if let urlString = imageUrls.first, let url = URL(string: urlString) {
                                 AsyncImage(url: url) { phase in
                                     if let image = phase.image {
                                         image
@@ -65,7 +67,7 @@ struct CookbookCoverView: View {
                         HStack(spacing: spacing) {
                             // Bottom Left
                             Group {
-                                if imageURLs.count > 1, let url = URL(string: imageURLs[1]) {
+                                if imageUrls.count > 1, let url = URL(string: imageUrls[1]) {
                                     AsyncImage(url: url) { phase in
                                         if let image = phase.image {
                                             image
@@ -86,7 +88,7 @@ struct CookbookCoverView: View {
                             
                             // Bottom Right
                             Group {
-                                if imageURLs.count > 2, let url = URL(string: imageURLs[2]) {
+                                if imageUrls.count > 2, let url = URL(string: imageUrls[2]) {
                                     AsyncImage(url: url) { phase in
                                         if let image = phase.image {
                                             image

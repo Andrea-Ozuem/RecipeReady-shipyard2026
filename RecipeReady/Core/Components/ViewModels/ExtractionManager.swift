@@ -2,48 +2,136 @@
 //  ExtractionManager.swift
 //  RecipeReady
 //
-//  Manages the recipe extraction workflow between Share Extension and main app.
+//  Manages recipe extraction flow and state.
 //
 
 import Foundation
 import SwiftUI
 
-/// Friendly errors for UI display
-enum ExtractionError: LocalizedError, Equatable {
-    case network
-    case noRecipeFound
-    case timeout
-    case unknown(String)
+@Observable
+final class ExtractionManager {
+    var state: ExtractionState = .idle
     
-    var title: String {
-        switch self {
-        case .network: return "Connection Lost"
-        case .noRecipeFound: return "The Chef is Confused"
-        case .timeout: return "Taking Too Long"
-        case .unknown: return "Something Went Wrong"
+    // Legacy properties for compatibility during migration (computed from state)
+    var isExtracting: Bool {
+        if case .processing = state { return true }
+        return false
+    }
+    
+    var savedRecipe: Recipe? {
+        if case .success(let recipe) = state { return recipe }
+        return nil
+    }
+    
+    var extractionError: Error? {
+        if case .error(let error) = state { return error }
+        return nil
+    }
+    
+    private let extractionService = RecipeExtractionService.shared
+    
+    // MARK: - Actions
+    
+    func reset() {
+        state = .idle
+    }
+    
+    func dismiss() {
+        state = .idle
+    }
+    
+    func retry() {
+        checkForPendingExtraction()
+    }
+    
+    func startManualCreation() {
+        // Placeholder for manual creation flow
+        // In a real app, this might set a flag to show a different sheet
+        print("Starting manual creation...")
+        dismiss()
+    }
+    
+    // MARK: - App Group Support
+    
+    func checkForPendingExtraction() {
+        print("🔍 ExtractionManager: Checking for pending extractions...")
+        guard let payload = AppGroupManager.shared.loadPendingPayload() else {
+            return
+        }
+        
+        print("📦 ExtractionManager: Found pending payload: \(payload.id)")
+        startExtraction(with: payload)
+    }
+    
+    private func startExtraction(with payload: ExtractionPayload) {
+        Task {
+            // Update state on main actor
+            await MainActor.run {
+                self.state = .processing
+            }
+            
+            do {
+                // Determine audio URL from payload if available
+                let audioURL = AppGroupManager.shared.audioFileURL(for: payload)
+                
+                // Perform extraction
+                let response = try await extractionService.extractRecipe(
+                    audioURL: audioURL,
+                    caption: payload.caption,
+                    remoteVideoURL: payload.remoteVideoURL,
+                    thumbnailURL: payload.thumbnailURL
+                )
+                
+                // Convert response to Recipe model
+                let newRecipe = Recipe(
+                    title: response.title ?? "New Recipe",
+                    ingredients: response.ingredients,
+                    steps: response.steps,
+                    sourceLink: payload.sourceURL,
+                    sourceCaption: payload.caption,
+                    imageURL: response.imageURL,
+                    difficulty: response.difficulty,
+                    prepTime: response.prepTime,
+                    cookingTime: response.cookingTime,
+                    restingTime: response.restingTime,
+                    servings: response.servings,
+                    confidenceScore: response.confidenceScore
+                )
+                
+                // Cleanup payload after successful extraction
+                try? AppGroupManager.shared.cleanupPendingPayload()
+                
+                // Update state on main actor
+                await MainActor.run {
+                    self.state = .success(newRecipe)
+                }
+                
+            } catch {
+                print("❌ ExtractionManager: Extraction failed: \(error)")
+                await MainActor.run {
+                    // Convert to ExtractionError
+                    let extractionError = ExtractionError(
+                        title: "Extraction Failed",
+                        message: error.localizedDescription,
+                        icon: "exclamationmark.triangle"
+                    )
+                    self.state = .error(extractionError)
+                }
+            }
         }
     }
     
-    var message: String {
-        switch self {
-        case .network: return "Please check your internet connection and try again."
-        case .noRecipeFound: return "We couldn't find a recipe in this video. You can try another one or create it manually."
-        case .timeout: return "The video is taking longer than expected to process. Please try again."
-        case .unknown(let msg): return msg
-        }
-    }
+    // MARK: - URL Handling
     
-    var icon: String {
-        switch self {
-        case .network: return "wifi.exclamationmark"
-        case .noRecipeFound: return "text.magnifyingglass"
-        case .timeout: return "clock.exclamationmark"
-        case .unknown: return "exclamationmark.triangle.fill"
-        }
+    func handleURL(_ url: URL) {
+        print("🔗 ExtractionManager: Handling URL: \(url)")
+        // When app is opened via URL scheme (e.g. from Share Extension), check for new data
+        checkForPendingExtraction()
     }
 }
 
-/// State of the extraction process.
+// MARK: - Supporting Types
+
 enum ExtractionState: Equatable {
     case idle
     case processing
@@ -51,157 +139,8 @@ enum ExtractionState: Equatable {
     case error(ExtractionError)
 }
 
-/// Observable manager for recipe extraction workflow.
-@MainActor
-@Observable
-final class ExtractionManager {
-    
-    // MARK: - Published Properties
-    
-    var state: ExtractionState = .idle
-    var currentPayload: ExtractionPayload?
-    var showingExtraction = false
-    var showingManualCreation = false
-    var manualRecipe: Recipe?
-    
-    // MARK: - Dependencies
-    
-    private let appGroupManager = AppGroupManager.shared
-    private let extractionService = RecipeExtractionService.shared
-    
-    // MARK: - Initialization
-    
-    init() {}
-    
-    // MARK: - Public Methods
-    
-    /// Checks for pending extraction payloads on app launch.
-    func checkForPendingExtraction() {
-        guard let payload = appGroupManager.loadPendingPayload() else {
-            return
-        }
-        
-        guard state == .idle else { return }
-        
-        currentPayload = payload
-        showingExtraction = true
-        
-        Task {
-            await processExtraction(payload)
-        }
-    }
-    
-    /// Handles URL scheme callback from Share Extension.
-    func handleURL(_ url: URL) {
-        guard url.scheme == "recipeready",
-              url.host == "extract" else {
-            return
-        }
-        
-        checkForPendingExtraction()
-    }
-    
-    /// Retries the current extraction.
-    func retry() {
-        guard let payload = currentPayload else { return }
-        
-        Task {
-            await processExtraction(payload)
-        }
-    }
-    
-    /// Starts the manual creation flow.
-    func startManualCreation() {
-        // 1. Dismiss extraction sheet
-        showingExtraction = false
-        cleanup()
-        
-        // 2. Prepare new recipe
-        manualRecipe = Recipe(
-            title: "",
-            ingredients: [],
-            steps: [],
-            sourceLink: currentPayload?.sourceURL,
-            sourceCaption: nil,
-            confidenceScore: 1.0
-        )
-        
-        // 3. Trigger manual creation sheet (with slight delay to allow dismissal)
-        // Note: In a real app, we might use a coordinate or cleaner state management.
-        // For MVP, we rely on SwiftUI's observation update cycle.
-        Task {
-            try? await Task.sleep(for: .seconds(0.5))
-            showingManualCreation = true
-        }
-    }
-    
-    /// Dismisses the extraction sheet and cleans up.
-    func dismiss() {
-        cleanup()
-        showingExtraction = false
-        state = .idle
-        currentPayload = nil
-    }
-    
-    // MARK: - Private Methods
-    
-    private func processExtraction(_ payload: ExtractionPayload) async {
-        state = .processing
-        
-        // Check if we have content to process
-        let hasAudio = appGroupManager.audioFileExists(for: payload)
-        let hasCaption = payload.caption != nil && !payload.caption!.isEmpty
-        let hasVideoURL = payload.remoteVideoURL != nil
-        
-        guard hasAudio || hasCaption || hasVideoURL else {
-            state = .error(.noRecipeFound)
-            return
-        }
-        
-        do {
-            // Get audio URL if available
-            let audioURL = hasAudio ? appGroupManager.audioFileURL(for: payload) : nil
-            
-            // Call extraction service with caption and video URL for fallback
-            let response = try await extractionService.extractRecipe(
-                audioURL: audioURL,
-                caption: payload.caption,
-                remoteVideoURL: payload.remoteVideoURL
-            )
-            
-            // Create recipe from response
-            let recipe = Recipe(
-                title: response.title ?? "Extracted Recipe",
-                ingredients: response.ingredients,
-                steps: response.steps,
-                sourceLink: response.sourceLink ?? payload.sourceURL,
-                sourceCaption: payload.caption,
-                confidenceScore: response.confidenceScore
-            )
-            
-            state = .success(recipe)
-            
-        } catch let error as RecipeExtractionError {
-            // Map service errors to friendly UI errors
-            switch error {
-            case .networkError, .serverError:
-                state = .error(.network)
-            case .noAudioFile, .parsingError:
-                state = .error(.noRecipeFound)
-            }
-        } catch {
-            state = .error(.unknown(error.localizedDescription))
-        }
-    }
-    
-    private func cleanup() {
-        guard let payload = currentPayload else { return }
-        
-        do {
-            try appGroupManager.cleanupAudioFile(for: payload)
-            try appGroupManager.cleanupPendingPayload()
-        } catch {
-            print("Cleanup error: \(error)")
-        }
-    }
+struct ExtractionError: Error, Equatable {
+    let title: String
+    let message: String
+    let icon: String
 }

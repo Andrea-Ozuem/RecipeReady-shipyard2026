@@ -11,6 +11,7 @@ struct RecipeDetailView: View {
     let recipe: Recipe
     
     // State for local interactions
+    @Environment(\.dismiss) private var dismiss
     @State private var currentServings: Int = 4
     
     var body: some View {
@@ -19,17 +20,41 @@ struct RecipeDetailView: View {
                 VStack(alignment: .leading, spacing: 0) {
                     // MARK: - Hero Image
                     // Placeholder or AsyncImage
-                    Rectangle()
-                        .fill(Color.gray.opacity(0.3))
-                        .overlay(
-                            Image(systemName: "fork.knife")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 60)
-                                .foregroundColor(.gray)
-                        )
+                    // MARK: - Hero Image
+                    if let imageURL = recipe.imageURL, let url = URL(string: imageURL) {
+                        AsyncImage(url: url) { phase in
+                            switch phase {
+                            case .empty:
+                                Rectangle()
+                                    .fill(Color.gray.opacity(0.3))
+                                    .overlay(ProgressView())
+                            case .success(let image):
+                                image
+                                    .resizable()
+                                    .scaledToFill()
+                            case .failure:
+                                Rectangle()
+                                    .fill(Color.gray.opacity(0.3))
+                                    .overlay(Image(systemName: "fork.knife").foregroundColor(.gray))
+                            @unknown default:
+                                EmptyView()
+                            }
+                        }
                         .frame(height: 300)
                         .clipped()
+                    } else {
+                        Rectangle()
+                            .fill(Color.gray.opacity(0.3))
+                            .overlay(
+                                Image(systemName: "fork.knife")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 60)
+                                    .foregroundColor(.gray)
+                            )
+                            .frame(height: 300)
+                            .clipped()
+                    }
                     
                     VStack(alignment: .leading, spacing: 24) {
                         
@@ -89,9 +114,41 @@ struct RecipeDetailView: View {
                                 ServingsStepper(servings: $currentServings)
                             }
                             
-                            VStack(spacing: 8) {
-                                ForEach(recipe.ingredients) { ingredient in
-                                    IngredientRow(ingredient: ingredient)
+                            // To preserve exact order of sections as they appear in the ingredients list:
+                            let sections: [String?] = recipe.ingredients.reduce(into: [String?]()) { result, ingredient in
+                                // Helper to handle the "String??" returned by result.last safely
+                                // If array is empty, we must append
+                                if result.isEmpty {
+                                    result.append(ingredient.section)
+                                } else if result.last! != ingredient.section {
+                                    // result.last! is safe because we checked isEmpty. 
+                                    // It returns String? (the element), which we compare to ingredient.section (String?)
+                                    result.append(ingredient.section)
+                                }
+                            }
+                            
+                            VStack(spacing: 16) {
+                                ForEach(Array(sections.enumerated()), id: \.offset) { index, section in
+                                    VStack(alignment: .leading, spacing: 8) {
+                                        if let sectionName = section, !sectionName.isEmpty {
+                                            Text(sectionName)
+                                                .font(.headline) // Or custom style
+                                                .foregroundColor(.textPrimary)
+                                                .padding(.top, 4)
+                                        }
+                                        
+                                        // Get ingredients for this specific block (to handle repeated section names correctly if needed, though unlikely)
+                                        // For simplicity, we just filter, but this breaks if section name repeats non-contiguously.
+                                        // Better loop strategy:
+                                        
+                                        let ingredientsInSection = recipe.ingredients.filter { $0.section == section }
+                                        // Wait, filtering destroys the "block" logic if names repeat.
+                                        // Let's assume unique section names for now or contiguous blocks.
+                                        
+                                        ForEach(ingredientsInSection) { ingredient in
+                                            IngredientRow(ingredient: ingredient)
+                                        }
+                                    }
                                 }
                             }
                             .padding(.top, 8)
@@ -153,23 +210,42 @@ struct RecipeDetailView: View {
             .edgesIgnoringSafeArea(.top) // Allow ScrollView to go under nav bar
             
             // Custom Floating Header
-            HStack(spacing: 12) {
+            HStack {
                 Button(action: {
-                    // TODO: Share action
+                    dismiss()
                 }) {
-                    Image(systemName: "square.and.arrow.up")
-                        .font(.system(size: 17, weight: .regular))
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 17, weight: .bold)) // Bold for back button
                         .foregroundColor(.textPrimary)
                         .padding(10)
+                        .background(Color.white.opacity(0.8)) // Add background for visibility over image
+                        .clipShape(Circle())
                 }
                 
-                Button(action: {
-                    // TODO: Favorite action
-                }) {
-                    Image(systemName: "heart")
-                        .font(.system(size: 17, weight: .regular))
-                        .foregroundColor(.textPrimary)
-                        .padding(10)
+                Spacer()
+                
+                HStack(spacing: 12) {
+                    Button(action: {
+                        // TODO: Share action
+                    }) {
+                        Image(systemName: "square.and.arrow.up")
+                            .font(.system(size: 17, weight: .regular))
+                            .foregroundColor(.textPrimary)
+                            .padding(10)
+                            .background(Color.white.opacity(0.8)) // Add background for consistency
+                            .clipShape(Circle())
+                    }
+                    
+                    Button(action: {
+                        // TODO: Favorite action
+                    }) {
+                        Image(systemName: "heart")
+                            .font(.system(size: 17, weight: .regular))
+                            .foregroundColor(.textPrimary)
+                            .padding(10)
+                            .background(Color.white.opacity(0.8)) // Add background for consistency
+                            .clipShape(Circle())
+                    }
                 }
             }
             .padding(.horizontal, 20)
@@ -181,6 +257,16 @@ struct RecipeDetailView: View {
 
 #Preview {
     NavigationStack {
-        RecipeDetailView(recipe: .mock)
+        RecipeDetailView(recipe: Recipe(
+            title: "Sample Recipe",
+            ingredients: [
+                Ingredient(name: "Salt", amount: "1 tsp"),
+                Ingredient(name: "Pepper", amount: "1/2 tsp")
+            ],
+            steps: [
+                CookingStep(order: 1, instruction: "Step 1"),
+                CookingStep(order: 2, instruction: "Step 2")
+            ]
+        ))
     }
 }

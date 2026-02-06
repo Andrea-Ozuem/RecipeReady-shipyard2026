@@ -2,35 +2,34 @@
 //  Cookbook.swift
 //  RecipeReady
 //
-//  SwiftData model for recipe cookbooks/collections.
+//  SwiftData model for a cookbook.
 //
 
 import Foundation
 import SwiftData
 
-/// A cookbook/collection that can contain multiple recipes.
 @Model
 final class Cookbook {
-    var id: UUID
-    var title: String
-    var isFavorites: Bool
-    var createdAt: Date
-    
-    // Many-to-many relationship with recipes
-    @Relationship(deleteRule: .nullify, inverse: \Recipe.cookbooks)
+    var name: String
+    var coverColor: String       // Hex color code
     var recipes: [Recipe]
+    var isFavorites: Bool         // Special flag for the default "Favorites" cookbook
+    var createdAt: Date
+    var updatedAt: Date
     
     init(
-        id: UUID = UUID(),
-        title: String,
+        name: String,
+        coverColor: String = "#FF6B35",  // Default orange
+        recipes: [Recipe] = [],
         isFavorites: Bool = false,
         createdAt: Date = Date(),
-        recipes: [Recipe] = []
+        updatedAt: Date = Date()
     ) {
-        self.id = id
-        self.title = title
+        self.name = name
+        self.coverColor = coverColor
+        self.recipes = recipes
         self.isFavorites = isFavorites
         self.createdAt = createdAt
-        self.recipes = recipes
+        self.updatedAt = updatedAt
     }
 }

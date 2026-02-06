@@ -51,10 +51,6 @@ extension Color {
 
 // Typography Extensions
 extension Font {
-    static var largeTitle: Font {
-        .system(size: 34, weight: .bold, design: .default)
-    }
-
     static var heading1: Font {
         .system(size: 24, weight: .bold, design: .default)
     }

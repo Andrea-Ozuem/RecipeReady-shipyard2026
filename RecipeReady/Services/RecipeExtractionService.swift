@@ -13,8 +13,16 @@ struct RecipeExtractionResponse: Codable {
     let ingredients: [Ingredient]
     let steps: [CookingStep]
     let sourceLink: String?
+    let imageURL: String?
     let confidenceScore: Double
     let title: String?
+    
+    // Metadata
+    let servings: Int?
+    let prepTime: Int?
+    let cookingTime: Int?
+    let restingTime: Int?
+    let difficulty: String?
 }
 
 /// Errors that can occur during recipe extraction.
@@ -43,7 +51,8 @@ protocol RecipeExtractionServiceProtocol {
     func extractRecipe(
         audioURL: URL?,
         caption: String?,
-        remoteVideoURL: String?
+        remoteVideoURL: String?,
+        thumbnailURL: String?
     ) async throws -> RecipeExtractionResponse
 }
 
@@ -63,66 +72,110 @@ final class RecipeExtractionService: RecipeExtractionServiceProtocol {
     
     // MARK: - Public API
     
-    /// Extracts recipe from caption first, with audio fallback.
     func extractRecipe(
         audioURL: URL?,
         caption: String?,
-        remoteVideoURL: String?
+        remoteVideoURL: String?,
+        thumbnailURL: String?
     ) async throws -> RecipeExtractionResponse {
         
-        // 1. Try caption first (fastest path)
+        // 1. Analyze Caption (always try this first)
+        var captionResult: GeminiRecipeResult?
         if let caption = caption, !caption.isEmpty {
-            let result = try await geminiService.parseRecipe(from: caption)
+            captionResult = try? await geminiService.parseRecipe(from: caption)
+        }
+        
+        // 2. Check completeness of caption result
+        if let result = captionResult {
+            // Golden path: Caption has both ingredients and steps
+            if !result.ingredients.isEmpty && !result.steps.isEmpty {
+                return mapToResponse(result, imageURL: thumbnailURL)
+            }
             
-            if result.hasRecipe {
-                return RecipeExtractionResponse(
-                    ingredients: result.ingredients,
-                    steps: result.steps,
-                    sourceLink: nil,
-                    confidenceScore: result.confidenceScore,
-                    title: result.title
-                )
+            // If caption has ingredients but no video available -> Return what we have
+            if !result.ingredients.isEmpty && remoteVideoURL == nil {
+                return mapToResponse(result, imageURL: thumbnailURL)
             }
         }
         
-        // 2. Fallback: Download video → Extract audio → Send to Gemini
+        // 3. Audio Fallback/Augmentation
+        // Only ignore if we have no video URL
         guard let videoURLString = remoteVideoURL,
               let videoURL = URL(string: videoURLString) else {
-            throw RecipeExtractionError.parsingError("No recipe found in caption and no video URL available for audio fallback.")
+             // If we have a partial caption result, return it. Otherwise fail.
+            if let result = captionResult, result.hasRecipe {
+                return mapToResponse(result, imageURL: thumbnailURL)
+            }
+            throw RecipeExtractionError.parsingError("No recipe found in caption and no video URL available.")
         }
         
-        // Download video
+        // Download & Extract Audio
         let localVideoURL = try await downloadVideo(from: videoURL)
+        defer { try? FileManager.default.removeItem(at: localVideoURL) }
         
-        defer {
-            // Cleanup temp video file
-            try? FileManager.default.removeItem(at: localVideoURL)
-        }
-        
-        // Extract audio from video
         let audioURL = try await audioExtractor.extractAudio(from: localVideoURL)
+        defer { audioExtractor.cleanup(audioURL: audioURL) }
         
-        defer {
-            // Cleanup temp audio file
-            audioExtractor.cleanup(audioURL: audioURL)
-        }
-        
-        // Read audio data
         let audioData = try Data(contentsOf: audioURL)
+        let audioResult = try await geminiService.parseRecipeFromAudio(audioData)
         
-        // Send to Gemini for transcription + recipe extraction
-        let result = try await geminiService.parseRecipeFromAudio(audioData)
+        // 4. Merge Results
+        // Prioritize caption for ingredients (usually better quality/structure)
+        // Prioritize audio for steps (if caption lacks them)
         
-        guard result.hasRecipe else {
-            throw RecipeExtractionError.parsingError("No recipe found in caption or audio. Try a different video with clear recipe instructions.")
+        var finalIngredients = audioResult.ingredients
+        if let captionIngredients = captionResult?.ingredients, !captionIngredients.isEmpty {
+            finalIngredients = captionIngredients
         }
         
+        var finalSteps = audioResult.steps
+        if let captionSteps = captionResult?.steps, !captionSteps.isEmpty {
+            finalSteps = captionSteps
+        } else if finalSteps.isEmpty && !finalIngredients.isEmpty {
+             // If we have ingredients but NO steps even after audio,
+             // create a placeholder step so the recipe is valid.
+             finalSteps = [CookingStep(order: 1, instruction: "Follow the instructions in the video.")]
+        }
+
+        // Merge Metadata (prefer caption, fallback to audio)
+        let serv = captionResult?.servings ?? audioResult.servings
+        let prep = captionResult?.prepTime ?? audioResult.prepTime
+        let cook = captionResult?.cookingTime ?? audioResult.cookingTime
+        let rest = captionResult?.restingTime ?? audioResult.restingTime
+        let diff = captionResult?.difficulty ?? audioResult.difficulty
+        let title = captionResult?.title ?? audioResult.title
+        
+        // Calculate combined confidence
+        let confidence = max(captionResult?.confidenceScore ?? 0, audioResult.confidenceScore)
+        
+        return RecipeExtractionResponse(
+            ingredients: finalIngredients,
+            steps: finalSteps,
+            sourceLink: nil,
+            imageURL: thumbnailURL,
+            confidenceScore: confidence,
+            title: title,
+            servings: serv,
+            prepTime: prep,
+            cookingTime: cook,
+            restingTime: rest,
+            difficulty: diff
+        )
+    }
+    
+    private func mapToResponse(_ result: GeminiRecipeResult, imageURL: String?) -> RecipeExtractionResponse {
         return RecipeExtractionResponse(
             ingredients: result.ingredients,
             steps: result.steps,
             sourceLink: nil,
+            imageURL: imageURL,
             confidenceScore: result.confidenceScore,
-            title: result.title
+            title: result.title,
+            servings: result.servings,
+            prepTime: result.prepTime,
+            cookingTime: result.cookingTime,
+            restingTime: result.restingTime,
+            difficulty: result.difficulty
         )
     }
     

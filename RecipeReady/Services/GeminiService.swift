@@ -14,6 +14,13 @@ struct GeminiRecipeResult {
     let ingredients: [Ingredient]
     let steps: [CookingStep]
     let confidenceScore: Double
+    
+    // Metadata
+    let servings: Int?
+    let prepTime: Int?        // in minutes
+    let cookingTime: Int?     // in minutes
+    let restingTime: Int?     // in minutes
+    let difficulty: String?   // "Easy", "Medium", "Hard"
 }
 
 /// Errors that can occur during Gemini operations
@@ -72,23 +79,34 @@ final class GeminiService {
         """
         You are a recipe extraction assistant. Analyze the following social media caption and extract any recipe information.
 
-        If the text contains BOTH ingredients AND cooking instructions, return ONLY valid JSON (no markdown, no code blocks):
+        If the text contains ANY recipe information (ingredients OR cooking instructions), return ONLY valid JSON (no markdown, no code blocks):
         {
           "hasRecipe": true,
           "title": "Recipe name based on the content",
-          "ingredients": [{"name": "ingredient name", "amount": "quantity"}],
+          "ingredients": [{"name": "ingredient name", "amount": "quantity or null", "section": "For the Sauce (optional)"}],
           "steps": [{"order": 1, "instruction": "Step description"}],
+          "metadata": {
+            "servings": 4,
+            "prepTime": 15,
+            "cookingTime": 30,
+            "restingTime": null,
+            "difficulty": "Easy"
+          },
           "confidenceScore": 0.85
         }
 
-        If the text does NOT contain a complete recipe with ingredients and instructions, return ONLY:
+        If the text does NOT contain any recipe information, return ONLY:
         {"hasRecipe": false}
 
-        Important:
-        - Extract ONLY what is explicitly mentioned in the text
-        - Do not invent or assume ingredients/steps
-        - Set confidenceScore based on how clear the recipe instructions are (0.0-1.0)
-        - Return ONLY raw JSON, no markdown formatting
+        Extraction Rules:
+        - Extract ONLY what is explicitly mentioned
+        - If ingredients are listed in sections (e.g. "For the Sauce"), include the section header in the "section" field. If no section, set to null.
+        - Ingredients: set "amount" to null if not specified, preserve vague amounts ("a handful", "to taste")
+        - Servings: extract if mentioned ("serves 4"), infer from ingredients if reasonable, or null
+        - Times (prepTime, cookingTime, restingTime): extract in minutes if mentioned, else null
+        - Difficulty: infer from complexity - Easy (≤5 steps), Medium (6-10 steps), Hard (>10 steps). Use explicit mentions if present.
+        - confidenceScore: 0.0-1.0 based on clarity
+        - Return ONLY raw JSON, no markdown
 
         Caption:
         \"\"\"
@@ -165,23 +183,34 @@ final class GeminiService {
         let audioPrompt = """
         Listen to this audio from a cooking video and extract the recipe.
         
-        If the audio contains BOTH ingredients AND cooking instructions, return ONLY valid JSON (no markdown, no code blocks):
+        If the audio contains ANY recipe information (ingredients OR cooking instructions), return ONLY valid JSON (no markdown, no code blocks):
         {
           "hasRecipe": true,
           "title": "Recipe name based on the content",
-          "ingredients": [{"name": "ingredient name", "amount": "quantity"}],
+          "ingredients": [{"name": "ingredient name", "amount": "quantity or null", "section": "For the Sauce (optional)"}],
           "steps": [{"order": 1, "instruction": "Step description"}],
+          "metadata": {
+            "servings": 4,
+            "prepTime": 15,
+            "cookingTime": 30,
+            "restingTime": null,
+            "difficulty": "Easy"
+          },
           "confidenceScore": 0.85
         }
         
-        If the audio does NOT contain a complete recipe with ingredients and instructions, return ONLY:
+        If the audio does NOT contain any recipe information, return ONLY:
         {"hasRecipe": false}
         
-        Important:
-        - Extract ONLY what is explicitly mentioned in the audio
-        - Do not invent or assume ingredients/steps
-        - Set confidenceScore based on how clear the recipe instructions are (0.0-1.0)
-        - Return ONLY raw JSON, no markdown formatting
+        Extraction Rules:
+        - Extract ONLY what is explicitly mentioned
+        - If ingredients are listed in sections (e.g. "For the Sauce"), include the section header in the "section" field
+        - Ingredients: set "amount" to null if not specified
+        - Servings: extract if mentioned, infer if reasonable, else null
+        - Times: extract in minutes if mentioned, else null
+        - Difficulty: infer from complexity
+        - confidenceScore: 0.0-1.0 based on clarity
+        - Return ONLY raw JSON, no markdown
         """
         
         // Encode audio as base64
@@ -257,7 +286,12 @@ final class GeminiService {
                 title: nil,
                 ingredients: [],
                 steps: [],
-                confidenceScore: 0
+                confidenceScore: 0,
+                servings: nil,
+                prepTime: nil,
+                cookingTime: nil,
+                restingTime: nil,
+                difficulty: nil
             )
         }
         
@@ -267,8 +301,9 @@ final class GeminiService {
             for item in ingredientsList {
                 let name = item["name"] as? String ?? ""
                 let amount = item["amount"] as? String
+                let section = item["section"] as? String
                 if !name.isEmpty {
-                    ingredients.append(Ingredient(name: name, amount: amount))
+                    ingredients.append(Ingredient(name: name, amount: amount, section: section))
                 }
             }
         }
@@ -285,12 +320,32 @@ final class GeminiService {
             }
         }
         
+        // Parse metadata
+        var servings: Int? = nil
+        var prepTime: Int? = nil
+        var cookingTime: Int? = nil
+        var restingTime: Int? = nil
+        var difficulty: String? = nil
+        
+        if let metadata = json["metadata"] as? [String: Any] {
+            servings = metadata["servings"] as? Int
+            prepTime = metadata["prepTime"] as? Int
+            cookingTime = metadata["cookingTime"] as? Int
+            restingTime = metadata["restingTime"] as? Int
+            difficulty = metadata["difficulty"] as? String
+        }
+        
         return GeminiRecipeResult(
             hasRecipe: true,
             title: json["title"] as? String,
             ingredients: ingredients,
             steps: steps,
-            confidenceScore: json["confidenceScore"] as? Double ?? 0.5
+            confidenceScore: json["confidenceScore"] as? Double ?? 0.5,
+            servings: servings,
+            prepTime: prepTime,
+            cookingTime: cookingTime,
+            restingTime: restingTime,
+            difficulty: difficulty
         )
     }
 }

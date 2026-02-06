@@ -6,19 +6,17 @@
 //
 
 import SwiftUI
-import SwiftData
 
 struct CookbookView: View {
+    @Environment(\.modelContext) private var modelContext
+    @Query(sort: \Cookbook.createdAt, order: .forward) private var cookbooks: [Cookbook]
+    
     // Grid Setup: 2 columns with spacing
     private let columns = [
         GridItem(.flexible(), spacing: 16),
         GridItem(.flexible(), spacing: 16)
     ]
     
-    // SwiftData Query
-    @Query(sort: \Cookbook.createdAt, order: .reverse) private var cookbooks: [Cookbook]
-    
-    // UI State
     @State private var isShowingAddCookbook = false
     
     var body: some View {
@@ -58,9 +56,12 @@ struct CookbookView: View {
             .background(Color.screenBackground)
             .navigationBarHidden(true)
             .sheet(isPresented: $isShowingAddCookbook) {
-                AddCookbookSheet()
-                    .presentationDetents([.medium])
-                    .presentationDragIndicator(.visible)
+                AddCookbookSheet(onSave: { newTitle in
+                    let newCookbook = Cookbook(name: newTitle)
+                    modelContext.insert(newCookbook)
+                })
+                .presentationDetents([.medium])
+                .presentationDragIndicator(.visible)
             }
         }
     }
@@ -75,12 +76,10 @@ struct CollectionCard: View {
         VStack(alignment: .leading, spacing: 8) {
             // Card Visual
             CookbookCoverView(cookbook: cookbook)
-            // .background(Color.white) // Removed this in favor of explicit ZStack logic logic
-            // .clipShape(RoundedRectangle(cornerRadius: 16)) // Moved inside
             
             // Meta Text
             VStack(alignment: .leading, spacing: 4) {
-                Text(cookbook.title)
+                Text(cookbook.name)
                     .font(.bodyRegular)
                     .foregroundColor(.textPrimary)
                     .multilineTextAlignment(.leading)
@@ -98,7 +97,7 @@ struct CollectionCard: View {
 
 struct AddCookbookSheet: View {
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.modelContext) private var modelContext
+    var onSave: (String) -> Void
     
     @State private var title: String = ""
     
@@ -124,8 +123,7 @@ struct AddCookbookSheet: View {
                 // Full-width Save Button at bottom
                 Button(action: {
                     if !title.isEmpty {
-                        let newCookbook = Cookbook(title: title, isFavorites: false)
-                        modelContext.insert(newCookbook)
+                        onSave(title)
                         dismiss()
                     }
                 }) {

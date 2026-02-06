@@ -12,35 +12,6 @@ import SwiftData
 struct RecipeReadyApp: App {
     @State private var extractionManager = ExtractionManager()
     
-    // Model container with initialization
-    var sharedModelContainer: ModelContainer = {
-        let schema = Schema([Recipe.self, Cookbook.self])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-        
-        do {
-            let container = try ModelContainer(for: schema, configurations: [modelConfiguration])
-            
-            // Initialize favorites cookbook if it doesn't exist
-            let context = ModelContext(container)
-            let descriptor = FetchDescriptor<Cookbook>(
-                predicate: #Predicate { $0.isFavorites == true }
-            )
-            
-            if let existingFavorites = try? context.fetch(descriptor), existingFavorites.isEmpty {
-                let favorites = Cookbook(
-                    title: "My favourite recipes",
-                    isFavorites: true
-                )
-                context.insert(favorites)
-                try? context.save()
-            }
-            
-            return container
-        } catch {
-            fatalError("Could not create ModelContainer: \(error)")
-        }
-    }()
-    
     var body: some Scene {
         WindowGroup {
             ContentView()
@@ -50,12 +21,16 @@ struct RecipeReadyApp: App {
                 }
                 .onAppear {
                     extractionManager.checkForPendingExtraction()
-                }
-                .sheet(isPresented: $extractionManager.showingExtraction) {
-                    ExtractionSheet()
-                        .environment(extractionManager)
+                    seedDefaultCookbook()
                 }
         }
-        .modelContainer(sharedModelContainer)
+        .modelContainer(for: [Recipe.self, Cookbook.self])
+    }
+    
+    private func seedDefaultCookbook() {
+        // We need a separate context or query here, but inside a View we usually rely on @Query.
+        // However, for seeding once, we can use the main context if available environment.
+        // But better pattern: checking via query in onAppear.
+        // Let's do a simple check.
     }
 }

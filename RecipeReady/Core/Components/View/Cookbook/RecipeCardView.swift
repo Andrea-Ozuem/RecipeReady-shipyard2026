@@ -75,6 +75,10 @@ struct RecipeCardView: View {
 }
 
 #Preview {
-    RecipeCardView(recipe: .mock)
+    RecipeCardView(recipe: Recipe(
+        title: "Sample Recipe",
+        ingredients: [Ingredient(name: "Test", amount: "1")],
+        steps: [CookingStep(order: 1, instruction: "Test")]
+    ))
         .padding()
 }

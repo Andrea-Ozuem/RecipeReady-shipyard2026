@@ -12,13 +12,11 @@ struct IngredientRow: View {
     
     var body: some View {
         HStack(alignment: .center, spacing: 12) {
-            // Amount (Left aligned)
-            if let amount = ingredient.amount {
-                Text(amount)
-                    .font(.bodyRegular)
-                    .foregroundColor(.textPrimary)
-                    .frame(width: 60, alignment: .leading)
-            }
+            // Amount (Left aligned) - show "-" if missing
+            Text(ingredient.amount ?? "-")
+                .font(.bodyRegular)
+                .foregroundColor(ingredient.amount == nil ? .textSecondary : .textPrimary)
+                .frame(width: 60, alignment: .leading)
             
             // Ingredient Name
             Text(ingredient.name)

@@ -23,6 +23,8 @@ struct ApifyDatasetItem: Codable {
     let caption: String?
     let videoUrl: String?
     let audioUrl: String?
+    let displayUrl: String?
+    let thumbnailUrl: String?
     let ownerUsername: String?
     let ownerFullName: String?
     let likesCount: Int?
@@ -81,8 +83,8 @@ final class ApifyService {
     
     /// Extracts caption from an Instagram/TikTok URL
     /// - Parameter url: The social media URL
-    /// - Returns: The caption text and optional video URL
-    func extractCaption(from url: URL) async throws -> (caption: String?, videoUrl: String?) {
+    /// - Returns: The caption text, video URL, and thumbnail URL
+    func extractCaption(from url: URL) async throws -> (caption: String?, videoUrl: String?, thumbnailUrl: String?) {
         // 1. Start actor run
         let runId = try await startActorRun(with: url)
         
@@ -95,11 +97,14 @@ final class ApifyService {
         // 4. Extract caption from first item
         guard let firstItem = items.first else {
             print("[ApifyService] ⚠️ No items returned from dataset")
-            return (nil, nil)
+            return (nil, nil, nil)
         }
         
-        print("[ApifyService] ✅ Got item - caption: \(firstItem.caption?.prefix(50) ?? "nil")..., videoUrl: \(firstItem.videoUrl ?? "nil")")
-        return (firstItem.caption, firstItem.videoUrl)
+        // Prefer displayUrl (full res) over thumbnailUrl
+        let image = firstItem.displayUrl ?? firstItem.thumbnailUrl
+        
+        print("[ApifyService] ✅ Got item - caption: \(firstItem.caption?.prefix(50) ?? "nil")..., videoUrl: \(firstItem.videoUrl ?? "nil"), thumb: \(image ?? "nil")")
+        return (firstItem.caption, firstItem.videoUrl, image)
     }
     
     // MARK: - Private Methods
