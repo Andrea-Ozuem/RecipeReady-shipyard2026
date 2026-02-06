@@ -38,48 +38,16 @@ struct RecipeResultCard: View {
                         .cornerRadius(20)
                 }
                 .padding(12)
-                
-                // Like Badge Bottom Right
-                VStack {
-                    Spacer()
-                    HStack {
-                        Spacer()
-                        HStack(spacing: 4) {
-                            Image(systemName: "heart")
-                                .font(.system(size: 14))
-                                .foregroundColor(.textPrimary)
-                            Text("3.4K") // Mock data
-                                .font(.captionMeta)
-                                .foregroundColor(.textPrimary)
-                        }
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 6)
-                        .background(Color.white)
-                        .cornerRadius(20)
-                    }
-                }
-                .padding(12)
             }
             .frame(width: 170) // Constrain width, let height grow by aspect ratio (~242)
             
             // Info Content
             VStack(alignment: .leading, spacing: 4) {
                 Text(recipeTitle)
-                    .font(.bodyBold)
+                    .font(.bodyRegular)
                     .foregroundColor(.textPrimary)
                     .lineLimit(2)
                     .fixedSize(horizontal: false, vertical: true)
-                
-                // Author Mock
-                HStack(spacing: 8) {
-                    Circle()
-                        .fill(Color.gray.opacity(0.3))
-                        .frame(width: 24, height: 24)
-                    
-                    Text("Hanna Reder")
-                        .font(.caption)
-                        .foregroundColor(.primaryOrange)
-                }
             }
         }
         .frame(width: 170)

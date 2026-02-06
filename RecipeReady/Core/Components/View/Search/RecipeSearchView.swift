@@ -59,32 +59,54 @@ struct RecipeSearchView: View {
                 .background(Color.softBeige.ignoresSafeArea(edges: .top))
                 .zIndex(0)
                 
-                // MARK: - Search Bar (Overlapping)
-                HStack {
-                    Image(systemName: "magnifyingglass")
-                        .foregroundColor(.textSecondary)
-                    
-                    TextField("Type an ingredient", text: $viewModel.searchText)
-                        .font(.bodyRegular)
-                        .foregroundColor(.textPrimary)
-                    
-                    if !viewModel.searchText.isEmpty {
-                        Button(action: { viewModel.searchText = "" }) {
-                            Image(systemName: "xmark.circle.fill")
-                                .foregroundColor(.textSecondary)
+                // MARK: - Search Bar & Dropdown Container
+                VStack(spacing: 0) {
+                    // Search Input Row
+                    HStack {
+                        Image(systemName: "magnifyingglass")
+                            .foregroundColor(.textSecondary)
+                        
+                        TextField("Type an ingredient", text: $viewModel.searchText)
+                            .font(.bodyRegular)
+                            .foregroundColor(.textPrimary)
+                        
+                        if !viewModel.searchText.isEmpty {
+                            Button(action: { viewModel.searchText = "" }) {
+                                Image(systemName: "xmark")
+                                    .foregroundColor(.textPrimary)
+                            }
                         }
                     }
+                    .padding()
+                    .frame(height: 56)
                     
-                    // Heart icon inside search bar
-                    Button(action: {
-                        // Action for favourites
-                    }) {
-                        Image(systemName: "heart")
-                            .font(.system(size: 20))
-                            .foregroundColor(.textSecondary)
+                    // Dropdown List (Visible when typing)
+                    if !viewModel.searchText.isEmpty {
+                        Divider()
+                            .background(Color.divider)
+                        
+                        ForEach(viewModel.filteredIngredients.prefix(5), id: \.self) { ingredient in
+                            VStack(spacing: 0) {
+                                SearchSuggestionRow(
+                                    name: ingredient,
+                                    isFavorite: viewModel.isFavorite(ingredient),
+                                    onSelect: {
+                                        viewModel.toggleIngredient(ingredient)
+                                    },
+                                    onToggleFavorite: {
+                                        viewModel.toggleFavorite(ingredient)
+                                    }
+                                )
+                                
+                                if ingredient != viewModel.filteredIngredients.prefix(5).last {
+                                    Divider()
+                                        .background(Color.divider)
+                                        .padding(.leading, 16)
+                                }
+                            }
+                        }
                     }
                 }
-                .padding()
                 .background(Color.white)
                 .cornerRadius(12)
                 .overlay(
@@ -92,10 +114,14 @@ struct RecipeSearchView: View {
                         .stroke(Color.gray.opacity(0.2), lineWidth: 1)
                 )
                 .padding(.horizontal)
-                .frame(height: 56) // Fixed height to ensure consistent overlap calculation
-                .offset(y: -28) // Pull up by half height
-                .padding(.bottom, -28) // Remove the space it occupied in the flow
-                .zIndex(1) // Ensure it sits on top of both backgrounds
+                // Layout Adjustments to handle expansion
+                .offset(y: -28) 
+                .padding(.bottom, -28) // Remove space
+                // .padding(.bottom, 20) // Removed extra padding here to keep overlap tight
+                .zIndex(1) // Keep on top
+                
+                // Overlay background dimming if searching (Optional, based on design "focus" state)
+                .shadow(color: Color.black.opacity(viewModel.searchText.isEmpty ? 0 : 0.1), radius: 10, x: 0, y: 5)
                 
                 // MARK: - Content Section (White)
                 ScrollView {
@@ -201,14 +227,71 @@ struct RecipeSearchView: View {
                         } else {
                             // 4. Default / Favourites Section (when nothing selected)
                             VStack(alignment: .leading, spacing: 12) {
-                                Text("My favourite ingredients")
-                                    .font(.bodyBold)
-                                    .foregroundColor(.textPrimary)
+                                HStack {
+                                    Text("My favourite ingredients")
+                                        .font(.bodyBold)
+                                        .foregroundColor(.textPrimary)
+                                    Spacer()
+                                    if !viewModel.favoriteIngredients.isEmpty {
+                                        Button("Edit") {
+                                            // Edit favorites action
+                                        }
+                                        .font(.bodyRegular)
+                                        .foregroundColor(.primaryOrange)
+                                    }
+                                }
                                 
-                                Text("Access your favourites easily! Click the ♡-icon in the search field to save your favourite ingredients.")
+                                Text("Click the-♡ icon in the search field to save more ingredients to this section.")
                                     .font(.captionMeta)
                                     .foregroundColor(.textSecondary)
                                     .lineSpacing(4)
+                                
+                                if !viewModel.favoriteIngredients.isEmpty {
+                                    ScrollView(.horizontal, showsIndicators: false) {
+                                        VStack(alignment: .leading, spacing: 8) {
+                                            let favorites = viewModel.sortedFavoriteIngredients
+                                            let firstRow = favorites.enumerated().filter { $0.offset % 2 == 0 }.map { $0.element }
+                                            let secondRow = favorites.enumerated().filter { $0.offset % 2 != 0 }.map { $0.element }
+                                            
+                                            HStack(spacing: 8) {
+                                                ForEach(firstRow, id: \.self) { ingredient in
+                                                    IngredientTag(
+                                                        name: ingredient,
+                                                        isSelected: false, // Display as normal tags
+                                                        action: {
+                                                            viewModel.toggleIngredient(ingredient)
+                                                        }
+                                                    )
+                                                }
+                                            }
+                                            
+                                            if !secondRow.isEmpty {
+                                                HStack(spacing: 8) {
+                                                    ForEach(secondRow, id: \.self) { ingredient in
+                                                        IngredientTag(
+                                                            name: ingredient,
+                                                            isSelected: false,
+                                                            action: {
+                                                                viewModel.toggleIngredient(ingredient)
+                                                            }
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        // No padding needed here as parent Vstack handles it? No, parent padding is outside this scrollview content usually.
+                                        // Wait, parent Vstack has horizontal padding? No.
+                                        // Let's check context. Vstack "My favourite..." has padding horizontal.
+                                        // So we need to be careful. The ScrollView should probably bleed edge to edge, so we might need negative padding or adjust hierarchy.
+                                        // Let's check `Suggested Ingredients` implementation. It has `.padding(.horizontal)` INSIDE the scrollview content.
+                                        // So we should remove parent horizontal padding for the list part.
+                                    }
+                                    .padding(.horizontal, -16) // Negate parent padding for scrollview allowing full width
+                                    .padding(.horizontal) // Apply padding to content inside? No, let's restructure slightly.
+                                    // Actually, looking at context lines, the enclosing VPC stack has `.padding(.horizontal)`.
+                                    // If we want scrollview to go edge-to-edge, we should move it out or use negative padding.
+                                    // Let's try negative horizontal padding on the ScrollView itself, then positive padding on the content.
+                                }
                             }
                             .padding(.horizontal)
                         }
