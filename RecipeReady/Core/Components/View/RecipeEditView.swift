@@ -42,6 +42,7 @@ struct RecipeEditView: View {
         _bakeTime = State(initialValue: recipe.bakingTime)
         _restTime = State(initialValue: recipe.restingTime)
         _difficulty = State(initialValue: recipe.difficulty)
+        _servings = State(initialValue: recipe.servings ?? 4)
     }
     
     var body: some View {
@@ -77,7 +78,7 @@ struct RecipeEditView: View {
                             HStack(spacing: 0) {
                                 EditableTimeCircleView(title: "Preparation", minutes: $prepTime)
                                 Spacer()
-                                EditableTimeCircleView(title: "Baking", minutes: $bakeTime)
+                                EditableTimeCircleView(title: "Cooking", minutes: $bakeTime)
                                 Spacer()
                                 EditableTimeCircleView(title: "Resting", minutes: $restTime)
                             }
@@ -101,7 +102,9 @@ struct RecipeEditView: View {
                             
                             // Grouping Logic
                             let sectionKeys = ingredients.reduce(into: [String?]()) { keys, ingredient in
-                                if keys.last != ingredient.section {
+                                if keys.isEmpty {
+                                    keys.append(ingredient.section)
+                                } else if keys[keys.count - 1] != ingredient.section {
                                     keys.append(ingredient.section)
                                 }
                             }
@@ -166,13 +169,13 @@ struct RecipeEditView: View {
                             SectionHeader(title: "Instructions")
                             
                             VStack(spacing: 12) {
-                                ForEach(Array($steps.enumerated()), id: \.element.id) { index, $step in
+                                ForEach(steps.indices, id: \.self) { index in
                                     EditableInstructionRow(
-                                        step: $step,
+                                        step: $steps[index],
                                         index: index + 1,
                                         onDelete: {
-                                            if let idx = steps.firstIndex(where: { $0.id == step.id }) {
-                                                steps.remove(at: idx)
+                                            if steps.indices.contains(index) {
+                                                steps.remove(at: index)
                                                 reorderSteps()
                                             }
                                         }

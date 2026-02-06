@@ -2,7 +2,7 @@
 //  ShoppingListIngredientRow.swift
 //  RecipeReady
 //
-//  Created for Shopping List Expanded State.
+//  Created for Grocery List Expanded State.
 //
 
 import SwiftUI

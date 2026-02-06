@@ -28,7 +28,7 @@ struct ContentView: View {
                 Label("Cookbooks", systemImage: "heart")
             }
             
-            // Shopping List Tab
+            // Grocery List Tab
             ShoppingListView()
                 .tabItem {
                     Label("Grocery list", systemImage: "cart")

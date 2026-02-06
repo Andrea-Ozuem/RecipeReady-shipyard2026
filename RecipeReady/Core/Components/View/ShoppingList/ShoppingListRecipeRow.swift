@@ -2,7 +2,7 @@
 //  ShoppingListRecipeRow.swift
 //  RecipeReady
 //
-//  Created for Shopping List implementation.
+//  Created for Grocery List implementation.
 //
 
 import SwiftUI

@@ -19,6 +19,7 @@ struct RecipeDetailView: View {
     @State private var currentServings: Int = 4
     @State private var showToast = false
     @State private var toastMessage = ""
+    @State private var showAddToCookbook = false
     
     var body: some View {
         ZStack(alignment: .topTrailing) {
@@ -87,7 +88,7 @@ struct RecipeDetailView: View {
                             HStack(spacing: 0) {
                                 TimeCircleView(title: "Preparation", minutes: recipe.prepTime)
                                 Spacer()
-                                TimeCircleView(title: "Baking", minutes: recipe.bakingTime)
+                                TimeCircleView(title: "Cooking", minutes: recipe.bakingTime)
                                 Spacer()
                                 TimeCircleView(title: "Resting", minutes: recipe.restingTime)
                             }
@@ -151,10 +152,10 @@ struct RecipeDetailView: View {
                             }
                             .padding(.top, 8)
                             
-                            // Add to shopping list Button
+                            // Add to Grocery List Button
                             Button(action: {
                                 if isInShoppingList {
-                                    // TODO: Navigate to Shopping List tab
+                                    // TODO: Navigate to Grocery List tab
                                     // For now, we just give feedback or do nothing as the user requested UI update
                                 } else {
                                     addToShoppingList()
@@ -163,10 +164,10 @@ struct RecipeDetailView: View {
                                 HStack {
                                     if isInShoppingList {
                                         Image(systemName: "checkmark.circle.fill")
-                                        Text("View in shopping list")
+                                        Text("View in Grocery List")
                                     } else {
                                         Image(systemName: "cart")
-                                        Text("Add to shopping list")
+                                        Text("Add to Grocery List")
                                     }
                                 }
                                 .font(.bodyBold)
@@ -249,7 +250,7 @@ struct RecipeDetailView: View {
                     }
                     
                     Button(action: {
-                        // TODO: Favorite action
+                        showAddToCookbook = true
                     }) {
                         Image(systemName: "heart")
                             .font(.system(size: 17, weight: .regular))
@@ -279,6 +280,11 @@ struct RecipeDetailView: View {
             }
         }
         .toolbar(.hidden, for: .navigationBar) // Completely hide system nav bar
+        .sheet(isPresented: $showAddToCookbook) {
+            AddToCookbookSheet(recipe: recipe)
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.hidden) // We built our own custom indicator in the view
+        }
     }
     
     // MARK: - Actions
@@ -294,7 +300,7 @@ struct RecipeDetailView: View {
         // We added `originalRecipeID` to ShoppingListRecipe for this purpose.
         
         if let existing = shoppingListRecipes.first(where: { $0.originalRecipeID == recipe.id }) {
-            toastMessage = "Recipe already in shopping list"
+            toastMessage = "Recipe already in Grocery List"
             withAnimation { showToast = true }
              DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
                 withAnimation { showToast = false }
@@ -329,7 +335,7 @@ struct RecipeDetailView: View {
         
         modelContext.insert(newListRecipe)
         
-        toastMessage = "Added to shopping list"
+        toastMessage = "Added to Grocery List"
         withAnimation { showToast = true }
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
             withAnimation { showToast = false }

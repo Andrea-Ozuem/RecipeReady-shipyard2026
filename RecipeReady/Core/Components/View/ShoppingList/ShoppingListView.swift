@@ -2,7 +2,7 @@
 //  ShoppingListView.swift
 //  RecipeReady
 //
-//  Created for Shopping List implementation.
+//  Created for Grocery List implementation.
 //
 
 import SwiftUI
@@ -25,7 +25,7 @@ struct ShoppingListView: View {
             VStack(spacing: 0) {
                 // Custom Header
                 HStack {
-                    Text("Shopping List")
+                    Text("Grocery List")
                         .font(.largeTitle)
                         .foregroundColor(.textPrimary)
                     
@@ -257,13 +257,13 @@ struct ShoppingListView: View {
                 .padding(.bottom, 16)
             
             VStack(spacing: 12) {
-                Text("You don't have recipes on your shopping list yet.")
+                Text("You don't have recipes on your Grocery List yet.")
                     .font(.heading3)
                     .foregroundStyle(Color.textPrimary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal,30)
                 
-                Text("When you add ingredients to your shopping list, you'll see them here! Happy shopping!")
+                Text("When you add ingredients to your Grocery List, you'll see them here! Happy shopping!")
                     .font(.bodyRegular)
                     .foregroundStyle(Color.textSecondary)
                     .multilineTextAlignment(.center)
