@@ -13,6 +13,7 @@ struct AddToCookbookSheet: View {
     @Environment(\.dismiss) private var dismiss
     
     let recipe: Recipe
+    let moveFromCookbook: Cookbook?
     
     // Sort logic: Favorites first, then alphabetical or by date
     @Query(sort: [
@@ -29,8 +30,9 @@ struct AddToCookbookSheet: View {
     @State private var showNewCookbookAlert = false
     @State private var newCookbookName = ""
     
-    init(recipe: Recipe) {
+    init(recipe: Recipe, moveFromCookbook: Cookbook? = nil) {
         self.recipe = recipe
+        self.moveFromCookbook = moveFromCookbook
         // _allCookbooks is initialized by the property wrapper default value
     }
     
@@ -117,7 +119,7 @@ struct AddToCookbookSheet: View {
         // usage of allCookbooks here is strictly safe only if Query is populated, 
         // but Query might be empty initially? No, it should satisfy immediately.
         if !allCookbooks.contains(where: { $0.isFavorites }) {
-            let favorites = Cookbook(name: "My favourite recipes", isFavorites: true)
+            let favorites = Cookbook(name: "My favourite recipes", coverColor: "#FF6B35", isFavorites: true)
             modelContext.insert(favorites)
             // No need to save explicitly, autosave or next cycle will handle it, 
             // but for immediate UI selection logic we might want to know about it.
@@ -133,7 +135,7 @@ struct AddToCookbookSheet: View {
                 if cookbook.isFavorites {
                     ZStack {
                         RoundedRectangle(cornerRadius: 12)
-                            .fill(Color.inputBackgroundLight.opacity(0.1)) // Assuming "softBeige" or similar logic
+                            .fill(Color.inputBackgroundLight)
                             .frame(width: 64, height: 64)
                         
                         Image(systemName: "heart.fill")
@@ -141,15 +143,20 @@ struct AddToCookbookSheet: View {
                             .foregroundColor(.primaryBlue)
                     }
                 } else {
-                    // Standard Cookbook Icon or generic
                     ZStack {
                         RoundedRectangle(cornerRadius: 12)
-                            .fill(Color(hex: cookbook.coverColor))
+                            .fill(Color.primaryBlue) // User requested primary blue fill
                             .frame(width: 64, height: 64)
                             
                         Image(systemName: "book.fill")
                             .font(.system(size: 24))
-                            .foregroundColor(.white.opacity(0.8))
+                            // User requested light blue for the image.
+                            // Assuming inputBackgroundLight which is a light blue-ish tone, or white opacity.
+                            // Given "light blue", and the background is dark blue, inputBackground is a good candidate if it's blue-tinted.
+                            // Or we can use .blue.opacity(0.8).
+                            // But looking at DesignSystem, inputBackgroundLight is the only "light" one defined recently.
+                            // Let's use that to match the user's intent of "light blue".
+                            .foregroundColor(.inputBackground)
                     }
                 }
                 
@@ -184,6 +191,11 @@ struct AddToCookbookSheet: View {
         // we check if cookbook.recipes contains this recipe.
         for cookbook in allCookbooks {
             if cookbook.recipes.contains(where: { $0.id == recipe.id }) {
+                // If we are moving FROM this cookbook, we do NOT select it initially.
+                // This means if the user saves without re-checking it, it will be removed.
+                if let from = moveFromCookbook, from.persistentModelID == cookbook.persistentModelID {
+                    continue
+                }
                 selectedCookbookIDs.insert(cookbook.persistentModelID)
             }
         }

@@ -111,7 +111,7 @@ struct CookbookDetailView: View {
                 RecipeSearchView()
             }
             .sheet(item: $recipeToMove) { recipe in
-                AddToCookbookSheet(recipe: recipe)
+                AddToCookbookSheet(recipe: recipe, moveFromCookbook: cookbook)
                     .presentationDetents([.medium, .large])
             }
     }

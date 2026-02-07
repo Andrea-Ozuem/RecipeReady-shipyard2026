@@ -22,7 +22,7 @@ struct HomeView: View {
                         Text("Recipe Ready")
                             .font(.absans(size: 24))
                             .foregroundColor(.primaryBlue)
-                            .padding(.horizontal, 30) // Add padding to align with content
+                            .padding(.horizontal, 20) // Add padding to align with content
                             .padding(.vertical, 5)
                         
                         // Underline

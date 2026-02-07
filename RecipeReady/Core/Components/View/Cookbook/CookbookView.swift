@@ -10,6 +10,7 @@ import SwiftData
 
 struct CookbookView: View {
     @Environment(\.modelContext) private var modelContext
+    @Query(filter: #Predicate<Cookbook> { $0.isFavorites == true }) var favoriteCookbooks: [Cookbook] // Should be 0 or 1
     @Query(filter: #Predicate<Cookbook> { !$0.isFavorites }, sort: \Cookbook.createdAt, order: .forward) var cookbooks: [Cookbook]
     
     // Grid Setup: 2 columns with spacing
@@ -21,6 +22,10 @@ struct CookbookView: View {
     @State private var isShowingAddCookbook = false
     @State private var errorMessage: String?
     @State private var showError = false
+
+    // Look for recipes that are favorite but maybe not linked?
+    // Actually we can't easily query that inside onAppear without a macro or fetch.
+    // We will do a manual fetch in onAppear.
     
     public init() {}
     
@@ -49,9 +54,11 @@ struct CookbookView: View {
                 // MARK: - Grid Content
                 ScrollView {
                     LazyVGrid(columns: columns, spacing: 24) {
-                        // 1. "Favorites" Cookbook (Virtual)
-                        NavigationLink(destination: FavoritesDetailView()) {
-                            FavoritesCollectionCard()
+                        // 1. "Favorites" Cookbook (Real Persisted)
+                        if let favorites = favoriteCookbooks.first {
+                            NavigationLink(destination: CookbookDetailView(cookbook: favorites)) {
+                                CollectionCard(cookbook: favorites)
+                            }
                         }
                         
                         // 2. User Created Cookbooks
@@ -66,7 +73,9 @@ struct CookbookView: View {
             }
             .background(Color.screenBackground)
             .navigationBarHidden(true)
-            // Removed .onAppear checkForSystemCookbooks
+            .onAppear {
+                ensureFavoritesSynced()
+            }
             .sheet(isPresented: $isShowingAddCookbook) {
                 AddCookbookSheet(onSave: { newTitle in
                     do {
@@ -85,6 +94,37 @@ struct CookbookView: View {
                 Button("OK", role: .cancel) { }
             } message: {
                 Text(errorMessage ?? "Unknown error")
+            }
+        }
+    }
+    
+    private func ensureFavoritesSynced() {
+        // 1. Ensure cookbook exists
+        let favorites: Cookbook
+        if let existing = favoriteCookbooks.first {
+            favorites = existing
+        } else {
+            favorites = Cookbook(name: "My favourite recipes", coverColor: "#FF6B35", isFavorites: true)
+            modelContext.insert(favorites)
+            // Save needed to get hash?
+        }
+        
+        // 2. Sync recipes
+        // Fetch all recipes where isFavorite == true
+        let descriptor = FetchDescriptor<Recipe>(
+            predicate: #Predicate { $0.isFavorite == true }
+        )
+        if let favRecipes = try? modelContext.fetch(descriptor) {
+            var changed = false
+            for recipe in favRecipes {
+                if !favorites.recipes.contains(where: { $0.id == recipe.id }) {
+                    favorites.recipes.append(recipe)
+                    changed = true
+                }
+            }
+            
+            if changed {
+               try? modelContext.save()
             }
         }
     }
@@ -116,21 +156,7 @@ struct CollectionCard: View {
     }
 }
 
-struct FavoritesCollectionCard: View {
-    @Query(filter: #Predicate<Recipe> { $0.isFavorite == true }) private var favoriteRecipes: [Recipe]
-    
-    var body: some View {
-        // Construct a transient cookbook for display
-        let favoritesCookbook = Cookbook(
-            name: "My favourite recipes",
-            coverColor: "#FF6B35",
-            recipes: favoriteRecipes,
-            isFavorites: true
-        )
-        
-        return CollectionCard(cookbook: favoritesCookbook)
-    }
-}
+// Removed FavoritesCollectionCard as it is no longer used
 
 // MARK: - Sheets
 
