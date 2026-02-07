@@ -23,6 +23,7 @@ struct ServingsStepper: View {
                     .foregroundColor(.textPrimary)
                     .frame(width: 32, height: 32)
             }
+            .buttonStyle(.borderless)
             .disabled(servings <= 1)
             
             // Current Servings Count
@@ -40,6 +41,7 @@ struct ServingsStepper: View {
                     .foregroundColor(.textPrimary)
                     .frame(width: 32, height: 32)
             }
+            .buttonStyle(.borderless)
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 6)

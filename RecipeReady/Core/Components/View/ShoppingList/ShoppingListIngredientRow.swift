@@ -46,10 +46,13 @@ struct ShoppingListIngredientRow: View {
                 }
                 .frame(width: 24, height: 24)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.borderless)
         }
         .padding(.vertical, 12)
-        .contentShape(Rectangle()) // Make full row tappable if desired, currently button handles tap
+        .contentShape(Rectangle())
+        .onTapGesture {
+            onToggle()
+        }
     }
 }
 

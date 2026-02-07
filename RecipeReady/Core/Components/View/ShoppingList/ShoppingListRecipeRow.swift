@@ -77,9 +77,11 @@ struct ShoppingListRecipeRow: View {
                     .font(.system(size: 16)) // Small icon
                     .foregroundColor(.textSecondary)
                     .rotationEffect(.degrees(90)) // Vertical ellipsis
-                    .padding(8) // Increase hit area
+                    .frame(width: 44, height: 44) // Explicit touch target
+                    .contentShape(Rectangle()) // Ensure entire frame is tappable
             }
-            .padding(.top, -4) // Align adjustments
+            .buttonStyle(.borderless) // Prevent row selection interference
+            .padding(.top, -12) // Align adjustments
         }
         .padding(.vertical, 12)
         .background(Color.white) // Ensure tap area

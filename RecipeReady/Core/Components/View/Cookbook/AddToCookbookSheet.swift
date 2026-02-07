@@ -150,12 +150,6 @@ struct AddToCookbookSheet: View {
                             
                         Image(systemName: "book.fill")
                             .font(.system(size: 24))
-                            // User requested light blue for the image.
-                            // Assuming inputBackgroundLight which is a light blue-ish tone, or white opacity.
-                            // Given "light blue", and the background is dark blue, inputBackground is a good candidate if it's blue-tinted.
-                            // Or we can use .blue.opacity(0.8).
-                            // But looking at DesignSystem, inputBackgroundLight is the only "light" one defined recently.
-                            // Let's use that to match the user's intent of "light blue".
                             .foregroundColor(.inputBackground)
                     }
                 }

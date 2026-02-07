@@ -14,6 +14,10 @@ struct ShoppingListView: View {
     
     @State private var recipeForOptions: ShoppingListRecipe?
     @State private var selectedTab: Tab = .recipes
+    @State private var navigationPath = NavigationPath()
+    @State private var showRecipeDetail = false
+    @State private var limit: Int = 10 
+    @State private var recipeIDToNavigate: UUID?
     
     enum Tab {
         case recipes
@@ -21,7 +25,7 @@ struct ShoppingListView: View {
     }
     
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $navigationPath) {
             VStack(spacing: 0) {
                 // Custom Header
                 HStack {
@@ -74,9 +78,7 @@ struct ShoppingListView: View {
                                         ShoppingListRecipeRow(
                                             recipe: recipe,
                                             onToggleExpand: {
-                                                withAnimation {
-                                                    recipe.isExpanded.toggle()
-                                                }
+                                                recipe.isExpanded.toggle()
                                             },
                                             onMoreTap: {
                                                 recipeForOptions = recipe
@@ -148,10 +150,9 @@ struct ShoppingListView: View {
                     VStack(spacing: 0) {
                         VStack(alignment: .leading, spacing: 0) {
                             
-                            // Open Recipe (Placeholder for navigation)
+                            // Open Recipe
                             Button(action: {
-                                // TODO: Navigate to recipe
-                                recipeForOptions = nil
+                                navigateToRecipe(recipe)
                             }) {
                                 HStack(spacing: 16) {
                                     Image(systemName: "square.and.arrow.up")
@@ -194,8 +195,11 @@ struct ShoppingListView: View {
                         Spacer()
                     }
                 }
-                .presentationDetents([.fraction(0.2)])
+                 .presentationDetents([.fraction(0.2)])
                 .presentationDragIndicator(.hidden)
+            }
+            .navigationDestination(for: Recipe.self) { recipe in
+                 RecipeDetailView(recipe: recipe)
             }
         }
     }
@@ -220,6 +224,21 @@ struct ShoppingListView: View {
         for recipe in recipes {
             for item in recipe.items {
                 item.isChecked = false
+            }
+        }
+    }
+
+    private func navigateToRecipe(_ shoppingListRecipe: ShoppingListRecipe) {
+        guard let originalID = shoppingListRecipe.originalRecipeID else { return }
+        
+        // Fetch the recipe from the model context
+        let descriptor = FetchDescriptor<Recipe>(predicate: #Predicate { $0.id == originalID })
+        if let recipe = try? modelContext.fetch(descriptor).first {
+            recipeForOptions = nil // Dismiss sheet first
+            
+            // Short delay to allow sheet to dismiss before pushing navigation
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                 navigationPath.append(recipe)
             }
         }
     }
