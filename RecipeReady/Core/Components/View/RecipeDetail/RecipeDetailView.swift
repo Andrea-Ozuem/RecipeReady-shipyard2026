@@ -18,7 +18,6 @@ struct RecipeDetailView: View {
     
     @State private var currentServings: Int = 4
     @State private var showToast = false
-    @State private var toastMessage = ""
     @State private var showAddToCookbook = false
     
     var body: some View {
@@ -275,15 +274,11 @@ struct RecipeDetailView: View {
                     }
                     
                     Button(action: {
-                        recipe.isFavorite.toggle()
-                        // Optional: Trigger a save if not auto-saved by SwiftData, usually auto.
-                        // But for immediate UI update, @Bindable or reliable invalidation is needed.
-                        // Since `recipe` is a let constant in this view, we can't toggle it if it's not a Bindable.
-                        // Wait, `recipe` is a SwiftData object (class), so we can mutate it.
+                        showAddToCookbook = true
                     }) {
                         Image(systemName: recipe.isFavorite ? "heart.fill" : "heart")
                             .font(.system(size: 17, weight: .regular))
-                            .foregroundColor(recipe.isFavorite ? .red : .textPrimary)
+                            .foregroundColor(recipe.isFavorite ? .primaryGreen : .textPrimary)
                             .padding(10)
                             .background(Color.white.opacity(0.8)) // Add background for consistency
                             .clipShape(Circle())
@@ -292,21 +287,6 @@ struct RecipeDetailView: View {
             }
             .padding(.horizontal, 20)
             // No top padding: ZStack content respects safe area by default, putting this in standard Toolbar position.
-            
-            // Toast Overlay
-            if showToast {
-                VStack {
-                    Spacer()
-                    Text(toastMessage)
-                        .foregroundColor(.white)
-                        .padding()
-                        .background(Color.black.opacity(0.8))
-                        .cornerRadius(10)
-                        .padding(.bottom, 50)
-                        .transition(.move(edge: .bottom).combined(with: .opacity))
-                }
-                .zIndex(1)
-            }
         }
         .toolbar(.hidden, for: .navigationBar) // Completely hide system nav bar
         .sheet(isPresented: $showAddToCookbook) {
@@ -327,15 +307,6 @@ struct RecipeDetailView: View {
         // Since we didn't link IDs before, we can check by title or assume new entry.
         // Better: Use recipe.id to check if we already added this specific recipe.
         // We added `originalRecipeID` to ShoppingListRecipe for this purpose.
-        
-        if let existing = shoppingListRecipes.first(where: { $0.originalRecipeID == recipe.id }) {
-            toastMessage = "Recipe already in Grocery List"
-            withAnimation { showToast = true }
-             DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                withAnimation { showToast = false }
-            }
-            return
-        }
         
         // Create new ShoppingListRecipe
         let newListRecipe = ShoppingListRecipe(
@@ -363,12 +334,6 @@ struct RecipeDetailView: View {
         }
         
         modelContext.insert(newListRecipe)
-        
-        toastMessage = "Added to Grocery List"
-        withAnimation { showToast = true }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-            withAnimation { showToast = false }
-        }
     }
     
     private func loadLocalImage(named filename: String) -> UIImage? {

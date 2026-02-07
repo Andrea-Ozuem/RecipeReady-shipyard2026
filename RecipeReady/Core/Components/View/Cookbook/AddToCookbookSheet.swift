@@ -133,12 +133,12 @@ struct AddToCookbookSheet: View {
                 if cookbook.isFavorites {
                     ZStack {
                         RoundedRectangle(cornerRadius: 12)
-                            .fill(Color.orange.opacity(0.1)) // Assuming "softBeige" or similar logic
+                            .fill(Color.inputBackgroundLight.opacity(0.1)) // Assuming "softBeige" or similar logic
                             .frame(width: 64, height: 64)
                         
                         Image(systemName: "heart.fill")
                             .font(.system(size: 24))
-                            .foregroundColor(.orange)
+                            .foregroundColor(.primaryBlue)
                     }
                 } else {
                     // Standard Cookbook Icon or generic
@@ -217,10 +217,18 @@ struct AddToCookbookSheet: View {
             if isSelected && !inputsRecipe {
                 // Add
                 cookbook.recipes.append(recipe)
+                // specific logic for Favorites sync
+                if cookbook.isFavorites {
+                    recipe.isFavorite = true
+                }
             } else if !isSelected && inputsRecipe {
                 // Remove
                 if let index = cookbook.recipes.firstIndex(where: { $0.id == recipe.id }) {
                     cookbook.recipes.remove(at: index)
+                }
+                // specific logic for Favorites sync
+                if cookbook.isFavorites {
+                    recipe.isFavorite = false
                 }
             }
         }

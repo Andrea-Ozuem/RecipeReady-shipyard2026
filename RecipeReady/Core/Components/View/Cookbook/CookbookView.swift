@@ -10,7 +10,7 @@ import SwiftData
 
 struct CookbookView: View {
     @Environment(\.modelContext) private var modelContext
-    @Query(sort: \Cookbook.createdAt, order: .forward) var cookbooks: [Cookbook]
+    @Query(filter: #Predicate<Cookbook> { !$0.isFavorites }, sort: \Cookbook.createdAt, order: .forward) var cookbooks: [Cookbook]
     
     // Grid Setup: 2 columns with spacing
     private let columns = [
