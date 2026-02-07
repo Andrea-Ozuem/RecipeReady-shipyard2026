@@ -49,7 +49,7 @@ struct RecipeSearchView: View {
                             .resizable()
                             .scaledToFit()
                             .frame(width: 60, height: 60) // Larger size for illustration
-                            .foregroundColor(.primaryOrange)
+                            .foregroundColor(.primaryBlue)
                             .opacity(0.9)
                             .padding(.bottom, -10) // Slight overlap or alignment fix
                     }
@@ -199,7 +199,7 @@ struct RecipeSearchView: View {
                                         // See all action
                                     }
                                     .font(.bodyRegular)
-                                    .foregroundColor(.primaryOrange)
+                                    .foregroundColor(.primaryBlue)
                                 }
                                 .padding(.horizontal)
                                 
@@ -238,7 +238,7 @@ struct RecipeSearchView: View {
                                             // Edit favorites action
                                         }
                                         .font(.bodyRegular)
-                                        .foregroundColor(.primaryOrange)
+                                        .foregroundColor(.primaryBlue)
                                     }
                                 }
                                 

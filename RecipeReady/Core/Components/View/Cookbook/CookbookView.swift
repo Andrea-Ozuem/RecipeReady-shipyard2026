@@ -58,6 +58,9 @@ struct CookbookView: View {
             }
             .background(Color.screenBackground)
             .navigationBarHidden(true)
+            .onAppear {
+                checkForSystemCookbooks()
+            }
             .sheet(isPresented: $isShowingAddCookbook) {
                 AddCookbookSheet(onSave: { newTitle in
                     let newCookbook = Cookbook(name: newTitle)
@@ -66,6 +69,29 @@ struct CookbookView: View {
                 .presentationDetents([.medium])
                 .presentationDragIndicator(.visible)
             }
+        }
+    }
+    
+    private func checkForSystemCookbooks() {
+        // Silent check for "Favorites"
+        let descriptor = FetchDescriptor<Cookbook>(
+            predicate: #Predicate { $0.isFavorites == true }
+        )
+        
+        do {
+            let count = try modelContext.fetchCount(descriptor)
+            if count == 0 {
+                // Determine logic: Should it be first?
+                // If sorting by createdAt forward (oldest first), make it very old.
+                let favorites = Cookbook(
+                    name: "My favourite recipes",
+                    isFavorites: true,
+                    createdAt: Date.distantPast
+                )
+                modelContext.insert(favorites)
+            }
+        } catch {
+            // Retrieve failed, do nothing silently
         }
     }
 }
@@ -135,7 +161,7 @@ struct AddCookbookSheet: View {
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .frame(height: 50)
-                        .background(Color.primaryOrange)
+                        .background(Color.primaryBlue)
                         .cornerRadius(25)
                 }
             }

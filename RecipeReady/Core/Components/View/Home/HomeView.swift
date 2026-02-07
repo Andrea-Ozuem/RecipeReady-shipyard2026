@@ -21,13 +21,13 @@ struct HomeView: View {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Recipe Ready")
                             .font(.bodyBold)
-                            .foregroundColor(.primaryOrange)
+                            .foregroundColor(.primaryBlue)
                             .padding(.horizontal, 30) // Add padding to align with content
-                            .padding(.vertical, 20)
+                            .padding(.vertical, 10)
                         
                         // Underline
                         Rectangle()
-                            .fill(Color.primaryOrange)
+                            .fill(Color.primaryBlue)
                             .frame(height: 2)
                             .frame(maxWidth: .infinity)
                     }
@@ -45,16 +45,47 @@ struct HomeView: View {
                     
                     // MARK: - Sections
                     
-                    if !viewModel.eitanRecipes.isEmpty {
-                        HomeSection(title: "From Eitan's Kitchen", recipes: viewModel.eitanRecipes)
-                    }
+                    HomeSection(title: "From Eitan's Kitchen", recipes: viewModel.eitanRecipes)
                     
-                    if !viewModel.tonightRecipes.isEmpty {
-                        HomeSection(title: "Cook This Tonight", recipes: viewModel.tonightRecipes)
-                    }
+                    HomeSection(title: "Cook This Tonight", recipes: viewModel.tonightRecipes)
                     
-                    if !viewModel.videoRecipes.isEmpty {
-                        HomeSection(title: "From Your Saved Videos", recipes: viewModel.videoRecipes)
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("From Your Saved Videos")
+                            .font(.heading2)
+                            .foregroundColor(.textPrimary)
+                            .padding(.horizontal, 20)
+                        
+                        if !viewModel.videoRecipes.isEmpty {
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 16) {
+                                    ForEach(viewModel.videoRecipes) { recipe in
+                                        NavigationLink(destination: RecipeDetailView(recipe: recipe)) {
+                                            RecipeCard(recipe: recipe)
+                                        }
+                                    }
+                                }
+                                .padding(.horizontal, 20)
+                            }
+                        } else {
+                            HStack {
+                                Spacer()
+                                VStack(spacing: 12) {
+                                    Image(systemName: "video.slash")
+                                        .font(.system(size: 40))
+                                        .foregroundColor(.textSecondary)
+                                    Text("No saved videos yet")
+                                        .font(.bodyBold)
+                                        .foregroundColor(.textPrimary)
+                                    Text("Extract recipes from videos to see them here.")
+                                        .font(.captionMeta)
+                                        .foregroundColor(.textSecondary)
+                                        .multilineTextAlignment(.center)
+                                }
+                                .padding(.vertical, 40)
+                                .padding(.horizontal, 20)
+                                Spacer()
+                            }
+                        }
                     }
                 }
                 .padding(.bottom, 40)
@@ -90,7 +121,7 @@ struct HomeSection: View {
                     // Action
                 }
                 .font(.bodyRegular)
-                .foregroundColor(.primaryOrange)
+                .foregroundColor(.primaryBlue)
             }
             .padding(.horizontal, 20)
             

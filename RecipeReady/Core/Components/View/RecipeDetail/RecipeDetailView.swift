@@ -192,6 +192,7 @@ struct RecipeDetailView: View {
                                     } else {
                                         Image(systemName: "cart")
                                         Text("Add to Grocery List")
+                                            .padding(.horizontal, 10)
                                     }
                                 }
                                 .font(.bodyBold)

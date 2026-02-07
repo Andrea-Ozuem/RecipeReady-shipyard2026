@@ -57,7 +57,7 @@ struct LargeFeaturedCard: View {
                     if let author = recipe.author {
                         Text(author)
                             .font(.captionMeta)
-                            .foregroundColor(.primaryOrange)
+                            .foregroundColor(.primaryBlue)
                     }
                     
                     Spacer()

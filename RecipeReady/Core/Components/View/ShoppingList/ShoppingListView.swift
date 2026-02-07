@@ -233,11 +233,11 @@ struct ShoppingListView: View {
             VStack(spacing: 8) {
                 Text(title)
                     .font(.bodyRegular)
-                    .foregroundStyle(selectedTab == tab ? Color.primaryOrange : Color.textPrimary)
+                    .foregroundStyle(selectedTab == tab ? Color.primaryBlue : Color.textPrimary)
                 
                 // Active Indicator
                 Rectangle()
-                    .fill(selectedTab == tab ? Color.primaryOrange : Color.clear)
+                    .fill(selectedTab == tab ? Color.primaryBlue : Color.clear)
                     .frame(height: 2)
             }
         }
@@ -253,7 +253,7 @@ struct ShoppingListView: View {
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(width: 120, height: 120)
-                .foregroundStyle(Color.primaryOrange.opacity(0.8))
+                .foregroundStyle(Color.primaryBlue.opacity(0.8))
                 .padding(.bottom, 16)
             
             VStack(spacing: 12) {

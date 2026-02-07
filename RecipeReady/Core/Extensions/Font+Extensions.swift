@@ -4,7 +4,7 @@ extension Font {
     static func pangram(_ weight: PangramWeight = .regular, size: CGFloat) -> Font {
         return .custom(weight.rawValue, size: size)
     }
-    
+
     enum PangramWeight: String {
         case black = "Pangram-Black"
         case bold = "Pangram-Bold"
@@ -29,6 +29,7 @@ struct Font_Previews: PreviewProvider {
                     Text("Pangram Light").font(.pangram(.light, size: 24))
                     Text("Pangram ExtraLight").font(.pangram(.extraLight, size: 24))
                     Text("Default Weight (Regular)").font(.pangram(size: 24))
+
                 }
                 
                 Divider()

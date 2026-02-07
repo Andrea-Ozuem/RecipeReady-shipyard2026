@@ -25,7 +25,7 @@ struct CookbookCoverView: View {
                 // Favorites Style: Centered Heart
                 Image(systemName: "heart.fill")
                     .font(.system(size: 32))
-                    .foregroundColor(.primaryOrange)
+                    .foregroundColor(.primaryBlue)
             } else {
                 // Collage Style: 1 Top, 2 Bottom
                 GeometryReader { geo in

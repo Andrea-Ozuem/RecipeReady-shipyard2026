@@ -25,7 +25,7 @@ struct SearchSuggestionRow: View {
                 Button(action: onToggleFavorite) {
                     Image(systemName: isFavorite ? "heart.fill" : "heart")
                         .font(.system(size: 20))
-                        .foregroundColor(isFavorite ? .primaryOrange : .textPrimary)
+                        .foregroundColor(isFavorite ? .primaryBlue : .textPrimary)
                 }
             }
             .padding(.horizontal, 16)

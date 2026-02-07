@@ -9,7 +9,7 @@ import SwiftUI
 
 extension Color {
     // Primary Brand Colors
-    static let primaryGreen = Color(hex: "1C5643")
+    static let primaryGreen = Color(hex: "738F7D")
     static let softBeige = Color(hex: "FDF5EC")
     static let screenBackground = Color(hex: "FFFFFF")
     
@@ -19,7 +19,7 @@ extension Color {
     
     // UI Elements
     static let divider = Color(hex: "E5E5E5")
-    static let primaryOrange = Color(hex: "FF6B35") // Vibrant orange from screenshot
+    static let primaryBlue = Color(hex: "33377B") // Indigo from brand update
     static let inputBackground = Color(hex: "F0F4F8") // Light blue-gray for inputs
     
     // Helper init for Hex
