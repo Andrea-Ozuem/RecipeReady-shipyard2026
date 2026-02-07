@@ -45,7 +45,7 @@ struct EditableTimeCircleView: View {
             VStack(spacing: 10) {
                 ZStack {
                     Circle()
-                        .stroke(isSet ? Color.orange : Color.divider, lineWidth: 2)
+                        .stroke(Color.divider, lineWidth: 2)
                         .frame(width: 60, height: 60)
                     
                     if isSet {
