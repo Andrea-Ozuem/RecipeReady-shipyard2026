@@ -18,10 +18,12 @@ struct HomeView: View {
         NavigationStack {
                 VStack(spacing: 0) {
                     // MARK: - Header
-                    VStack(spacing: 8) {
+                    VStack(alignment: .leading, spacing: 8) {
                         Text("Recipe Ready")
                             .font(.bodyBold)
                             .foregroundColor(.primaryOrange)
+                            .padding(.horizontal, 30) // Add padding to align with content
+                            .padding(.vertical, 20)
                         
                         // Underline
                         Rectangle()

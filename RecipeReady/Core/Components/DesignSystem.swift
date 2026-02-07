@@ -52,26 +52,26 @@ extension Color {
 // Typography Extensions
 extension Font {
     static var heading1: Font {
-        .system(size: 24, weight: .bold, design: .default)
+        .pangram(.bold, size: 24)
     }
     
     static var heading2: Font {
-        .system(size: 20, weight: .bold, design: .default)
+        .pangram(.bold, size: 20)
     }
     
     static var heading3: Font {
-        .system(size: 18, weight: .semibold, design: .default)
+        .pangram(.medium, size: 18)
     }
     
     static var bodyBold: Font {
-        .system(size: 16, weight: .semibold, design: .default)
+        .pangram(.medium, size: 16)
     }
     
     static var bodyRegular: Font {
-        .system(size: 16, weight: .regular, design: .default)
+        .pangram(.regular, size: 16)
     }
     
     static var captionMeta: Font {
-        .system(size: 14, weight: .regular, design: .default)
+        .pangram(.regular, size: 14)
     }
 }

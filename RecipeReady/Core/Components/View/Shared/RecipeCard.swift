@@ -38,7 +38,7 @@ struct RecipeCard: View {
                     Rectangle().fill(Color.gray.opacity(0.1))
                 }
             }
-            .frame(width: 160, height: 220)
+            .frame(width: 208, height: 247)
             .clipShape(RoundedRectangle(cornerRadius: 12))
             
             // Meta
@@ -48,7 +48,7 @@ struct RecipeCard: View {
                     .foregroundColor(.textPrimary)
                     .lineLimit(2)
                     .multilineTextAlignment(.leading)
-                    .frame(width: 160, alignment: .leading)
+                    .frame(width: 190, alignment: .leading)
                 
                 HStack(spacing: 4) {
                     if let author = recipe.author {
