@@ -16,7 +16,8 @@ struct ContentView: View {
     var body: some View {
         TabView {
             // Home Tab
-            Text("Home")
+            // Home Tab
+            HomeView()
             .tabItem {
                 Label("Home", systemImage: "house")
             }
@@ -49,6 +50,7 @@ struct ContentView: View {
         }
         .onAppear {
             seedDefaultCookbook()
+            DataSeeder.seed(context: modelContext)
         }
     }
     

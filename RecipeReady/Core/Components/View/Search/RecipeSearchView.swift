@@ -10,7 +10,8 @@ import SwiftUI
 struct RecipeSearchView: View {
     @StateObject private var viewModel = RecipeSearchViewModel()
     @Environment(\.dismiss) var dismiss
-    
+    @Environment(\.modelContext) private var modelContext
+
     var body: some View {
         NavigationView {
             VStack(spacing: 0) {
@@ -303,6 +304,9 @@ struct RecipeSearchView: View {
                 .zIndex(0)
             }
             .navigationBarHidden(true)
+        }
+        .onAppear {
+            viewModel.loadData(context: modelContext)
         }
     }
 }

@@ -14,6 +14,8 @@ struct CookbookDetailView: View {
     let cookbook: Cookbook
     
     @State private var isShowingEditSheet = false
+    @State private var isShowingSearch = false
+    @State private var recipeToMove: Recipe?
     
     // Grid Setup
     private let columns = [
@@ -37,13 +39,21 @@ struct CookbookDetailView: View {
                         
                         ForEach(sortedRecipes) { recipe in
                             NavigationLink(destination: RecipeDetailView(recipe: recipe)) {
-                                RecipeCardView(recipe: recipe)
+                                RecipeCardView(
+                                    recipe: recipe,
+                                    onMove: {
+                                        recipeToMove = recipe
+                                    },
+                                    onDelete: {
+                                        delete(recipe)
+                                    }
+                                )
                             }
                         }
                     }
                 }
                 .padding(.horizontal, 20)
-                .padding(.top, 10)
+                .padding(.top, 20)
             }
             .background(Color.screenBackground)
             .navigationBarBackButtonHidden(true) // Custom back button
@@ -67,7 +77,9 @@ struct CookbookDetailView: View {
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
                     HStack(spacing: 16) {
-                        Button(action: {}) {
+                        Button(action: {
+                            isShowingSearch = true
+                        }) {
                             Image(systemName: "magnifyingglass")
                             .foregroundColor(.textPrimary)
                         }
@@ -95,6 +107,25 @@ struct CookbookDetailView: View {
                 .presentationDetents([.fraction(0.75)])
                 .presentationDragIndicator(.visible)
             }
+            .fullScreenCover(isPresented: $isShowingSearch) {
+                RecipeSearchView()
+            }
+            .sheet(item: $recipeToMove) { recipe in
+                AddToCookbookSheet(recipe: recipe)
+                    .presentationDetents([.medium, .large])
+            }
+    }
+    
+    private func delete(_ recipe: Recipe) {
+        if let index = cookbook.recipes.firstIndex(where: { $0.id == recipe.id }) {
+            withAnimation {
+                cookbook.recipes.remove(at: index)
+                // Optional: If you want to delete the recipe entirely from the app if it's not in any other cookbook,
+                // you'd need more complex logic. For now, we assume "Delete" in the context of a cookbook means removing it from that cookbook.
+                // However, if this is the "Main" list or "My Recipes", usage might vary.
+                // Given the prompt "for recipies in cookbook", removing from cookbook is the safest interpretation unless specified otherwise.
+            }
+        }
     }
 }
 

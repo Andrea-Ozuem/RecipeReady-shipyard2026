@@ -79,7 +79,7 @@ final class ExtractionManager {
                     audioURL: audioURL,
                     caption: payload.caption,
                     remoteVideoURL: payload.remoteVideoURL,
-                    thumbnailURL: payload.thumbnailURL
+                    thumbnailURL: nil
                 )
                 
                 // Convert response to Recipe model

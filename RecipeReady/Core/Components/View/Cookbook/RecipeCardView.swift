@@ -9,6 +9,8 @@ import SwiftUI
 
 struct RecipeCardView: View {
     let recipe: Recipe
+    let onMove: () -> Void
+    let onDelete: () -> Void
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -76,12 +78,19 @@ struct RecipeCardView: View {
                 Spacer()
                 
                 // More Action
-                Button(action: {
-                    // TODO: Menu action
-                }) {
+                Menu {
+                    Button(action: onMove) {
+                        Label("Move", systemImage: "folder")
+                    }
+                    
+                    Button(role: .destructive, action: onDelete) {
+                        Label("Delete", systemImage: "trash")
+                    }
+                } label: {
                     Image(systemName: "ellipsis")
                         .rotationEffect(.degrees(90))
                         .foregroundColor(.textSecondary)
+                        .padding(8)
                 }
             }
         }
@@ -94,10 +103,14 @@ struct RecipeCardView: View {
 }
 
 #Preview {
-    RecipeCardView(recipe: Recipe(
-        title: "Sample Recipe",
-        ingredients: [Ingredient(name: "Test", amount: "1")],
-        steps: [CookingStep(order: 1, instruction: "Test")]
-    ))
+    RecipeCardView(
+        recipe: Recipe(
+            title: "Sample Recipe",
+            ingredients: [Ingredient(name: "Test", amount: "1")],
+            steps: [CookingStep(order: 1, instruction: "Test")]
+        ),
+        onMove: {},
+        onDelete: {}
+    )
         .padding()
 }
