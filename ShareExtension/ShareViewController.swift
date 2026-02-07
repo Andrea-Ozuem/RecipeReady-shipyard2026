@@ -356,7 +356,8 @@ class ShareViewController: UIViewController {
                     audioFileName: nil,  // No audio for caption-only mode
                     caption: caption ?? "No caption available for this video.",
                     sourceURL: url.absoluteString,
-                    remoteVideoURL: videoUrl  // Pass video URL for audio fallback
+                    remoteVideoURL: videoUrl, // Pass video URL for audio fallback
+                    thumbnailURL: thumbnailUrl // Pass thumbnail URL
                 )
                 
                 print("[ShareExtension] 💾 Saving payload with remoteVideoURL: \(payload.remoteVideoURL ?? "nil")")
