@@ -275,11 +275,15 @@ struct RecipeDetailView: View {
                     }
                     
                     Button(action: {
-                        showAddToCookbook = true
+                        recipe.isFavorite.toggle()
+                        // Optional: Trigger a save if not auto-saved by SwiftData, usually auto.
+                        // But for immediate UI update, @Bindable or reliable invalidation is needed.
+                        // Since `recipe` is a let constant in this view, we can't toggle it if it's not a Bindable.
+                        // Wait, `recipe` is a SwiftData object (class), so we can mutate it.
                     }) {
-                        Image(systemName: "heart")
+                        Image(systemName: recipe.isFavorite ? "heart.fill" : "heart")
                             .font(.system(size: 17, weight: .regular))
-                            .foregroundColor(.textPrimary)
+                            .foregroundColor(recipe.isFavorite ? .red : .textPrimary)
                             .padding(10)
                             .background(Color.white.opacity(0.8)) // Add background for consistency
                             .clipShape(Circle())

@@ -26,7 +26,7 @@ struct ShoppingListView: View {
                 // Custom Header
                 HStack {
                     Text("Grocery List")
-                        .font(.largeTitle)
+                        .font(.display)
                         .foregroundColor(.textPrimary)
                     
                     Spacer()

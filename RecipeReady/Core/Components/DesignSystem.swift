@@ -21,6 +21,7 @@ extension Color {
     static let divider = Color(hex: "E5E5E5")
     static let primaryBlue = Color(hex: "33377B") // Indigo from brand update
     static let inputBackground = Color(hex: "F0F4F8") // Light blue-gray for inputs
+    static let inputBackgroundLight = Color(red: 233/255, green: 236/255, blue: 239/255) // User requested favorites bg
     
     // Helper init for Hex
     init(hex: String) {
@@ -51,6 +52,10 @@ extension Color {
 
 // Typography Extensions
 extension Font {
+    static var display: Font {
+        .pangram(.bold, size: 32)
+    }
+    
     static var heading1: Font {
         .pangram(.bold, size: 24)
     }

@@ -28,7 +28,7 @@ struct CookbookView: View {
                 // MARK: - Header
                 HStack {
                     Text("Saved")
-                        .font(.largeTitle)
+                        .font(.display)
                         .foregroundColor(.textPrimary)
                     
                     Spacer()
@@ -47,6 +47,12 @@ struct CookbookView: View {
                 // MARK: - Grid Content
                 ScrollView {
                     LazyVGrid(columns: columns, spacing: 24) {
+                        // 1. "Favorites" Cookbook (Virtual)
+                        NavigationLink(destination: FavoritesDetailView()) {
+                            FavoritesCollectionCard()
+                        }
+                        
+                        // 2. User Created Cookbooks
                         ForEach(cookbooks) { cookbook in
                              NavigationLink(destination: CookbookDetailView(cookbook: cookbook)) {
                                  CollectionCard(cookbook: cookbook)
@@ -58,40 +64,16 @@ struct CookbookView: View {
             }
             .background(Color.screenBackground)
             .navigationBarHidden(true)
-            .onAppear {
-                checkForSystemCookbooks()
-            }
+            // Removed .onAppear checkForSystemCookbooks
             .sheet(isPresented: $isShowingAddCookbook) {
                 AddCookbookSheet(onSave: { newTitle in
                     let newCookbook = Cookbook(name: newTitle)
                     modelContext.insert(newCookbook)
+                    try? modelContext.save()
                 })
                 .presentationDetents([.medium])
                 .presentationDragIndicator(.visible)
             }
-        }
-    }
-    
-    private func checkForSystemCookbooks() {
-        // Silent check for "Favorites"
-        let descriptor = FetchDescriptor<Cookbook>(
-            predicate: #Predicate { $0.isFavorites == true }
-        )
-        
-        do {
-            let count = try modelContext.fetchCount(descriptor)
-            if count == 0 {
-                // Determine logic: Should it be first?
-                // If sorting by createdAt forward (oldest first), make it very old.
-                let favorites = Cookbook(
-                    name: "My favourite recipes",
-                    isFavorites: true,
-                    createdAt: Date.distantPast
-                )
-                modelContext.insert(favorites)
-            }
-        } catch {
-            // Retrieve failed, do nothing silently
         }
     }
 }
@@ -119,6 +101,22 @@ struct CollectionCard: View {
                     .foregroundColor(.textSecondary)
             }
         }
+    }
+}
+
+struct FavoritesCollectionCard: View {
+    @Query(filter: #Predicate<Recipe> { $0.isFavorite == true }) private var favoriteRecipes: [Recipe]
+    
+    var body: some View {
+        // Construct a transient cookbook for display
+        let favoritesCookbook = Cookbook(
+            name: "My favourite recipes",
+            coverColor: "#FF6B35",
+            recipes: favoriteRecipes,
+            isFavorites: true
+        )
+        
+        return CollectionCard(cookbook: favoritesCookbook)
     }
 }
 

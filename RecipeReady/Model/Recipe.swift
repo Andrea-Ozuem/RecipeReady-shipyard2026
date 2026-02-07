@@ -14,6 +14,7 @@ final class Recipe {
     var title: String
     var author: String? // Added for Home screen
     var isFeatured: Bool // Added for Home screen hero
+    var isFavorite: Bool // Refactored Favorites logic
     var ingredients: [Ingredient]
     var steps: [CookingStep]
     var sourceLink: String?
@@ -38,6 +39,7 @@ final class Recipe {
         title: String,
         author: String? = nil, // Added parameter
         isFeatured: Bool = false, // Added parameter
+        isFavorite: Bool = false, // Added parameter
         ingredients: [Ingredient] = [],
         steps: [CookingStep] = [],
         sourceLink: String? = nil,
@@ -57,6 +59,7 @@ final class Recipe {
         self.title = title
         self.author = author
         self.isFeatured = isFeatured
+        self.isFavorite = isFavorite
         self.ingredients = ingredients
         self.steps = steps
         self.sourceLink = sourceLink

@@ -20,7 +20,7 @@ struct HomeView: View {
                     // MARK: - Header
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Recipe Ready")
-                            .font(.bodyBold)
+                            .font(.absans(size: 24))
                             .foregroundColor(.primaryBlue)
                             .padding(.horizontal, 30) // Add padding to align with content
                             .padding(.vertical, 10)

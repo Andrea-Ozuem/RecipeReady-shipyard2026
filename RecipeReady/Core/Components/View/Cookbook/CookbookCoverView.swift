@@ -15,7 +15,7 @@ struct CookbookCoverView: View {
             // Background varies: Favorites uses softBeige, Collage uses White (gap color)
             if cookbook.isFavorites {
                 RoundedRectangle(cornerRadius: 16)
-                    .fill(Color.softBeige)
+                    .fill(Color.inputBackgroundLight)
             } else {
                 RoundedRectangle(cornerRadius: 16)
                     .fill(Color.white)

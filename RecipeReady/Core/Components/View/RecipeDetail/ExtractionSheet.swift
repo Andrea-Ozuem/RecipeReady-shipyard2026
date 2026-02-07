@@ -254,7 +254,13 @@ struct ExtractionSheet: View {
             favoritesCookbook.recipes.append(recipe)
         }
         
+        // Ensure the flag is set for the dynamic query in FavoritesCollectionCard
+        recipe.isFavorite = true
+        
         modelContext.insert(recipe)
+        
+        // Explicit save to ensure persistence immediately
+        try? modelContext.save()
         extractionManager.dismiss()
         dismiss()
     }

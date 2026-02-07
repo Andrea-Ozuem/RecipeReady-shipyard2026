@@ -307,8 +307,14 @@ struct RecipeEditView: View {
                 favoritesCookbook.recipes.append(recipe)
             }
             
+            // Ensure the flag is set for the dynamic query in FavoritesCollectionCard
+            recipe.isFavorite = true
+            
             modelContext.insert(recipe)
         }
+        
+        // Explicit save to ensure persistence immediately
+        try? modelContext.save()
         
         // If we are in extraction flow, notify manager we are done
         extractionManager.dismiss()

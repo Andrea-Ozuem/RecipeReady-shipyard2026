@@ -4,6 +4,10 @@ extension Font {
     static func pangram(_ weight: PangramWeight = .regular, size: CGFloat) -> Font {
         return .custom(weight.rawValue, size: size)
     }
+    
+    static func absans(size: CGFloat) -> Font {
+        return .custom("Absans-Regular", size: size)
+    }
 
     enum PangramWeight: String {
         case black = "Pangram-Black"
