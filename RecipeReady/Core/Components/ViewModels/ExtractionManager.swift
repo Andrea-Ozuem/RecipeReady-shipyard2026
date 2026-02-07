@@ -12,6 +12,9 @@ import SwiftUI
 final class ExtractionManager {
     var state: ExtractionState = .idle
     
+    // Store payload in memory for retries, so we can delete the file immediately
+    private var pendingPayload: ExtractionPayload?
+    
     // Legacy properties for compatibility during migration (computed from state)
     var isExtracting: Bool {
         if case .processing = state { return true }
@@ -33,15 +36,25 @@ final class ExtractionManager {
     // MARK: - Actions
     
     func reset() {
+        // If we're resetting, we should clean up any pending data
+        cleanupPendingData()
         state = .idle
     }
     
     func dismiss() {
+        // If we're dismissing, we should clean up any pending data
+        cleanupPendingData()
         state = .idle
     }
     
     func retry() {
-        checkForPendingExtraction()
+        // Try to use in-memory payload first
+        if let payload = pendingPayload {
+            startExtraction(with: payload)
+        } else {
+            // Fallback to checking disk (though usually it should be gone)
+            checkForPendingExtraction()
+        }
     }
     
     func startManualCreation() {
@@ -60,6 +73,14 @@ final class ExtractionManager {
         }
         
         print("📦 ExtractionManager: Found pending payload: \(payload.id)")
+        
+        // Store in memory for retry capability
+        self.pendingPayload = payload
+        
+        // IMMEDIATE CLEANUP: Remove the file from disk so it doesn't survive app restart
+        // This prevents the "loop" where old extractions keep reappearing
+        try? AppGroupManager.shared.cleanupPendingPayload()
+        
         startExtraction(with: payload)
     }
     
@@ -98,8 +119,11 @@ final class ExtractionManager {
                     confidenceScore: response.confidenceScore
                 )
                 
-                // Cleanup payload after successful extraction
-                try? AppGroupManager.shared.cleanupPendingPayload()
+                // Cleanup audio file after successful extraction
+                try? AppGroupManager.shared.cleanupAudioFile(for: payload)
+                
+                // Clear pending payload from memory as we're done
+                self.pendingPayload = nil
                 
                 // Update state on main actor
                 await MainActor.run {
@@ -127,6 +151,15 @@ final class ExtractionManager {
         print("🔗 ExtractionManager: Handling URL: \(url)")
         // When app is opened via URL scheme (e.g. from Share Extension), check for new data
         checkForPendingExtraction()
+    }
+    
+    // MARK: - Private Helpers
+    
+    private func cleanupPendingData() {
+        if let payload = pendingPayload {
+            try? AppGroupManager.shared.cleanupAudioFile(for: payload)
+            pendingPayload = nil
+        }
     }
 }
 

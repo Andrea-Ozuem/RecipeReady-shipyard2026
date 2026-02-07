@@ -19,6 +19,8 @@ struct CookbookView: View {
     ]
     
     @State private var isShowingAddCookbook = false
+    @State private var errorMessage: String?
+    @State private var showError = false
     
     public init() {}
     
@@ -67,12 +69,22 @@ struct CookbookView: View {
             // Removed .onAppear checkForSystemCookbooks
             .sheet(isPresented: $isShowingAddCookbook) {
                 AddCookbookSheet(onSave: { newTitle in
-                    let newCookbook = Cookbook(name: newTitle)
-                    modelContext.insert(newCookbook)
-                    try? modelContext.save()
+                    do {
+                        let newCookbook = Cookbook(name: newTitle)
+                        modelContext.insert(newCookbook)
+                        try modelContext.save()
+                    } catch {
+                        errorMessage = "Failed to create cookbook: \(error.localizedDescription)"
+                        showError = true
+                    }
                 })
                 .presentationDetents([.medium])
                 .presentationDragIndicator(.visible)
+            }
+            .alert("Error", isPresented: $showError) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text(errorMessage ?? "Unknown error")
             }
         }
     }
@@ -159,7 +171,7 @@ struct AddCookbookSheet: View {
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .frame(height: 50)
-                        .background(Color.primaryBlue)
+                        .background(Color.primaryGreen)
                         .cornerRadius(25)
                 }
             }

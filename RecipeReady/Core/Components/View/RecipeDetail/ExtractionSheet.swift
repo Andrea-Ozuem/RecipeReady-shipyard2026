@@ -174,6 +174,7 @@ struct ExtractionSheet: View {
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)
+                    .tint(.primaryGreen)
                     .controlSize(.large)
                     
                     Button("Edit Before Saving") {

@@ -48,7 +48,7 @@ struct CookbookCoverView: View {
                             if let path = imagePaths.first {
                                 imageView(for: path, width: geo.size.width, height: halfHeight)
                             } else {
-                                Rectangle().fill(Color.softBeige)
+                                Rectangle().fill(Color.inputBackgroundLight)
                             }
                         }
                         .frame(width: geo.size.width, height: halfHeight)
@@ -61,7 +61,7 @@ struct CookbookCoverView: View {
                                 if imagePaths.count > 1 {
                                     imageView(for: imagePaths[1], width: halfWidth, height: halfHeight)
                                 } else {
-                                    Rectangle().fill(Color.softBeige)
+                                    Rectangle().fill(Color.inputBackgroundLight)
                                 }
                             }
                             .frame(width: halfWidth, height: halfHeight)
@@ -72,7 +72,7 @@ struct CookbookCoverView: View {
                                 if imagePaths.count > 2 {
                                     imageView(for: imagePaths[2], width: halfWidth, height: halfHeight)
                                 } else {
-                                    Rectangle().fill(Color.softBeige)
+                                    Rectangle().fill(Color.inputBackgroundLight)
                                 }
                             }
                             .frame(width: halfWidth, height: halfHeight)
@@ -101,12 +101,12 @@ struct CookbookCoverView: View {
                             .frame(width: width, height: height)
                             .clipped()
                     } else {
-                        Color.softBeige
+                        Color.inputBackgroundLight
                             .overlay(ProgressView())
                     }
                 }
             } else {
-                 Color.softBeige
+                 Color.inputBackgroundLight
             }
         } else {
             // Assume local file
@@ -118,7 +118,7 @@ struct CookbookCoverView: View {
                     .clipped()
             } else {
                 // Fallback / Placeholder
-                 Color.softBeige
+                                 Color.inputBackgroundLight
                     .overlay(
                         Image(systemName: "photo")
                             .foregroundColor(.gray)

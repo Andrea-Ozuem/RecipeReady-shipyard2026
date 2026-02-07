@@ -10,6 +10,7 @@ import SwiftData
 
 @Model
 final class Cookbook {
+    @Attribute(.unique) var id: UUID
     var name: String
     var coverColor: String       // Hex color code
     var recipes: [Recipe]
@@ -18,6 +19,7 @@ final class Cookbook {
     var updatedAt: Date
     
     init(
+        id: UUID = UUID(),
         name: String,
         coverColor: String = "#FF6B35",  // Default orange
         recipes: [Recipe] = [],
@@ -25,6 +27,7 @@ final class Cookbook {
         createdAt: Date = Date(),
         updatedAt: Date = Date()
     ) {
+        self.id = id
         self.name = name
         self.coverColor = coverColor
         self.recipes = recipes

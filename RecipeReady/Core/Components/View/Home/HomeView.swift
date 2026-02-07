@@ -23,7 +23,7 @@ struct HomeView: View {
                             .font(.absans(size: 24))
                             .foregroundColor(.primaryBlue)
                             .padding(.horizontal, 30) // Add padding to align with content
-                            .padding(.vertical, 10)
+                            .padding(.vertical, 5)
                         
                         // Underline
                         Rectangle()

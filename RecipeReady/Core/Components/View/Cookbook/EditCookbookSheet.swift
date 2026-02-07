@@ -120,7 +120,7 @@ struct EditCookbookSheet: View {
                         }) {
                             Text("Save")
                                 .font(.bodyBold)
-                                .foregroundColor(.primaryBlue)
+                                .foregroundColor(.primaryGreen)
                         }
                     }
                 }
