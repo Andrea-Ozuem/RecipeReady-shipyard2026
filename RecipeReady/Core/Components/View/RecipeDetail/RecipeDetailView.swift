@@ -173,7 +173,15 @@ struct RecipeDetailView: View {
                                         // Let's assume unique section names for now or contiguous blocks.
                                         
                                         ForEach(ingredientsInSection) { ingredient in
-                                            IngredientRow(ingredient: ingredient)
+                                            // Calculate scaled amount
+                                            let originalServings = recipe.servings ?? 1
+                                            let scaledAmount = IngredientScaler.scale(
+                                                amount: ingredient.amount,
+                                                from: originalServings,
+                                                to: currentServings
+                                            )
+                                            
+                                            IngredientRow(ingredient: ingredient, overriddenAmount: scaledAmount)
                                         }
                                     }
                                 }

@@ -9,11 +9,12 @@ import SwiftUI
 
 struct IngredientRow: View {
     let ingredient: Ingredient
+    var overriddenAmount: String? = nil // Optional override for scaling
     
     var body: some View {
         HStack(alignment: .center, spacing: 12) {
             // Amount (Left aligned) - show "-" if missing
-            Text(ingredient.amount ?? "-")
+            Text(overriddenAmount ?? ingredient.amount ?? "-")
                 .font(.bodyRegular)
                 .foregroundColor(ingredient.amount == nil ? .textSecondary : .textPrimary)
                 .frame(width: 60, alignment: .leading)
