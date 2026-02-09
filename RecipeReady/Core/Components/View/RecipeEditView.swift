@@ -31,7 +31,7 @@ struct RecipeEditView: View {
     @State private var bakeTime: Int?
     @State private var restTime: Int?
     @State private var difficulty: String?
-    @State private var servings: Int = 4
+    @State private var servings: Int = 1
     
     init(recipe: Recipe) {
         self.recipe = recipe
@@ -42,7 +42,7 @@ struct RecipeEditView: View {
         _bakeTime = State(initialValue: recipe.bakingTime)
         _restTime = State(initialValue: recipe.restingTime)
         _difficulty = State(initialValue: recipe.difficulty)
-        _servings = State(initialValue: recipe.servings ?? 4)
+        _servings = State(initialValue: recipe.servings ?? 1)
     }
     
     var body: some View {

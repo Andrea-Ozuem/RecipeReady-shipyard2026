@@ -76,9 +76,10 @@ final class Recipe {
         self.updatedAt = updatedAt
     }
     
-    // For backwards compatibility with existing code using bakingTime
     var bakingTime: Int? {
         get { cookingTime }
         set { cookingTime = newValue }
     }
 }
+
+

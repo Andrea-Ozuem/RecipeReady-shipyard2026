@@ -16,9 +16,14 @@ struct RecipeDetailView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var shoppingListRecipes: [ShoppingListRecipe]
     
-    @State private var currentServings: Int = 4
+    @State private var currentServings: Int
     @State private var showToast = false
     @State private var showAddToCookbook = false
+    
+    init(recipe: Recipe) {
+        self.recipe = recipe
+        _currentServings = State(initialValue: recipe.servings ?? 1)
+    }
     
     var body: some View {
         ZStack(alignment: .topTrailing) {
