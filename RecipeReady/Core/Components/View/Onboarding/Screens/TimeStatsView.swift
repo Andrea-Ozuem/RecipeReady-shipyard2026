@@ -33,6 +33,7 @@ struct TimeStatsView: View {
                     .foregroundColor(.textSecondary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 32)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             .padding(.top, 20)
             

@@ -28,6 +28,10 @@ struct SetupLoadingView: View {
                 Text("\(Int(progress * 100))%")
                     .font(.display)
                     .foregroundColor(.primaryGreen)
+                
+                if progress >= 1.0 {
+                    MinimalConfettiView()
+                }
             }
             .frame(width: 200, height: 200)
             
@@ -58,7 +62,7 @@ struct SetupLoadingView: View {
             } else {
                 timer.upstream.connect().cancel()
                 // Auto advance after completion
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
                     viewModel.next()
                 }
             }
@@ -76,5 +80,49 @@ struct SetupLoadingView: View {
 struct SetupLoadingView_Previews: PreviewProvider {
     static var previews: some View {
         SetupLoadingView(viewModel: OnboardingViewModel())
+    }
+}
+
+struct MinimalConfettiView: View {
+    @State private var animate = false
+    
+    let colors: [Color] = [.primaryGreen, .primaryBlue]
+    
+    var body: some View {
+        ZStack {
+            ForEach(0..<30, id: \.self) { i in
+                Circle()
+                    .fill(colors[i % 2])
+                    .frame(width: 8, height: 8)
+                    .modifier(ConfettiModifier(animate: animate, index: i))
+            }
+        }
+        .onAppear {
+            animate = true
+        }
+    }
+}
+
+struct ConfettiModifier: ViewModifier {
+    let animate: Bool
+    let index: Int
+    
+    // Deterministic random animation values based on index
+    var xOffset: CGFloat {
+        let angle = Double(index) * 12.0 // Spread radially
+        return CGFloat(cos(angle * .pi / 180) * 150)
+    }
+    
+    var yOffset: CGFloat {
+        // Explode upwards then fall
+        return animate ? 200 : -200 
+    }
+    
+    func body(content: Content) -> some View {
+        content
+            .offset(x: animate ? xOffset + CGFloat.random(in: -20...20) : 0, 
+                    y: animate ? CGFloat.random(in: -300...300) : 0)
+            .opacity(animate ? 0 : 1)
+            .animation(Animation.easeOut(duration: 2.5).delay(Double(index) * 0.02), value: animate)
     }
 }

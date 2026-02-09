@@ -15,12 +15,11 @@ struct OnboardingContainerView: View {
             // Content
             ZStack {
                 stepView(for: viewModel.currentStep)
-                    .background(Color.screenBackground) // Ensure opaque background to prevent overlap transparency issues
+                    .background(Color.screenBackground)
                     .transition(.asymmetric(
                         insertion: .move(edge: .trailing),
                         removal: .move(edge: .leading)
                     ))
-                    .id(viewModel.currentStep) // Force redraw on step change to trigger transition
             }
             .animation(.easeInOut(duration: 0.3), value: viewModel.currentStep)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -51,9 +50,9 @@ struct OnboardingContainerView: View {
             
         case .gender:
             GenericSelectionView(
-                title: "Which gender do you identify with?",
+                title: "What is your gender?",
                 subtitle: "This helps us tailor your experience.",
-                options: ["Male", "Female", "Non-binary", "Prefer not to say"],
+                options: ["Male", "Female", "Prefer not to say"],
                 selectedOption: $viewModel.data.gender,
                 onNext: viewModel.next
             )
@@ -177,13 +176,13 @@ struct OnboardingContainerView: View {
         case .reassurance:
              VStack(spacing: 24) {
                  // Title
-                 Text("That's great!")
+                 Text("That's Alright!")
                      .font(.display)
                      .foregroundColor(.textPrimary)
                      .padding(.top, 20)
                  
                  // Social Proof / Stat
-                 Text("94% of home cooks say Recipe Ready helps them reduce food waste and save time.")
+                 Text("94% of home cooks say Recipe Ready helps them finally cook the recipes they’ve been saving for later.")
                      .font(.bodyRegular)
                      .foregroundColor(.textSecondary)
                      .multilineTextAlignment(.center)
