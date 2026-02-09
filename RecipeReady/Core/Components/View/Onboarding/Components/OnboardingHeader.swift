@@ -10,7 +10,7 @@ struct OnboardingHeader: View {
             if showBack {
                 Button(action: onBack) {
                     Image(systemName: "chevron.left")
-                        .font(.system(size: 20, weight: .semibold))
+                        .font(.iconRegular)
                         .foregroundColor(.primaryGreen)
                         .padding(8)
                         .background(Color.white.opacity(0.8))

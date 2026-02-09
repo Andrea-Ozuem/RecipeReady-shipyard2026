@@ -153,7 +153,7 @@ struct OnboardingContainerView: View {
             VStack(spacing: 24) {
                 Spacer()
                 Image(systemName: isExploratory ? "sparkles.rectangle.stack.fill" : "doc.text.fill")
-                    .font(.system(size: 80))
+                    .font(.system(size: 80, weight: .light))
                     .foregroundColor(.primaryGreen)
                 
                 Text(title)
@@ -196,7 +196,7 @@ struct OnboardingContainerView: View {
                          .fill(Color.gray.opacity(0.1))
                      
                      Image(systemName: "frying.pan.fill")
-                         .font(.system(size: 60))
+                         .font(.system(size: 60, weight: .light))
                          .foregroundColor(.primaryGreen.opacity(0.6))
                  }
                  .aspectRatio(1.5, contentMode: .fit)
@@ -243,7 +243,7 @@ struct OnboardingContainerView: View {
                      
                      VStack(spacing: 12) {
                          Image(systemName: "photo.on.rectangle.angled")
-                             .font(.system(size: 40))
+                             .font(.system(size: 40, weight: .light))
                              .foregroundColor(.gray)
                          Text("Social Media Integration Image")
                              .font(.caption)
@@ -283,7 +283,7 @@ struct OnboardingContainerView: View {
              VStack(spacing: 24) {
                  Spacer()
                  Image(systemName: "bell.badge.circle.fill")
-                        .font(.system(size: 80))
+                        .font(.system(size: 80, weight: .light))
                         .foregroundColor(.primaryBlue)
                  Text("Don't miss a thing")
                      .font(.heading1)

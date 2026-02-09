@@ -22,6 +22,7 @@ struct TrustAndPrivacyView: View {
                 
                 Image(systemName: "hand.thumbsup.fill")
                     .resizable()
+                    .fontWeight(.light)
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 100, height: 100)
                     .foregroundColor(.primaryBlue)
@@ -67,7 +68,7 @@ struct TrustAndPrivacyView: View {
                 
                 // Lock Icon
                 Image(systemName: "lock.fill")
-                    .font(.system(size: 24))
+                    .font(.iconRegular)
                     .foregroundColor(.gray.opacity(0.5))
                     .padding(12)
                     .background(

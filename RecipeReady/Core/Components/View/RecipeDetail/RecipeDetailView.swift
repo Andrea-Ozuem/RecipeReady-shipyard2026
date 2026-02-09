@@ -200,9 +200,11 @@ struct RecipeDetailView: View {
                                 HStack {
                                     if isInShoppingList {
                                         Image(systemName: "checkmark.circle.fill")
+                                            .font(.iconRegular)
                                         Text("View in Grocery List")
                                     } else {
                                         Image(systemName: "cart")
+                                            .font(.iconRegular)
                                         Text("Add to Grocery List")
                                             .padding(.horizontal, 10)
                                     }
@@ -265,7 +267,7 @@ struct RecipeDetailView: View {
                     dismiss()
                 }) {
                     Image(systemName: "chevron.left")
-                        .font(.system(size: 17, weight: .bold)) // Bold for back button
+                        .font(.iconRegular)
                         .foregroundColor(.textPrimary)
                         .padding(10)
                         .background(Color.white.opacity(0.8)) // Add background for visibility over image
@@ -279,7 +281,7 @@ struct RecipeDetailView: View {
                         // TODO: Share action
                     }) {
                         Image(systemName: "square.and.arrow.up")
-                            .font(.system(size: 17, weight: .regular))
+                            .font(.iconRegular)
                             .foregroundColor(.textPrimary)
                             .padding(10)
                             .background(Color.white.opacity(0.8)) // Add background for consistency
@@ -290,7 +292,7 @@ struct RecipeDetailView: View {
                         showAddToCookbook = true
                     }) {
                         Image(systemName: recipe.isFavorite ? "heart.fill" : "heart")
-                            .font(.system(size: 17, weight: .regular))
+                            .font(.iconRegular)
                             .foregroundColor(recipe.isFavorite ? .primaryGreen : .textPrimary)
                             .padding(10)
                             .background(Color.white.opacity(0.8)) // Add background for consistency

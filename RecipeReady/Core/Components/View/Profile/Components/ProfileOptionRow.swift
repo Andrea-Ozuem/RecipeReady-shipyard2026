@@ -34,7 +34,7 @@ struct ProfileOptionRow<TrailingContent: View>: View {
                 }
                 if showChevron {
                     Image(systemName: "chevron.right")
-                        .font(.captionMeta)
+                        .font(.iconSmall)
                         .foregroundColor(.textSecondary)
                 }
             }

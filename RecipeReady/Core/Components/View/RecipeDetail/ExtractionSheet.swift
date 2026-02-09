@@ -67,7 +67,7 @@ struct ExtractionSheet: View {
                 HStack {
                     Image(systemName: "checkmark.circle.fill")
                         .foregroundStyle(.green)
-                        .font(.title)
+                        .font(.iconRegular)
                     
                     Text("Recipe Extracted!")
                         .font(.title2)
@@ -81,6 +81,7 @@ struct ExtractionSheet: View {
                         HStack {
                             Image(systemName: "text.quote")
                                 .foregroundStyle(.blue)
+                                .font(.iconRegular)
                             Text("Extracted Caption")
                                 .font(.headline)
                         }
@@ -155,7 +156,7 @@ struct ExtractionSheet: View {
                             Image(systemName: recipe.confidenceScore > 0.8 ? "checkmark.seal.fill" : "exclamationmark.triangle")
                             Text("\(Int(recipe.confidenceScore * 100))% confidence")
                         }
-                        .font(.caption)
+                        .font(.iconSmall)
                         .foregroundStyle(recipe.confidenceScore > 0.8 ? .green : .orange)
                         .padding(.top)
                     }
@@ -200,7 +201,7 @@ struct ExtractionSheet: View {
                     .frame(width: 100, height: 100)
                 
                 Image(systemName: error.icon)
-                    .font(.system(size: 44))
+                    .font(.system(size: 44, weight: .light))
                     .foregroundStyle(.orange)
             }
             

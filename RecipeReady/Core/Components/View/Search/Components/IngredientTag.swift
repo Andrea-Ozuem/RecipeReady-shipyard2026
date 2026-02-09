@@ -20,7 +20,7 @@ struct IngredientTag: View {
                 
                 if isSelected {
                     Image(systemName: "xmark")
-                        .font(.system(size: 12, weight: .bold))
+                        .font(.iconSmall)
                 }
             }
             .foregroundColor(.textPrimary)

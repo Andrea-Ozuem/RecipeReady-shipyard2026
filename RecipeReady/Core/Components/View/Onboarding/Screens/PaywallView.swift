@@ -17,7 +17,7 @@ struct PaywallView: View {
                     // Header Image or Icon
                     VStack(spacing: 16) {
                         Image(systemName: "star.circle.fill")
-                            .font(.system(size: 60))
+                            .font(.system(size: 60, weight: .light))
                             .foregroundColor(.yellow)
                             .padding(.top, 40)
                         
@@ -80,11 +80,11 @@ struct PaywallView: View {
                                         if selectedPackage == retentionPackage {
                                             Image(systemName: "checkmark.circle.fill")
                                                 .foregroundColor(.white)
-                                                .font(.title2)
+                                                .font(.iconRegular)
                                         } else {
                                             Image(systemName: "circle")
                                                 .foregroundColor(.white.opacity(0.7))
-                                                .font(.title2)
+                                                .font(.iconRegular)
                                         }
                                     }
                                     .padding()
@@ -219,11 +219,11 @@ struct PackageOptionView: View {
                 if isSelected {
                     Image(systemName: "checkmark.circle.fill")
                         .foregroundColor(.primaryGreen)
-                        .font(.title2)
+                        .font(.iconRegular)
                 } else {
                     Image(systemName: "circle")
                         .foregroundColor(.gray)
-                        .font(.title2)
+                        .font(.iconRegular)
                 }
             }
             .padding()
@@ -244,6 +244,7 @@ struct FeatureRow: View {
     var body: some View {
         HStack {
             Image(systemName: icon)
+                .font(.iconRegular)
                 .foregroundColor(.primaryGreen)
                 .frame(width: 30)
             

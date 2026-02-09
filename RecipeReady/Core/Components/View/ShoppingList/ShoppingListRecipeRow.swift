@@ -74,7 +74,7 @@ struct ShoppingListRecipeRow: View {
             // More Options
             Button(action: onMoreTap) {
                 Image(systemName: "ellipsis")
-                    .font(.system(size: 16)) // Small icon
+                    .font(.iconRegular)
                     .foregroundColor(.textSecondary)
                     .rotationEffect(.degrees(90)) // Vertical ellipsis
                     .frame(width: 44, height: 44) // Explicit touch target

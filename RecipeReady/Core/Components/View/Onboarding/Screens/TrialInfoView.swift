@@ -8,7 +8,7 @@ struct TrialInfoView: View {
             Spacer()
             
             Image(systemName: "calendar.badge.clock")
-                .font(.system(size: 80))
+                .font(.system(size: 80, weight: .light))
                 .foregroundColor(.primaryGreen)
             
             VStack(spacing: 16) {
@@ -24,6 +24,7 @@ struct TrialInfoView: View {
             VStack(alignment: .leading, spacing: 20) {
                 HStack {
                     Image(systemName: "bell.badge.fill")
+                        .font(.iconRegular)
                         .foregroundColor(.primaryBlue)
                     Text("We'll remind you 2 days before trial ends")
                         .font(.bodyBold)
@@ -31,6 +32,7 @@ struct TrialInfoView: View {
                 
                 HStack {
                     Image(systemName: "lock.open.fill")
+                        .font(.iconRegular)
                         .foregroundColor(.primaryBlue)
                     Text("No commitment. Cancel anytime.")
                         .font(.bodyBold)

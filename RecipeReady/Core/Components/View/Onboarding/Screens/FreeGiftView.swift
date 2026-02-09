@@ -14,7 +14,7 @@ struct FreeGiftView: View {
                     .frame(width: 120, height: 120)
                 
                 Image(systemName: "gift.fill")
-                    .font(.system(size: 60))
+                    .font(.system(size: 60, weight: .light))
                     .foregroundColor(.primaryBlue)
             }
             .padding(.bottom, 20)

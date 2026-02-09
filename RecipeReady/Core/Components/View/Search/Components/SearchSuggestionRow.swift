@@ -24,7 +24,7 @@ struct SearchSuggestionRow: View {
                 
                 Button(action: onToggleFavorite) {
                     Image(systemName: isFavorite ? "heart.fill" : "heart")
-                        .font(.system(size: 20))
+                        .font(.iconRegular)
                         .foregroundColor(isFavorite ? .primaryBlue : .textPrimary)
                 }
             }

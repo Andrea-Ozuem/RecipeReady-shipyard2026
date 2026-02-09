@@ -22,7 +22,7 @@ struct RecipeResultCard: View {
                     .aspectRatio(0.8, contentMode: .fill) // Portrait (Taller)
                     .overlay(
                          Image(systemName: "fork.knife")
-                            .font(.system(size: 40))
+                            .font(.system(size: 40, weight: .light))
                             .foregroundColor(.white)
                     )
                     .clipShape(RoundedRectangle(cornerRadius: 16))

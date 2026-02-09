@@ -23,7 +23,7 @@ struct RecipeSearchView: View {
                             dismiss()
                         }) {
                             Image(systemName: "chevron.left")
-                                .font(.system(size: 20, weight: .bold))
+                                .font(.iconRegular)
                                 .foregroundColor(.textPrimary)
                                 .padding(10)
                                 .background(Color.white)
@@ -48,6 +48,7 @@ struct RecipeSearchView: View {
                         Image(systemName: "takeoutbag.and.cup.and.straw.fill") // Closest SF Symbol to "jar & cup with straw" / food containers
                             .resizable()
                             .scaledToFit()
+                            .fontWeight(.light) // Consistent weight
                             .frame(width: 60, height: 60) // Larger size for illustration
                             .foregroundColor(.primaryBlue)
                             .opacity(0.9)
@@ -65,6 +66,7 @@ struct RecipeSearchView: View {
                     // Search Input Row
                     HStack {
                         Image(systemName: "magnifyingglass")
+                            .font(.iconRegular)
                             .foregroundColor(.textSecondary)
                         
                         TextField("Type an ingredient", text: $viewModel.searchText)
@@ -74,6 +76,7 @@ struct RecipeSearchView: View {
                         if !viewModel.searchText.isEmpty {
                             Button(action: { viewModel.searchText = "" }) {
                                 Image(systemName: "xmark")
+                                    .font(.iconRegular)
                                     .foregroundColor(.textPrimary)
                             }
                         }

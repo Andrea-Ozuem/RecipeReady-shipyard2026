@@ -40,7 +40,7 @@ struct ShoppingListIngredientRow: View {
                     // Icon
                     if ingredient.isChecked {
                         Image(systemName: "checkmark")
-                            .font(.system(size: 14, weight: .bold))
+                            .font(.iconSmall)
                             .foregroundStyle(Color.white)
                     }
                 }

@@ -44,7 +44,7 @@ struct CookbookView: View {
                         isShowingAddCookbook = true
                     }) {
                         Image(systemName: "plus")
-                            .font(.system(size: 24, weight: .regular))
+                            .font(.iconRegular)
                             .foregroundColor(.textPrimary)
                     }
                 }

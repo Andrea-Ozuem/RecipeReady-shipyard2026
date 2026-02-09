@@ -44,7 +44,7 @@ struct ShoppingListView: View {
                                 }
                             }) {
                                 Image(systemName: "trash")
-                                    .font(.system(size: 20))
+                                    .font(.iconRegular)
                                     .foregroundColor(.textPrimary)
                             }
                         }
@@ -102,6 +102,8 @@ struct ShoppingListView: View {
                                             deleteRecipe(recipe)
                                         } label: {
                                             Label("Delete", systemImage: "trash")
+                                                // Note: swipeActions Label icons are handled by system, often don't respect custom fonts well, but we can't do much here.
+                                                // System swipe actions use standard UI conventions.
                                         }
                                     }
                                 }
@@ -156,7 +158,7 @@ struct ShoppingListView: View {
                             }) {
                                 HStack(spacing: 16) {
                                     Image(systemName: "square.and.arrow.up")
-                                        .font(.system(size: 20))
+                                        .font(.iconRegular)
                                         .foregroundColor(.textPrimary)
                                         .frame(width: 24)
                                     
@@ -176,7 +178,7 @@ struct ShoppingListView: View {
                             }) {
                                 HStack(spacing: 16) {
                                     Image(systemName: "trash")
-                                        .font(.system(size: 20))
+                                        .font(.iconRegular)
                                         .foregroundColor(.textPrimary)
                                         .frame(width: 24)
                                     
@@ -270,6 +272,7 @@ struct ShoppingListView: View {
             // Illustration
             Image(systemName: "cart.badge.plus")
                 .resizable()
+                .fontWeight(.light) // Consistent with design system weight
                 .aspectRatio(contentMode: .fit)
                 .frame(width: 120, height: 120)
                 .foregroundStyle(Color.primaryBlue.opacity(0.8))

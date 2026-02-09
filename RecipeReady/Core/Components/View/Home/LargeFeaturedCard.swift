@@ -64,6 +64,7 @@ struct LargeFeaturedCard: View {
                     
                     HStack(spacing: 4) {
                         Image(systemName: "heart")
+                            .font(.iconSmall)
                         Text("1.64K")
                     }
                     .font(.captionMeta)
