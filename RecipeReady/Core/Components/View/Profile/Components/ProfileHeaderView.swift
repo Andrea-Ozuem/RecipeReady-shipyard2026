@@ -55,7 +55,7 @@ struct ProfileHeaderView: View {
             
             Spacer()
         }
-        .padding(.vertical, 20)
+        .padding(.vertical, 10)
     }
 }
 

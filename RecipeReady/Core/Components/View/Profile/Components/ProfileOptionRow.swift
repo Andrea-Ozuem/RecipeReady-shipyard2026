@@ -21,7 +21,7 @@ struct ProfileOptionRow<TrailingContent: View>: View {
     }
     
     // Convenience init for just a chevron or text
-    init(icon: String, title: String, text: String? = nil, showChevron: Bool = true, action: (() -> Void)? = nil) where TrailingContent == AnyView {
+    init(icon: String, title: String, text: String? = nil, showChevron: Bool = false, action: (() -> Void)? = nil) where TrailingContent == AnyView {
         self.icon = icon
         self.title = title
         self.action = action
@@ -55,7 +55,7 @@ struct ProfileOptionRow<TrailingContent: View>: View {
     private var rowContent: some View {
         HStack(spacing: 16) {
             Image(systemName: icon)
-                .font(.heading2) // 20pt
+                .font(.iconRegular)
                 .foregroundColor(.textPrimary)
                 .frame(width: 24, height: 24)
             

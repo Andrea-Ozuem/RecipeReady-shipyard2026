@@ -79,4 +79,13 @@ extension Font {
     static var captionMeta: Font {
         .pangram(.regular, size: 14)
     }
+    
+    // Icon Fonts
+    static var iconRegular: Font {
+        .system(size: 22, weight: .light)
+    }
+    
+    static var iconSmall: Font {
+        .system(size: 14, weight: .light)
+    }
 }

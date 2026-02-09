@@ -13,6 +13,7 @@ import Combine
 class ProfileViewModel: ObservableObject {
     // MARK: - App Storage
     @AppStorage("measurementSystem") var measurementSystem: MeasurementSystem = .metric
+    @AppStorage("areNotificationsEnabled") var areNotificationsEnabled: Bool = true
     
     // MARK: - Published Properties
     @Published var appVersion: String = ""
