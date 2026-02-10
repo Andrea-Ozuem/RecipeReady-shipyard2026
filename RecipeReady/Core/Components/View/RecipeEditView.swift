@@ -23,6 +23,7 @@ struct RecipeEditView: View {
     
     // State buffer for editing
     @State private var title: String
+    @State private var sourceLink: String // Added sourceLink
     @State private var ingredients: [Ingredient]
     @State private var steps: [CookingStep]
     
@@ -36,6 +37,7 @@ struct RecipeEditView: View {
     init(recipe: Recipe) {
         self.recipe = recipe
         _title = State(initialValue: recipe.title)
+        _sourceLink = State(initialValue: recipe.sourceLink ?? "") // Initialize sourceLink
         _ingredients = State(initialValue: recipe.ingredients)
         _steps = State(initialValue: recipe.steps)
         _prepTime = State(initialValue: recipe.prepTime)
@@ -53,6 +55,22 @@ struct RecipeEditView: View {
                     EditableHeaderView(title: $title, imageURL: recipe.imageURL)
                     
                     VStack(alignment: .leading, spacing: 24) {
+                        
+                        // Source Link Input
+                        HStack {
+                            Image(systemName: "link")
+                                .foregroundColor(.gray)
+                                .font(.system(size: 16))
+                            
+                            TextField("Source URL (e.g. from Instagram/TikTok)", text: $sourceLink)
+                                .font(.bodyRegular)
+                                .keyboardType(.URL)
+                                .textInputAutocapitalization(.never)
+                                .disableAutocorrection(true)
+                        }
+                        .padding(12)
+                        .background(Color.gray.opacity(0.1))
+                        .cornerRadius(8)
                         
                         // MARK: - Metadata (Difficulty & Times)
                         VStack(alignment: .leading, spacing: 24) {
@@ -285,6 +303,7 @@ struct RecipeEditView: View {
     
     private func saveChanges() {
         recipe.title = title
+        recipe.sourceLink = sourceLink.isEmpty ? nil : sourceLink // Save sourceLink
         recipe.ingredients = ingredients.filter { !$0.name.isEmpty }
         recipe.steps = steps.filter { !$0.instruction.isEmpty }
         

@@ -19,6 +19,7 @@ struct RecipeDetailView: View {
     @State private var currentServings: Int
     @State private var showToast = false
     @State private var showAddToCookbook = false
+    @State private var isCookingModePresented = false
     
     init(recipe: Recipe) {
         self.recipe = recipe
@@ -92,6 +93,27 @@ struct RecipeDetailView: View {
                     }
                     
                     VStack(alignment: .leading, spacing: 24) {
+                        
+
+                        // MARK: - Title & Source
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text(recipe.title)
+                                .font(.display)
+                                .foregroundColor(.textPrimary)
+                                .fixedSize(horizontal: false, vertical: true)
+                            
+                            if let sourceLink = recipe.sourceLink, let url = URL(string: sourceLink) {
+                                Link(destination: url) {
+                                    HStack(spacing: 4) {
+                                        Text("Watch original video")
+                                            .font(.bodyBold)
+                                        Image(systemName: "arrow.up.right")
+                                            .font(.system(size: 14))
+                                    }
+                                    .foregroundColor(.primaryGreen)
+                                }
+                            }
+                        }
                         
                         // MARK: - Metadata Section (Difficulty & Times)
                         VStack(alignment: .leading, spacing: 24) {
@@ -243,7 +265,7 @@ struct RecipeDetailView: View {
                         
                         // Start Cooking Button - Moved here after Instructions
                             Button(action: {
-                                // TODO: Start cooking mode
+                                isCookingModePresented = true
                             }) {
                                 Text("Start cooking!")
                                 .font(.bodyBold)
@@ -309,6 +331,9 @@ struct RecipeDetailView: View {
                 .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.hidden) // We built our own custom indicator in the view
         }
+        .fullScreenCover(isPresented: $isCookingModePresented) {
+            CookingModeView(recipe: recipe, isPresented: $isCookingModePresented)
+        }
     }
     
     // MARK: - Actions
@@ -368,7 +393,8 @@ struct RecipeDetailView: View {
             steps: [
                 CookingStep(order: 1, instruction: "Step 1"),
                 CookingStep(order: 2, instruction: "Step 2")
-            ]
+            ],
+            sourceLink: "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
         ))
     }
 }

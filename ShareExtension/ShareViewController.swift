@@ -284,30 +284,55 @@ class ShareViewController: UIViewController {
             return
         }
         
-        // Look for video content
+        // 1. Attempt to find a Source URL first (e.g. Instagram/TikTok link)
+        findURL(in: attachments) { [weak self] sourceURL in
+            self?.handleContent(attachments: attachments, sourceURL: sourceURL)
+        }
+    }
+    
+    private func findURL(in attachments: [NSItemProvider], completion: @escaping (URL?) -> Void) {
+        // Find first attachment that is a URL
+        guard let urlAttachment = attachments.first(where: { $0.hasItemConformingToTypeIdentifier(UTType.url.identifier) }) else {
+            completion(nil)
+            return
+        }
+        
+        // Load it
+        urlAttachment.loadItem(forTypeIdentifier: UTType.url.identifier) { item, error in
+            DispatchQueue.main.async {
+                if let url = item as? URL {
+                    completion(url)
+                } else {
+                    completion(nil)
+                }
+            }
+        }
+    }
+    
+    private func handleContent(attachments: [NSItemProvider], sourceURL: URL?) {
+        // 2. Check for Video Content
         for attachment in attachments {
             if attachment.hasItemConformingToTypeIdentifier(UTType.movie.identifier) {
-                loadVideo(from: attachment)
+                loadVideo(from: attachment, sourceURL: sourceURL)
                 return
             }
             if attachment.hasItemConformingToTypeIdentifier(UTType.video.identifier) {
-                loadVideo(from: attachment)
+                loadVideo(from: attachment, sourceURL: sourceURL)
                 return
             }
         }
         
-        // No video found - check for URL (Instagram/TikTok share links)
-        for attachment in attachments {
-            if attachment.hasItemConformingToTypeIdentifier(UTType.url.identifier) {
-                loadURL(from: attachment)
-                return
-            }
+        // 3. No Video found - Fallback to URL only processing (Apify)
+        if let url = sourceURL {
+            extractCaptionFromURL(url)
+            return
         }
         
         showError("Please share a video from Instagram or TikTok")
     }
     
-    private func loadVideo(from attachment: NSItemProvider) {
+    // Updated to accept sourceURL
+    private func loadVideo(from attachment: NSItemProvider, sourceURL: URL?) {
         attachment.loadItem(forTypeIdentifier: UTType.movie.identifier) { [weak self] item, error in
             DispatchQueue.main.async {
                 if let error = error {
@@ -320,12 +345,13 @@ class ShareViewController: UIViewController {
                     return
                 }
                 
-                self?.extractAudio(from: url)
+                self?.extractAudio(from: url, sourceURL: sourceURL)
             }
         }
     }
     
     private func loadURL(from attachment: NSItemProvider) {
+        // Legacy entry point, now mostly handled by handleContent + extractCaptionFromURL
         attachment.loadItem(forTypeIdentifier: UTType.url.identifier) { [weak self] item, error in
             guard let self = self else { return }
             
@@ -335,7 +361,6 @@ class ShareViewController: UIViewController {
                     return
                 }
                 
-                // Start Apify caption extraction
                 self.extractCaptionFromURL(url)
             }
         }
@@ -392,7 +417,8 @@ class ShareViewController: UIViewController {
         }
     }
     
-    private func extractAudio(from videoURL: URL) {
+    // Updated to accept sourceURL
+    private func extractAudio(from videoURL: URL, sourceURL: URL?) {
         updateStatus("Extracting audio...")
         
         Task {
@@ -414,7 +440,7 @@ class ShareViewController: UIViewController {
                 let payload = ExtractionPayload(
                     audioFileName: audioURL.lastPathComponent,
                     caption: nil, // TODO: Extract caption if available
-                    sourceURL: nil
+                    sourceURL: sourceURL?.absoluteString // Now passing the source URL!
                 )
                 
                 try appGroupManager.savePayload(payload)
