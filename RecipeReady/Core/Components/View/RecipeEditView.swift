@@ -33,6 +33,7 @@ struct RecipeEditView: View {
     @State private var restTime: Int?
     @State private var difficulty: String?
     @State private var servings: Int = 1
+    @State private var isEditingSourceLink = false
     
     init(recipe: Recipe) {
         self.recipe = recipe
@@ -56,38 +57,69 @@ struct RecipeEditView: View {
                     
                     VStack(alignment: .leading, spacing: 24) {
                         
-                        // Source Link Input
-                        HStack {
-                            Image(systemName: "link")
-                                .foregroundColor(.gray)
-                                .font(.system(size: 16))
-                            
-                            TextField("Source URL (e.g. from Instagram/TikTok)", text: $sourceLink)
-                                .font(.bodyRegular)
-                                .keyboardType(.URL)
-                                .textInputAutocapitalization(.never)
-                                .disableAutocorrection(true)
-                        }
-                        .padding(12)
-                        .background(Color.gray.opacity(0.1))
-                        .cornerRadius(8)
+
                         
                         // MARK: - Metadata (Difficulty & Times)
                         VStack(alignment: .leading, spacing: 24) {
-                            // Difficulty (simplified to just text for now, could be picker)
-                            HStack(alignment: .center, spacing: 4) {
-                                Text("Difficulty:")
-                                    .font(.bodyBold)
-                                    .foregroundColor(.textPrimary)
-                                
-                                // Simple difficulty rotation for now
-                                Button(action: toggleDifficulty) {
-                                    Text(difficulty ?? "Easy")
-                                        .font(.bodyRegular)
-                                        .foregroundColor(.primaryGreen)
-                                        .underline()
+                            VStack(alignment: .leading, spacing: 5) {
+                                // Difficulty (simplified to just text for now, could be picker)
+                                HStack(alignment: .center, spacing: 4) {
+                                    Text("Difficulty:")
+                                        .font(.bodyBold)
+                                        .foregroundColor(.textPrimary)
+                                    
+                                    // Simple difficulty rotation for now
+                                    Button(action: toggleDifficulty) {
+                                        Text(difficulty ?? "Easy")
+                                            .font(.bodyRegular)
+                                            .foregroundColor(.primaryGreen)
+                                            .underline()
+                                    }
+                                    Spacer()
                                 }
-                                Spacer()
+                                
+                                // Source Link Row (matches RecipeDetailView style)
+                                Button(action: {
+                                    withAnimation(.easeInOut(duration: 0.2)) {
+                                        isEditingSourceLink.toggle()
+                                    }
+                                }) {
+                                    HStack(spacing: 4) {
+                                        Text(sourceLink.isEmpty ? "Add source link" : "Watch original video")
+                                            .font(.bodyBold)
+                                            .foregroundColor(.textPrimary)
+                                        Image(systemName: "arrow.up.right")
+                                            .font(.system(size: 14))
+                                            .foregroundColor(.primaryGreen)
+                                    }
+                                }
+                                
+                                // Inline URL editor (revealed on tap)
+                                if isEditingSourceLink {
+                                    HStack {
+                                        Image(systemName: "link")
+                                            .foregroundColor(.gray)
+                                            .font(.system(size: 14))
+                                        
+                                        TextField("Paste URL (e.g. Instagram/TikTok)", text: $sourceLink)
+                                            .font(.bodyRegular)
+                                            .keyboardType(.URL)
+                                            .textInputAutocapitalization(.never)
+                                            .disableAutocorrection(true)
+                                        
+                                        if !sourceLink.isEmpty {
+                                            Button(action: { sourceLink = "" }) {
+                                                Image(systemName: "xmark.circle.fill")
+                                                    .foregroundColor(.gray)
+                                                    .font(.system(size: 14))
+                                            }
+                                        }
+                                    }
+                                    .padding(10)
+                                    .background(Color.gray.opacity(0.08))
+                                    .cornerRadius(8)
+                                    .transition(.opacity.combined(with: .move(edge: .top)))
+                                }
                             }
                             
                             Divider().foregroundColor(Color.divider)
@@ -355,4 +387,5 @@ struct RecipeEditView: View {
             CookingStep(order: 2, instruction: "Step two is also quite straightforward.")
         ]
     ))
+    .environment(ExtractionManager())
 }

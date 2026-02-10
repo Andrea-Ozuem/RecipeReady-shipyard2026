@@ -92,42 +92,44 @@ struct RecipeDetailView: View {
                             .clipped()
                     }
                     
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(recipe.title)
+                            .font(.heading1.bold())
+                            .foregroundColor(.textPrimary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .padding(.top, 16)
+                    .padding(.horizontal, 20)
+                    
                     VStack(alignment: .leading, spacing: 24) {
-                        
-
-                        // MARK: - Title & Source
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text(recipe.title)
-                                .font(.display)
-                                .foregroundColor(.textPrimary)
-                                .fixedSize(horizontal: false, vertical: true)
-                            
-                            if let sourceLink = recipe.sourceLink, let url = URL(string: sourceLink) {
-                                Link(destination: url) {
-                                    HStack(spacing: 4) {
-                                        Text("Watch original video")
-                                            .font(.bodyBold)
-                                        Image(systemName: "arrow.up.right")
-                                            .font(.system(size: 14))
-                                    }
-                                    .foregroundColor(.primaryGreen)
-                                }
-                            }
-                        }
                         
                         // MARK: - Metadata Section (Difficulty & Times)
                         VStack(alignment: .leading, spacing: 24) {
-                            
-                            // Difficulty Row
-                            if let difficulty = recipe.difficulty {
-                                HStack(alignment: .center, spacing: 4) {
-                                    Text("Difficulty:")
-                                        .font(.bodyBold)
-                                        .foregroundColor(.textPrimary)
-                                    Text(difficulty)
-                                        .font(.bodyRegular)
-                                        .foregroundColor(.textPrimary)
-                                    Spacer()
+                            VStack(alignment: .leading, spacing: 5) {
+                                // Difficulty Row
+                                if let difficulty = recipe.difficulty {
+                                    HStack(alignment: .center, spacing: 4) {
+                                        Text("Difficulty:")
+                                            .font(.bodyBold)
+                                            .foregroundColor(.textPrimary)
+                                        Text(difficulty)
+                                            .font(.bodyRegular)
+                                            .foregroundColor(.primaryGreen)
+                                            .underline()
+                                        Spacer()
+                                    }
+                                }
+                                if let sourceLink = recipe.sourceLink, let url = URL(string: sourceLink) {
+                                    Link(destination: url) {
+                                        HStack(spacing: 4) {
+                                            Text("Watch original video")
+                                                .font(.bodyBold)
+                                                .foregroundColor(.textPrimary)
+                                            Image(systemName: "arrow.up.right")
+                                                .font(.system(size: 14))
+                                                .foregroundColor(.primaryGreen)
+                                        }
+                                    }
                                 }
                             }
                             
