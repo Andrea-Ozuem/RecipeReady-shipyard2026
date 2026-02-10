@@ -10,9 +10,17 @@ import UIKit
 
 final class ImageStorageService {
     static let shared = ImageStorageService()
-    
+
     private let fileManager = FileManager.default
-    
+
+    // Custom URLSession with no cache for image downloads
+    private lazy var downloadSession: URLSession = {
+        let config = URLSessionConfiguration.default
+        config.urlCache = nil  // Disable caching for downloads
+        config.requestCachePolicy = .reloadIgnoringLocalCacheData
+        return URLSession(configuration: config)
+    }()
+
     private init() {}
     
     /// Downloads an image from a URL and saves it locally.
@@ -20,7 +28,7 @@ final class ImageStorageService {
     func saveImage(from url: URL) async throws -> String {
         MemoryDebugger.shared.log("🖼️ Before image download")
 
-        let (data, response) = try await URLSession.shared.data(from: url)
+        let (data, response) = try await downloadSession.data(from: url)
 
         guard let httpResponse = response as? HTTPURLResponse,
               (200...299).contains(httpResponse.statusCode) else {

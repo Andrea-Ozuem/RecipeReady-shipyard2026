@@ -62,18 +62,6 @@ struct LargeFeaturedCard: View {
                     
                     Spacer()
                     
-                    HStack(spacing: 4) {
-                        Image(systemName: "heart")
-                            .font(.iconSmall)
-                        Text("1.64K")
-                    }
-                    .font(.captionMeta)
-                    .foregroundColor(.textSecondary)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(Color.white)
-                    .cornerRadius(16)
-                    .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
                 }
             }
             .padding(24)

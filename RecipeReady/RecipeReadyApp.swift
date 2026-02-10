@@ -22,6 +22,14 @@ struct RecipeReadyApp: App {
     }
 
     private func setupMemoryMonitoring() {
+        // Configure URLCache with smaller memory footprint
+        // Default is ~512MB memory, we'll reduce to 20MB
+        let cache = URLCache(
+            memoryCapacity: 20 * 1024 * 1024,  // 20 MB memory cache
+            diskCapacity: 100 * 1024 * 1024     // 100 MB disk cache
+        )
+        URLCache.shared = cache
+
         // Log initial state
         MemoryDebugger.shared.logDetailed("🚀 App Launch")
 
@@ -33,10 +41,13 @@ struct RecipeReadyApp: App {
         ) { _ in
             print("⚠️⚠️⚠️ MEMORY WARNING RECEIVED ⚠️⚠️⚠️")
             MemoryDebugger.shared.printSummary()
+
+            // Clear URLCache on memory warning
+            URLCache.shared.removeAllCachedResponses()
+            print("🧹 Cleared URLCache due to memory warning")
         }
 
         // Log URLCache configuration
-        let cache = URLCache.shared
         print("🗄️ URLCache Configuration:")
         print("   Memory Capacity: \(cache.memoryCapacity / 1024 / 1024) MB")
         print("   Disk Capacity: \(cache.diskCapacity / 1024 / 1024) MB")
