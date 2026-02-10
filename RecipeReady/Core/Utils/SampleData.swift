@@ -64,24 +64,5 @@ struct SampleData {
             )
         ]
     }
-    
-    // 4. Saved Videos
-    static var videoRecipes: [Recipe] {
-        [
-            Recipe(
-                title: "How to make Sushi",
-                author: "Sushi Master",
-                sourceLink: "https://youtube.com/watch?v=12345",
-                imageURL: "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=600&q=80",
-                cookingTime: 60
-            ),
-            Recipe(
-                title: "Best Burger Tutorial",
-                author: "Burger King",
-                 sourceLink: "https://tiktok.com/@burgerking/video/123456",
-                imageURL: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80",
-                cookingTime: 30
-            )
-        ]
-    }
+
 }

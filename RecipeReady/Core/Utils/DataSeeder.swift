@@ -37,11 +37,6 @@ struct DataSeeder {
             context.insert(recipe)
         }
         
-         // 4. Saved Videos
-        for recipe in SampleData.videoRecipes {
-            context.insert(recipe)
-        }
-        
         do {
             try context.save()
             print("✅ Seeding complete.")

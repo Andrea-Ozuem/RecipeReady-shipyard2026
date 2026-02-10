@@ -299,7 +299,7 @@ struct OnboardingContainerView: View {
              }
             
         case .paywall:
-            PaywallView(viewModel: viewModel)
+            RevenueCatPaywallView(viewModel: viewModel)
         }
     }
 }

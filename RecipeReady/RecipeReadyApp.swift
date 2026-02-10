@@ -36,7 +36,7 @@ struct RecipeReadyApp: App {
                         .environmentObject(revenueCatService)
                 } else {
                     // Hard paywall for users who finished onboarding but aren't pro (e.g. cancelled subscription)
-                    PaywallView(viewModel: OnboardingViewModel()) // Create a temporary viewModel or refactor PaywallView to not need it for this state
+                    RevenueCatPaywallView(viewModel: OnboardingViewModel())
                         .environmentObject(revenueCatService)
                 }
             }
