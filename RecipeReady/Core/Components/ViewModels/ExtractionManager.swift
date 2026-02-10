@@ -42,9 +42,13 @@ final class ExtractionManager {
     }
     
     func dismiss() {
+        MemoryDebugger.shared.log("🚪 Before dismiss/cleanup")
+
         // If we're dismissing, we should clean up any pending data
         cleanupPendingData()
         state = .idle
+
+        MemoryDebugger.shared.log("🚪 After dismiss - state set to idle")
     }
     
     func retry() {
@@ -86,15 +90,18 @@ final class ExtractionManager {
     
     private func startExtraction(with payload: ExtractionPayload) {
         Task {
+            MemoryDebugger.shared.checkpoint("extraction_start")
+            MemoryDebugger.shared.log("🔄 Starting extraction")
+
             // Update state on main actor
             await MainActor.run {
                 self.state = .processing
             }
-            
+
             do {
                 // Determine audio URL from payload if available
                 let audioURL = AppGroupManager.shared.audioFileURL(for: payload)
-                
+
                 // Perform extraction
                 let response = try await extractionService.extractRecipe(
                     audioURL: audioURL,
@@ -102,7 +109,9 @@ final class ExtractionManager {
                     remoteVideoURL: payload.remoteVideoURL,
                     thumbnailURL: payload.thumbnailURL
                 )
-                
+
+                MemoryDebugger.shared.logFromCheckpoint("extraction_start", label: "🔄 After extraction service")
+
                 // Convert response to Recipe model
                 let newRecipe = Recipe(
                     title: response.title ?? "New Recipe",
@@ -118,17 +127,22 @@ final class ExtractionManager {
                     servings: response.servings,
                     confidenceScore: response.confidenceScore
                 )
-                
+
+                print("📝 Recipe created: \(newRecipe.ingredients.count) ingredients, \(newRecipe.steps.count) steps")
+                MemoryDebugger.shared.logFromCheckpoint("extraction_start", label: "🔄 After Recipe object creation")
+
                 // Cleanup audio file after successful extraction
                 try? AppGroupManager.shared.cleanupAudioFile(for: payload)
-                
+
                 // Clear pending payload from memory as we're done
                 self.pendingPayload = nil
-                
+
                 // Update state on main actor
                 await MainActor.run {
                     self.state = .success(newRecipe)
                 }
+
+                MemoryDebugger.shared.logFromCheckpoint("extraction_start", label: "🔄 Extraction complete - Recipe in state")
                 
             } catch {
                 print("❌ ExtractionManager: Extraction failed: \(error)")

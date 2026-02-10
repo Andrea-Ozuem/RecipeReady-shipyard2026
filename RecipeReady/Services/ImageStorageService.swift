@@ -18,18 +18,29 @@ final class ImageStorageService {
     /// Downloads an image from a URL and saves it locally.
     /// Returns the local filename/path relative to Documents directory.
     func saveImage(from url: URL) async throws -> String {
+        MemoryDebugger.shared.log("🖼️ Before image download")
+
         let (data, response) = try await URLSession.shared.data(from: url)
-        
-        guard let httpResponse = response as? HTTPURLResponse, 
+
+        guard let httpResponse = response as? HTTPURLResponse,
               (200...299).contains(httpResponse.statusCode) else {
             throw URLError(.badServerResponse)
         }
-        
+
+        print("📥 Downloaded image: \(data.count / 1024) KB from \(url.lastPathComponent)")
+        MemoryDebugger.shared.log("🖼️ After download, before UIImage creation")
+
         guard let image = UIImage(data: data) else {
             throw URLError(.cannotDecodeContentData)
         }
-        
-        return try saveImage(image)
+
+        MemoryDebugger.shared.log("🖼️ After UIImage creation, before save")
+
+        let filename = try saveImage(image)
+
+        MemoryDebugger.shared.log("🖼️ After image saved to disk")
+
+        return filename
     }
     
     /// Saves a UIImage locally.

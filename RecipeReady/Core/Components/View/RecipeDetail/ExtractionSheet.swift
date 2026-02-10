@@ -244,27 +244,46 @@ struct ExtractionSheet: View {
     }
     
     // MARK: - Actions
-    
+
     private func saveRecipe(_ recipe: Recipe) {
+        MemoryDebugger.shared.checkpoint("save_recipe")
+        MemoryDebugger.shared.logDetailed("💾 Before saving recipe")
+
         // Query for favorites cookbook
         let descriptor = FetchDescriptor<Cookbook>(
             predicate: #Predicate { $0.isFavorites == true }
         )
-        
+
         if let favoritesCookbook = try? modelContext.fetch(descriptor).first {
             // Add recipe to favorites
             favoritesCookbook.recipes.append(recipe)
+            print("📚 Added recipe to favorites cookbook (now has \(favoritesCookbook.recipes.count) recipes)")
         }
-        
+
         // Ensure the flag is set for the dynamic query in FavoritesCollectionCard
         recipe.isFavorite = true
-        
+
+        MemoryDebugger.shared.logFromCheckpoint("save_recipe", label: "💾 Before modelContext.insert")
+
         modelContext.insert(recipe)
-        
+
+        MemoryDebugger.shared.logFromCheckpoint("save_recipe", label: "💾 After insert, before save")
+
         // Explicit save to ensure persistence immediately
         try? modelContext.save()
+
+        MemoryDebugger.shared.logFromCheckpoint("save_recipe", label: "💾 After modelContext.save")
+
         extractionManager.dismiss()
+
+        MemoryDebugger.shared.logFromCheckpoint("save_recipe", label: "💾 After extractionManager.dismiss")
+
         dismiss()
+
+        // Log final state after a short delay to see if memory is released
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            MemoryDebugger.shared.logDetailed("💾 1 second after save complete")
+        }
     }
 }
 

@@ -11,7 +11,8 @@ import RevenueCat
 struct ProfileView: View {
     @StateObject private var viewModel = ProfileViewModel()
     @EnvironmentObject var revenueCatService: RevenueCatService
-    
+    @State private var showMemoryDebug = false
+
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -141,16 +142,22 @@ struct ProfileView: View {
                             .font(.heading2)
                             .foregroundColor(.textPrimary)
                             .padding(.horizontal)
-                        
+
                         VStack(spacing: 0) {
                             ProfileOptionRow(icon: "bubble.left.and.bubble.right", title: "Feedback", action: viewModel.contactSupport)
                                 .padding(.horizontal)
-                            
+
                             ProfileOptionRow(icon: "ant", title: "Report a bug", action: viewModel.contactSupport)
                                 .padding(.horizontal)
-                            
+
                             ProfileOptionRow(icon: "star", title: "Rate App", showChevron: false, action: viewModel.rateApp)
                                 .padding(.horizontal)
+
+                            // Debug option
+                            ProfileOptionRow(icon: "chart.bar.fill", title: "Memory Debug", action: {
+                                showMemoryDebug = true
+                            })
+                            .padding(.horizontal)
                         }
                     }
                     
@@ -165,7 +172,10 @@ struct ProfileView: View {
             }
             .navigationTitle("Profile")
             .navigationBarTitleDisplayMode(.large)
-            .background(Color.screenBackground) 
+            .background(Color.screenBackground)
+            .sheet(isPresented: $showMemoryDebug) {
+                MemoryDebugView()
+            }
         }
     }
 }

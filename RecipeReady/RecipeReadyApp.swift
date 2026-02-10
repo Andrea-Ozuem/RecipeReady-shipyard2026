@@ -12,10 +12,34 @@ import SwiftData
 struct RecipeReadyApp: App {
     @State private var extractionManager = ExtractionManager()
     @StateObject private var revenueCatService = RevenueCatService.shared
-    
+
     init() {
         // Configure RevenueCat on launch
         RevenueCatService.shared.configure()
+
+        // Setup memory debugging
+        setupMemoryMonitoring()
+    }
+
+    private func setupMemoryMonitoring() {
+        // Log initial state
+        MemoryDebugger.shared.logDetailed("🚀 App Launch")
+
+        // Monitor memory warnings
+        NotificationCenter.default.addObserver(
+            forName: UIApplication.didReceiveMemoryWarningNotification,
+            object: nil,
+            queue: .main
+        ) { _ in
+            print("⚠️⚠️⚠️ MEMORY WARNING RECEIVED ⚠️⚠️⚠️")
+            MemoryDebugger.shared.printSummary()
+        }
+
+        // Log URLCache configuration
+        let cache = URLCache.shared
+        print("🗄️ URLCache Configuration:")
+        print("   Memory Capacity: \(cache.memoryCapacity / 1024 / 1024) MB")
+        print("   Disk Capacity: \(cache.diskCapacity / 1024 / 1024) MB")
     }
     
     
