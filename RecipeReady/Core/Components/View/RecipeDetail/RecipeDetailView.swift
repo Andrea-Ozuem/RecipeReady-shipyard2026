@@ -20,6 +20,7 @@ struct RecipeDetailView: View {
     @State private var showToast = false
     @State private var showAddToCookbook = false
     @State private var isCookingModePresented = false
+    @State private var showSetReminder = false
     
     init(recipe: Recipe) {
         self.recipe = recipe
@@ -311,7 +312,7 @@ struct RecipeDetailView: View {
                             .background(Color.white.opacity(0.8)) // Add background for consistency
                             .clipShape(Circle())
                     }
-                    
+
                     Button(action: {
                         showAddToCookbook = true
                     }) {
@@ -320,6 +321,18 @@ struct RecipeDetailView: View {
                             .foregroundColor(recipe.isFavorite ? .primaryGreen : .textPrimary)
                             .padding(10)
                             .background(Color.white.opacity(0.8)) // Add background for consistency
+                            .clipShape(Circle())
+                    }
+
+                    // Reminder Button
+                    Button(action: {
+                        showSetReminder = true
+                    }) {
+                        Image(systemName: recipe.reminderDate != nil ? "bell.fill" : "bell")
+                            .font(.iconRegular)
+                            .foregroundColor(recipe.reminderDate != nil ? .primaryBlue : .textPrimary)
+                            .padding(10)
+                            .background(Color.white.opacity(0.8))
                             .clipShape(Circle())
                     }
                 }
@@ -331,6 +344,11 @@ struct RecipeDetailView: View {
         .sheet(isPresented: $showAddToCookbook) {
             AddToCookbookSheet(recipe: recipe)
                 .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.hidden) // We built our own custom indicator in the view
+        }
+        .sheet(isPresented: $showSetReminder) {
+            SetReminderSheet(recipe: recipe)
+                .presentationDetents([.large])
                 .presentationDragIndicator(.hidden) // We built our own custom indicator in the view
         }
         .fullScreenCover(isPresented: $isCookingModePresented) {

@@ -52,7 +52,7 @@ struct CookingModeView: View {
                         VStack(alignment: .leading) {
                             Spacer()
                             Text(step.instruction)
-                                .font(.system(size: 32, weight: .bold)) // Large display font
+                                .font(.pangram(.bold, size: 32)) // Large display font
                                 .lineSpacing(8)
                                 .multilineTextAlignment(.leading)
                                 .foregroundColor(.textPrimary)

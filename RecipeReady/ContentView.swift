@@ -12,8 +12,11 @@ struct ContentView: View {
     // We keep the environments to avoid breaking the App entry point if it injects them
     @Environment(\.modelContext) private var modelContext
     @Environment(ExtractionManager.self) private var extractionManager
-    
+
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = false
+
+    @State private var recipeToOpen: Recipe?
+    @State private var showRecipeDetail = false
     
     var body: some View {
         Group {
@@ -55,8 +58,45 @@ struct ContentView: View {
         )) {
             ExtractionSheet()
         }
+        .sheet(item: $recipeToOpen) { recipe in
+            NavigationStack {
+                RecipeDetailView(recipe: recipe)
+            }
+        }
         .onAppear {
             DataSeeder.seed(context: modelContext)
+            setupNotificationListener()
+        }
+    }
+
+    // MARK: - Notification Handling
+
+    private func setupNotificationListener() {
+        NotificationCenter.default.addObserver(
+            forName: NSNotification.Name("OpenRecipeFromNotification"),
+            object: nil,
+            queue: .main
+        ) { notification in
+            guard let recipeId = notification.userInfo?["recipeId"] as? UUID else { return }
+            openRecipe(withId: recipeId)
+        }
+    }
+
+    private func openRecipe(withId recipeId: UUID) {
+        // Fetch the recipe from SwiftData
+        let descriptor = FetchDescriptor<Recipe>(
+            predicate: #Predicate { recipe in
+                recipe.id == recipeId
+            }
+        )
+
+        do {
+            let recipes = try modelContext.fetch(descriptor)
+            if let recipe = recipes.first {
+                recipeToOpen = recipe
+            }
+        } catch {
+            print("Error fetching recipe for notification: \(error)")
         }
     }
 }

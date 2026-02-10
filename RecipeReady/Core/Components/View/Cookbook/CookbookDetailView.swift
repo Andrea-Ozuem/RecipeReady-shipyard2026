@@ -12,32 +12,138 @@ struct CookbookDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     let cookbook: Cookbook
-    
+
     @State private var isShowingEditSheet = false
-    @State private var isShowingSearch = false
+    @State private var isSearching = false
+    @State private var searchQuery = ""
+    @State private var isShowingIngredientSearch = false
     @State private var recipeToMove: Recipe?
-    
+
     // Grid Setup
     private let columns = [
         GridItem(.flexible(), spacing: 16),
         GridItem(.flexible(), spacing: 16)
     ]
+
+    // Filtered recipes based on search query
+    private var filteredRecipes: [Recipe] {
+        let sorted = cookbook.recipes.sorted(by: { $0.createdAt > $1.createdAt })
+
+        guard !searchQuery.isEmpty else {
+            return sorted
+        }
+
+        return sorted.filter { recipe in
+            // Search in title
+            if recipe.title.localizedCaseInsensitiveContains(searchQuery) {
+                return true
+            }
+
+            // Search in ingredients
+            if recipe.ingredients.contains(where: { $0.name.localizedCaseInsensitiveContains(searchQuery) }) {
+                return true
+            }
+
+            return false
+        }
+    }
     
     var body: some View {
+        VStack(spacing: 0) {
+            // Search bar and ingredient filter (conditionally shown)
+            if isSearching {
+                VStack(spacing: 0) {
+                    // Search bar
+                    HStack(spacing: 12) {
+                        Image(systemName: "magnifyingglass")
+                            .font(.iconRegular)
+                            .foregroundColor(.textSecondary)
+
+                        TextField("Search recipes...", text: $searchQuery)
+                            .font(.bodyRegular)
+                            .foregroundColor(.textPrimary)
+                            .autocorrectionDisabled()
+                            .textInputAutocapitalization(.never)
+
+                        if !searchQuery.isEmpty {
+                            Button(action: {
+                                searchQuery = ""
+                            }) {
+                                Image(systemName: "xmark.circle.fill")
+                                    .font(.iconRegular)
+                                    .foregroundColor(.textSecondary)
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 12)
+                    .background(Color.white)
+                    .overlay(
+                        Rectangle()
+                            .frame(height: 1)
+                            .foregroundColor(.divider),
+                        alignment: .bottom
+                    )
+
+                    // Ingredient filter button
+                    HStack(spacing: 8) {
+                        Button(action: {
+                            isShowingIngredientSearch = true
+                        }) {
+                            HStack(spacing: 8) {
+                                Image(systemName: "basket")
+                                    .font(.iconSmall)
+                                Text("Ingredients")
+                                    .font(.bodyRegular)
+                                Image(systemName: "chevron.down")
+                                    .font(.iconSmall)
+                            }
+                            .foregroundColor(.textPrimary)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 10)
+                            .background(Color.white)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 20)
+                                    .stroke(Color.divider, lineWidth: 1)
+                            )
+                            .cornerRadius(20)
+                        }
+
+                        Spacer()
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 12)
+                    .background(Color.screenBackground)
+                }
+                .transition(.move(edge: .top).combined(with: .opacity))
+            }
+
             ScrollView {
                 LazyVGrid(columns: columns, spacing: 24) {
                     if cookbook.recipes.isEmpty {
-                        // Optional empty state
+                        // Empty cookbook state
                         Text("No recipes yet")
                             .font(.bodyRegular)
                             .foregroundColor(.textSecondary)
                             .gridCellColumns(2)
                             .padding(.top, 40)
+                    } else if filteredRecipes.isEmpty {
+                        // No search results state
+                        VStack(spacing: 12) {
+                            Image(systemName: "magnifyingglass")
+                                .font(.system(size: 40, weight: .light))
+                                .foregroundColor(.textSecondary)
+                            Text("No recipes found")
+                                .font(.bodyBold)
+                                .foregroundColor(.textPrimary)
+                            Text("Try a different search term")
+                                .font(.captionMeta)
+                                .foregroundColor(.textSecondary)
+                        }
+                        .gridCellColumns(2)
+                        .padding(.top, 60)
                     } else {
-                        // Sort by createdAt descending
-                        let sortedRecipes = cookbook.recipes.sorted(by: { $0.createdAt > $1.createdAt })
-                        
-                        ForEach(sortedRecipes) { recipe in
+                        ForEach(filteredRecipes) { recipe in
                             NavigationLink(destination: RecipeDetailView(recipe: recipe)) {
                                 RecipeCardView(
                                     recipe: recipe,
@@ -56,6 +162,7 @@ struct CookbookDetailView: View {
                 .padding(.top, 20)
             }
             .background(Color.screenBackground)
+        }
             .navigationBarBackButtonHidden(true) // Custom back button
             .toolbarBackground(Color.clear, for: .navigationBar) // User suggested fix for white pills
             .toolbar {
@@ -78,16 +185,23 @@ struct CookbookDetailView: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     HStack(spacing: 16) {
                         Button(action: {
-                            isShowingSearch = true
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                isSearching.toggle()
+                                if !isSearching {
+                                    searchQuery = ""
+                                }
+                            }
                         }) {
-                            Image(systemName: "magnifyingglass")
-                            .foregroundColor(.textPrimary)
+                            Image(systemName: isSearching ? "xmark" : "magnifyingglass")
+                                .font(.iconRegular)
+                                .foregroundColor(.textPrimary)
                         }
-                        
+
                         Button(action: {
                             isShowingEditSheet = true
                         }) {
                             Image(systemName: "pencil")
+                                .font(.iconRegular)
                                 .foregroundColor(.textPrimary)
                         }
                     }
@@ -107,12 +221,13 @@ struct CookbookDetailView: View {
                 .presentationDetents([.fraction(0.75)])
                 .presentationDragIndicator(.visible)
             }
-            .fullScreenCover(isPresented: $isShowingSearch) {
-                RecipeSearchView()
-            }
+
             .sheet(item: $recipeToMove) { recipe in
                 AddToCookbookSheet(recipe: recipe, moveFromCookbook: cookbook)
                     .presentationDetents([.medium, .large])
+            }
+            .fullScreenCover(isPresented: $isShowingIngredientSearch) {
+                RecipeSearchView(cookbook: cookbook)
             }
     }
     

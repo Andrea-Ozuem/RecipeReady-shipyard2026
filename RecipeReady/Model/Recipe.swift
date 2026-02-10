@@ -33,6 +33,10 @@ final class Recipe {
     // Timestamps
     var createdAt: Date
     var updatedAt: Date
+
+    // Reminder fields
+    var reminderDate: Date?
+    var reminderNotificationId: String?
     
     init(
         id: UUID = UUID(),
@@ -53,7 +57,9 @@ final class Recipe {
         servings: Int? = nil,
         confidenceScore: Double = 0.5,
         createdAt: Date = Date(),
-        updatedAt: Date = Date()
+        updatedAt: Date = Date(),
+        reminderDate: Date? = nil,
+        reminderNotificationId: String? = nil
     ) {
         self.id = id
         self.title = title
@@ -74,6 +80,8 @@ final class Recipe {
         self.confidenceScore = confidenceScore
         self.createdAt = createdAt
         self.updatedAt = updatedAt
+        self.reminderDate = reminderDate
+        self.reminderNotificationId = reminderNotificationId
     }
     
     var bakingTime: Int? {

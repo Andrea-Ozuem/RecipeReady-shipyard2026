@@ -39,17 +39,25 @@ class RecipeSearchViewModel: ObservableObject {
     ]
     
     // MARK: - Data Loading
-    
+
     /// Loads recipes from SwiftData and extracts unique ingredients
-    func loadData(context: ModelContext) {
+    /// - Parameters:
+    ///   - context: The SwiftData ModelContext
+    ///   - cookbook: Optional cookbook to scope the search to only its recipes
+    func loadData(context: ModelContext, cookbook: Cookbook? = nil) {
         do {
-            let descriptor = FetchDescriptor<Recipe>(sortBy: [SortDescriptor(\.createdAt, order: .reverse)])
-            self.allRecipes = try context.fetch(descriptor)
-            
+            // If cookbook is provided, use only its recipes; otherwise fetch all recipes
+            if let cookbook = cookbook {
+                self.allRecipes = cookbook.recipes
+            } else {
+                let descriptor = FetchDescriptor<Recipe>(sortBy: [SortDescriptor(\.createdAt, order: .reverse)])
+                self.allRecipes = try context.fetch(descriptor)
+            }
+
             // Extract all unique ingredients from all recipes
             // We normalize them to lowercase to avoid duplicates like "Tomato" vs "tomato"
             var ingredients = Set<String>(commonIngredients) // Start with common ingredients
-            
+
             for recipe in allRecipes {
                 for ingredient in recipe.ingredients {
                     let cleanedName = ingredient.name.trimmingCharacters(in: .whitespacesAndNewlines).capitalized
@@ -58,7 +66,7 @@ class RecipeSearchViewModel: ObservableObject {
                     }
                 }
             }
-            
+
             self.allKnownIngredients = ingredients
             // Initial filter update?
              objectWillChange.send() // Force UI update just in case

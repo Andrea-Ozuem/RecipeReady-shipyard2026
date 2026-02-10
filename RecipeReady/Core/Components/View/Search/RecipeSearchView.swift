@@ -12,6 +12,13 @@ struct RecipeSearchView: View {
     @Environment(\.dismiss) var dismiss
     @Environment(\.modelContext) private var modelContext
 
+    /// Optional cookbook to scope the search to only its recipes
+    let cookbook: Cookbook?
+
+    init(cookbook: Cookbook? = nil) {
+        self.cookbook = cookbook
+    }
+
     var body: some View {
         NavigationView {
             VStack(spacing: 0) {
@@ -37,11 +44,19 @@ struct RecipeSearchView: View {
                     
                     // Title and Illustration
                     HStack(alignment: .bottom) {
-                        Text("Search by ingredients")
-                            .font(.heading1)
-                            .foregroundColor(.textPrimary)
-                            .multilineTextAlignment(.leading)
-                            .padding(.bottom, 10) // Align roughly with image bottom
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Search by ingredients")
+                                .font(.heading1)
+                                .foregroundColor(.textPrimary)
+                                .multilineTextAlignment(.leading)
+
+                            if let cookbook = cookbook {
+                                Text("in \(cookbook.name)")
+                                    .font(.bodyRegular)
+                                    .foregroundColor(.textSecondary)
+                            }
+                        }
+                        .padding(.bottom, 10) // Align roughly with image bottom
                         
                         Spacer()
                         
@@ -247,7 +262,7 @@ struct RecipeSearchView: View {
             .navigationBarHidden(true)
         }
         .onAppear {
-            viewModel.loadData(context: modelContext)
+            viewModel.loadData(context: modelContext, cookbook: cookbook)
         }
     }
 }
