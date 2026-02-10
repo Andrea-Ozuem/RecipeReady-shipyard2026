@@ -194,38 +194,46 @@ struct RecipeSearchView: View {
                         if !viewModel.selectedIngredients.isEmpty {
                             VStack(alignment: .leading, spacing: 16) {
                                 HStack {
-                                    Text("\(viewModel.selectedIngredients.count) out of 4 ingredients") // Mock count
+                                    Text("\(viewModel.searchResults.count) recipe\(viewModel.searchResults.count == 1 ? "" : "s") found")
                                         .font(.heading2)
                                         .foregroundColor(.textPrimary)
                                     Spacer()
-                                    Button("See all") {
-                                        // See all action
-                                    }
-                                    .font(.bodyRegular)
-                                    .foregroundColor(.primaryBlue)
                                 }
                                 .padding(.horizontal)
                                 
-                                // Chips for matched ingredients (Mock for now, or reuse selected)
-                                // The design shows them here too? Or maybe just recipe cards. 
-                                // Let's stick to the Recipe Cards scroll for now as per plan.
-                                
-                                ScrollView(.horizontal, showsIndicators: false) {
-                                    HStack(spacing: 16) {
-                                        // Mock Results
-                                        RecipeResultCard(
-                                            recipeTitle: "Homemade Lasagna",
-                                            time: "70 min.",
-                                            imageURL: nil
-                                        )
-                                        
-                                        RecipeResultCard(
-                                            recipeTitle: "Pan-Seared Salmon",
-                                            time: "30 min.",
-                                            imageURL: nil
-                                        )
+                                if viewModel.searchResults.isEmpty {
+                                    // Empty state
+                                    VStack(spacing: 12) {
+                                        Image(systemName: "magnifyingglass")
+                                            .font(.system(size: 40))
+                                            .foregroundColor(.textSecondary)
+                                        Text("No recipes found")
+                                            .font(.bodyBold)
+                                            .foregroundColor(.textPrimary)
+                                        Text("Try removing an ingredient or searching for different combinations.")
+                                            .font(.captionMeta)
+                                            .foregroundColor(.textSecondary)
+                                            .multilineTextAlignment(.center)
+                                            .padding(.horizontal, 40)
                                     }
-                                    .padding(.horizontal)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 40)
+                                } else {
+                                    // Actual search results
+                                    ScrollView(.horizontal, showsIndicators: false) {
+                                        HStack(spacing: 16) {
+                                            ForEach(viewModel.searchResults) { recipe in
+                                                NavigationLink(destination: RecipeDetailView(recipe: recipe)) {
+                                                    RecipeResultCard(
+                                                        recipeTitle: recipe.title,
+                                                        time: recipe.cookingTime.map { "\($0) min" } ?? "—",
+                                                        imageURL: recipe.imageURL
+                                                    )
+                                                }
+                                            }
+                                        }
+                                        .padding(.horizontal)
+                                    }
                                 }
                             }
                         } else {
