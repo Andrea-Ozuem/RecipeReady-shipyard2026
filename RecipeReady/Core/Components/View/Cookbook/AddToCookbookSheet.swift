@@ -26,9 +26,12 @@ struct AddToCookbookSheet: View {
     // Or save immediately? The design "Save" button implies deferred saving.
     // We will track selected cookbook IDs.
     @State private var selectedCookbookIDs: Set<PersistentIdentifier> = []
-    
+
     @State private var showNewCookbookAlert = false
     @State private var newCookbookName = ""
+
+    // Track newly created cookbook to avoid @Query synchronization issues
+    @State private var newlyCreatedCookbook: Cookbook? = nil
     
     init(recipe: Recipe, moveFromCookbook: Cookbook? = nil) {
         self.recipe = recipe
@@ -104,6 +107,10 @@ struct AddToCookbookSheet: View {
         .onAppear {
             checkAndCreateFavorites()
             initializeSelections()
+        }
+        .onDisappear {
+            // Clean up state when sheet dismisses
+            newlyCreatedCookbook = nil
         }
         .alert("New Cookbook", isPresented: $showNewCookbookAlert) {
             TextField("Name", text: $newCookbookName)
@@ -205,21 +212,45 @@ struct AddToCookbookSheet: View {
     
     private func createNewCookbook() {
         guard !newCookbookName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
-        
+
         let newCookbook = Cookbook(name: newCookbookName)
         modelContext.insert(newCookbook)
-        
+
         // Auto-select the new cookbook
         // We save context to generate ID
-        try? modelContext.save() 
+        try? modelContext.save()
         selectedCookbookIDs.insert(newCookbook.persistentModelID)
+
+        // Store reference to avoid @Query synchronization issues
+        newlyCreatedCookbook = newCookbook
     }
     
     private func saveChanges() {
+        // Handle newly created cookbook first (if any)
+        // This avoids @Query synchronization issues where the new cookbook
+        // might not appear in allCookbooks yet
+        if let newCookbook = newlyCreatedCookbook {
+            if !newCookbook.recipes.contains(where: { $0.id == recipe.id }) {
+                newCookbook.recipes.append(recipe)
+                // Sync favorites flag if needed
+                if newCookbook.isFavorites {
+                    recipe.isFavorite = true
+                }
+            }
+        }
+
+        // Process existing cookbooks from the @Query
         for cookbook in allCookbooks {
+            // Skip the newly created cookbook if it appears in the query
+            // (to avoid processing it twice)
+            if let newCookbook = newlyCreatedCookbook,
+               cookbook.persistentModelID == newCookbook.persistentModelID {
+                continue
+            }
+
             let isSelected = selectedCookbookIDs.contains(cookbook.persistentModelID)
             let inputsRecipe = cookbook.recipes.contains(where: { $0.id == recipe.id })
-            
+
             if isSelected && !inputsRecipe {
                 // Add
                 cookbook.recipes.append(recipe)
@@ -238,7 +269,7 @@ struct AddToCookbookSheet: View {
                 }
             }
         }
-        
+
         try? modelContext.save()
     }
 }
