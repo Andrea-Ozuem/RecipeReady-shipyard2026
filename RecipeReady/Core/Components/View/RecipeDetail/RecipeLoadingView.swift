@@ -10,7 +10,6 @@ import Combine
 
 struct RecipeLoadingView: View {
     @State private var currentMessageIndex = 0
-    @State private var progress: CGFloat = 0.0
     @State private var rotationAngle: Double = 0.0
 
     // Status messages aligned with extraction pipeline
@@ -23,9 +22,6 @@ struct RecipeLoadingView: View {
 
     // Timer to cycle through messages every 3 seconds
     private let messageTimer = Timer.publish(every: 3.0, on: .main, in: .common).autoconnect()
-
-    // Timer for progress animation (simulated indeterminate progress)
-    private let progressTimer = Timer.publish(every: 0.05, on: .main, in: .common).autoconnect()
 
     var body: some View {
         VStack(spacing: 40) {
