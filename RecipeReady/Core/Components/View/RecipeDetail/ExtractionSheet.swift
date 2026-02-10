@@ -42,22 +42,7 @@ struct ExtractionSheet: View {
     // MARK: - Views
     
     private var processingView: some View {
-        VStack(spacing: 24) {
-            ProgressView()
-            // Make loader larger and more modern
-                .controlSize(.extraLarge)
-            
-            VStack(spacing: 8) {
-                Text("Extracting Recipe...")
-                    .font(.headline)
-                
-                Text("Analyzing video audio and captions")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-            }
-        }
-        .padding()
+        RecipeLoadingView()
     }
     
     private func successView(_ recipe: Recipe) -> some View {

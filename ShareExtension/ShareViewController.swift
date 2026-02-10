@@ -38,26 +38,26 @@ class ShareViewController: UIViewController {
         return label
     }()
     
+    private lazy var loadingAnimationView: RecipeLoadingAnimationView = {
+        let view = RecipeLoadingAnimationView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+
     private lazy var statusLabel: UILabel = {
         let label = UILabel()
-        label.text = "Processing video..."
-        label.font = .systemFont(ofSize: 16)
-        label.textColor = .secondaryLabel
+        label.font = .systemFont(ofSize: 16, weight: .medium)
         label.textAlignment = .center
         label.numberOfLines = 0
         label.translatesAutoresizingMaskIntoConstraints = false
+        label.isHidden = true
         return label
-    }()
-    
-    private lazy var activityIndicator: UIActivityIndicatorView = {
-        let indicator = UIActivityIndicatorView(style: .large)
-        indicator.translatesAutoresizingMaskIntoConstraints = false
-        return indicator
     }()
     
     private lazy var cancelButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Cancel", for: .normal)
+        button.setTitleColor(UIColor(red: 51/255, green: 55/255, blue: 123/255, alpha: 1.0), for: .normal) // primaryBlue
         button.addTarget(self, action: #selector(cancelTapped), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
@@ -244,35 +244,36 @@ class ShareViewController: UIViewController {
     
     private func setupUI() {
         view.backgroundColor = UIColor.black.withAlphaComponent(0.4)
-        
+
         view.addSubview(containerView)
         containerView.addSubview(titleLabel)
-        containerView.addSubview(activityIndicator)
+        containerView.addSubview(loadingAnimationView)
         containerView.addSubview(statusLabel)
         containerView.addSubview(cancelButton)
-        
+
         NSLayoutConstraint.activate([
             containerView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             containerView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            containerView.widthAnchor.constraint(equalToConstant: 280),
-            containerView.heightAnchor.constraint(equalToConstant: 200),
-            
+            containerView.widthAnchor.constraint(equalToConstant: 300),
+            containerView.heightAnchor.constraint(equalToConstant: 280),
+
             titleLabel.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 20),
             titleLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
             titleLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
-            
-            activityIndicator.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
-            activityIndicator.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 20),
-            
-            statusLabel.topAnchor.constraint(equalTo: activityIndicator.bottomAnchor, constant: 16),
+
+            loadingAnimationView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 10),
+            loadingAnimationView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
+            loadingAnimationView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
+            loadingAnimationView.bottomAnchor.constraint(equalTo: cancelButton.topAnchor, constant: -10),
+
+            statusLabel.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
+            statusLabel.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
             statusLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
             statusLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
-            
+
             cancelButton.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -16),
             cancelButton.centerXAnchor.constraint(equalTo: containerView.centerXAnchor)
         ])
-        
-        activityIndicator.startAnimating()
     }
     
     // MARK: - Content Processing
@@ -457,34 +458,35 @@ class ShareViewController: UIViewController {
     }
     
     // MARK: - UI Updates
-    
+
     private func updateStatus(_ message: String) {
-        DispatchQueue.main.async {
-            self.statusLabel.text = message
-        }
+        // Status is now handled by RecipeLoadingAnimationView
+        // This method is kept for compatibility but does nothing during normal loading
     }
     
     private func showError(_ message: String) {
         DispatchQueue.main.async {
-            self.activityIndicator.stopAnimating()
+            self.loadingAnimationView.isHidden = true
+            self.statusLabel.isHidden = false
             self.statusLabel.text = message
             self.statusLabel.textColor = .systemRed
         }
-        
+
         // Auto-dismiss after delay
         DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
             self.cancelTapped()
         }
     }
-    
+
     private func completeSuccessfully() {
-        activityIndicator.stopAnimating()
+        loadingAnimationView.isHidden = true
+        statusLabel.isHidden = false
         statusLabel.text = "Recipe ready for extraction!"
         statusLabel.textColor = .systemGreen
-        
+
         // Open main app
         openMainApp()
-        
+
         // Complete extension
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
             self.extensionContext?.completeRequest(returningItems: nil)
