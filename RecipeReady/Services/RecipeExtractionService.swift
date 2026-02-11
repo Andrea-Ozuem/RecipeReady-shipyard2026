@@ -2,8 +2,8 @@
 //  RecipeExtractionService.swift
 //  RecipeReady
 //
-//  Service for extracting recipes from audio + caption via backend API.
-//  Currently stubbed for local development (backend deferred).
+//  Service for extracting recipes from audio + caption via Gemini AI.
+//  Implements audio extraction and AI processing.
 //
 
 import Foundation

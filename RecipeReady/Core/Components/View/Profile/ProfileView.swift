@@ -151,6 +151,9 @@ struct ProfileView: View {
 
                             ProfileOptionRow(icon: "star", title: "Rate App", showChevron: false, action: viewModel.rateApp)
                                 .padding(.horizontal)
+
+                            ProfileOptionRow(icon: "hand.raised", title: "Privacy Policy", showChevron: true, action: viewModel.openPrivacyPolicy)
+                                .padding(.horizontal)
                         }
                     }
                     

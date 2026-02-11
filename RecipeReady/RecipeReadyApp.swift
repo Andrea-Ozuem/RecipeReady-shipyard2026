@@ -62,44 +62,18 @@ struct RecipeReadyApp: App {
         // Configure RevenueCat on launch
         RevenueCatService.shared.configure()
 
-        // Setup memory debugging
-        setupMemoryMonitoring()
-
-        // Setup notification delegate
-        UNUserNotificationCenter.current().delegate = NotificationDelegate.shared
-    }
-
-    private func setupMemoryMonitoring() {
         // Configure URLCache with smaller memory footprint
-        // Default is ~512MB memory, we'll reduce to 20MB
         let cache = URLCache(
             memoryCapacity: 20 * 1024 * 1024,  // 20 MB memory cache
             diskCapacity: 100 * 1024 * 1024     // 100 MB disk cache
         )
         URLCache.shared = cache
 
-        // Log initial state
-        MemoryDebugger.shared.logDetailed("🚀 App Launch")
-
-        // Monitor memory warnings
-        NotificationCenter.default.addObserver(
-            forName: UIApplication.didReceiveMemoryWarningNotification,
-            object: nil,
-            queue: .main
-        ) { _ in
-            print("⚠️⚠️⚠️ MEMORY WARNING RECEIVED ⚠️⚠️⚠️")
-            MemoryDebugger.shared.printSummary()
-
-            // Clear URLCache on memory warning
-            URLCache.shared.removeAllCachedResponses()
-            print("🧹 Cleared URLCache due to memory warning")
-        }
-
-        // Log URLCache configuration
-        print("🗄️ URLCache Configuration:")
-        print("   Memory Capacity: \(cache.memoryCapacity / 1024 / 1024) MB")
-        print("   Disk Capacity: \(cache.diskCapacity / 1024 / 1024) MB")
+        // Setup notification delegate
+        UNUserNotificationCenter.current().delegate = NotificationDelegate.shared
     }
+
+
     
     
     @AppStorage("hasCompletedOnboarding") var hasCompletedOnboarding: Bool = false

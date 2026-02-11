@@ -346,8 +346,7 @@ struct RecipeEditView: View {
         
         recipe.updatedAt = Date()
 
-        MemoryDebugger.shared.checkpoint("edit_save")
-        MemoryDebugger.shared.logDetailed("✏️ RecipeEditView: Before save")
+
 
         // If recipe is not in context (e.g., newly extracted), insert it now.
         if recipe.modelContext == nil {
@@ -364,28 +363,25 @@ struct RecipeEditView: View {
             // Ensure the flag is set for the dynamic query in FavoritesCollectionCard
             recipe.isFavorite = true
 
-            MemoryDebugger.shared.logFromCheckpoint("edit_save", label: "✏️ Before modelContext.insert")
+
             modelContext.insert(recipe)
-            MemoryDebugger.shared.logFromCheckpoint("edit_save", label: "✏️ After modelContext.insert")
+
         }
 
         // Explicit save to ensure persistence immediately
         try? modelContext.save()
 
-        MemoryDebugger.shared.logFromCheckpoint("edit_save", label: "✏️ After modelContext.save")
+
 
         // If we are in extraction flow, notify manager we are done
         extractionManager.dismiss()
         print("💾 RecipeEditView: Saved recipe \(recipe.title), dismissing...")
 
-        MemoryDebugger.shared.logFromCheckpoint("edit_save", label: "✏️ After extractionManager.dismiss")
+
 
         dismiss()
 
-        // Log final state after a short delay
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            MemoryDebugger.shared.logDetailed("✏️ 1 second after RecipeEditView save")
-        }
+
     }
 }
 

@@ -69,6 +69,12 @@ class ProfileViewModel: ObservableObject {
             SKStoreReviewController.requestReview(in: scene)
         }
     }
+    
+    func openPrivacyPolicy() {
+        if let url = URL(string: "https://gist.githubusercontent.com/Andrea-Ozuem/efb42f6a0a3e0789f6d344f664fd3849/raw/a7124b2b38ac7d7b5053da679d90515318d8b55b/privacy_policy.md") {
+            UIApplication.shared.open(url)
+        }
+    }
 }
 
 // MARK: - Settings Enum
