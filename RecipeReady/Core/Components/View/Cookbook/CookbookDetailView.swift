@@ -147,10 +147,10 @@ struct CookbookDetailView: View {
                             NavigationLink(destination: RecipeDetailView(recipe: recipe)) {
                                 RecipeCardView(
                                     recipe: recipe,
-                                    onMove: {
+                                    onMove: (cookbook.isStatic == true) ? nil : {
                                         recipeToMove = recipe
                                     },
-                                    onDelete: {
+                                    onDelete: (cookbook.isStatic == true) ? nil : {
                                         delete(recipe)
                                     }
                                 )
@@ -197,12 +197,14 @@ struct CookbookDetailView: View {
                                 .foregroundColor(.textPrimary)
                         }
 
-                        Button(action: {
-                            isShowingEditSheet = true
-                        }) {
-                            Image(systemName: "pencil")
-                                .font(.iconRegular)
-                                .foregroundColor(.textPrimary)
+                        if (cookbook.isStatic ?? false) == false {
+                            Button(action: {
+                                isShowingEditSheet = true
+                            }) {
+                                Image(systemName: "pencil")
+                                    .font(.iconRegular)
+                                    .foregroundColor(.textPrimary)
+                            }
                         }
                     }
                 }

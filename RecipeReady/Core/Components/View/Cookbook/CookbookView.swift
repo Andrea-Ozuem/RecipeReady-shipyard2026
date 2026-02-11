@@ -75,6 +75,7 @@ struct CookbookView: View {
             .navigationBarHidden(true)
             .onAppear {
                 ensureFavoritesSynced()
+                ensureStaticsSynced()
             }
             .sheet(isPresented: $isShowingAddCookbook) {
                 AddCookbookSheet(onSave: { newTitle in
@@ -126,6 +127,41 @@ struct CookbookView: View {
             if changed {
                try? modelContext.save()
             }
+        }
+    }
+
+    private func ensureStaticsSynced() {
+        // Check if "Eitan Eats the world" exists
+        // We use a descriptor to find it since we can't augment the Query easily here for a one-off check without state
+        let descriptor = FetchDescriptor<Cookbook>(
+            predicate: #Predicate { $0.isStatic == true }
+        )
+        
+        do {
+            let statics = try modelContext.fetch(descriptor)
+            
+            // If it exists, we assume it's good for now.
+            // If we wanted to ensure recipes are up to date, we'd check content. 
+            // But requirement says "static", so creation is main point.
+            if statics.isEmpty {
+                // Create it
+                print("Creating Static Cookbook 'Eitan Eats the world'")
+                let eitanCookbook = Cookbook(
+                    name: "Eitan Eats the world",
+                    coverColor: "#FF6B35", // Or specific color?
+                    isStatic: true
+                )
+                
+                // Add recipes
+                // We create NEW instances as requested, ignoring existing pool
+                let recipes = SampleData.eitanStaticRecipes
+                eitanCookbook.recipes = recipes
+                
+                modelContext.insert(eitanCookbook)
+                try modelContext.save()
+            }
+        } catch {
+            print("Failed to sync static cookbooks: \(error)")
         }
     }
 }

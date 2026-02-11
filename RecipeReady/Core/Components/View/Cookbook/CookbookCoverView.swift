@@ -109,21 +109,30 @@ struct CookbookCoverView: View {
                  Color.inputBackgroundLight
             }
         } else {
-            // Assume local file
-            if let uiImage = loadLocalImage(named: path) {
-                Image(uiImage: uiImage)
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-                    .frame(width: width, height: height)
-                    .clipped()
-            } else {
-                // Fallback / Placeholder
-                                 Color.inputBackgroundLight
-                    .overlay(
-                        Image(systemName: "photo")
-                            .foregroundColor(.gray)
-                    )
-            }
+            localOrAssetImage(named: path, width: width, height: height)
+        }
+    }
+    
+    @ViewBuilder
+    private func localOrAssetImage(named name: String, width: CGFloat, height: CGFloat) -> some View {
+        if let uiImage = loadLocalImage(named: name) {
+             Image(uiImage: uiImage)
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+                .frame(width: width, height: height)
+                .clipped()
+        } else if UIImage(named: name) != nil {
+            Image(name)
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+                .frame(width: width, height: height)
+                .clipped()
+        } else {
+            Color.inputBackgroundLight
+               .overlay(
+                   Image(systemName: "photo")
+                       .foregroundColor(.gray)
+               )
         }
     }
     

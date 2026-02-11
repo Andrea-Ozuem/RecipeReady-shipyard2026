@@ -13,45 +13,37 @@ struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(ExtractionManager.self) private var extractionManager
 
-    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = false
-
     @State private var recipeToOpen: Recipe?
     @State private var showRecipeDetail = false
-    
+
     var body: some View {
-        Group {
-            if !hasCompletedOnboarding {
-                OnboardingContainerView()
-            } else {
-                TabView {
-                    // Home Tab
-                    HomeView()
-                        .tabItem {
-                            Label("Home", systemImage: "house")
-                        }
-                    
-                    NavigationStack {
-                        CookbookView()
-                    }
-                    .tabItem {
-                        Label("Cookbooks", systemImage: "heart")
-                    }
-                    
-                    // Grocery List Tab
-                    ShoppingListView()
-                        .tabItem {
-                            Label("Grocery list", systemImage: "cart")
-                        }
-                    
-                    // Profile Tab
-                    ProfileView()
-                        .tabItem {
-                            Label("Profile", systemImage: "person")
-                        }
+        TabView {
+            // Home Tab
+            HomeView()
+                .tabItem {
+                    Label("Home", systemImage: "house")
                 }
-                .tint(.primaryBlue)
+            
+            NavigationStack {
+                CookbookView()
             }
+            .tabItem {
+                Label("Cookbooks", systemImage: "heart")
+            }
+            
+            // Grocery List Tab
+            ShoppingListView()
+                .tabItem {
+                    Label("Grocery list", systemImage: "cart")
+                }
+            
+            // Profile Tab
+            ProfileView()
+                .tabItem {
+                    Label("Profile", systemImage: "person")
+                }
         }
+        .tint(.primaryBlue)
         .sheet(isPresented: Binding(
             get: { extractionManager.state != .idle },
             set: { if !$0 { extractionManager.dismiss() } }

@@ -9,8 +9,8 @@ import SwiftUI
 
 struct RecipeCardView: View {
     let recipe: Recipe
-    let onMove: () -> Void
-    let onDelete: () -> Void
+    let onMove: (() -> Void)?
+    let onDelete: (() -> Void)?
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -48,10 +48,11 @@ struct RecipeCardView: View {
                             .frame(height: 200)
                             .clipShape(RoundedRectangle(cornerRadius: 16))
                     } else {
-                        // Placeholder for failed local load
-                        Rectangle()
-                            .fill(Color.gray.opacity(0.1))
-                            .overlay(Image(systemName: "photo").foregroundColor(.gray))
+                        // Try Asset Catalog
+                        Image(imageURLString)
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(minWidth: 0, maxWidth: .infinity)
                             .frame(height: 200)
                             .clipShape(RoundedRectangle(cornerRadius: 16))
                     }
@@ -78,19 +79,25 @@ struct RecipeCardView: View {
                 Spacer()
                 
                 // More Action
-                Menu {
-                    Button(action: onMove) {
-                        Label("Move", systemImage: "folder")
+                if onMove != nil || onDelete != nil {
+                    Menu {
+                        if let onMove = onMove {
+                            Button(action: onMove) {
+                                Label("Move", systemImage: "folder")
+                            }
+                        }
+                        
+                        if let onDelete = onDelete {
+                            Button(role: .destructive, action: onDelete) {
+                                Label("Delete", systemImage: "trash")
+                            }
+                        }
+                    } label: {
+                        Image(systemName: "ellipsis")
+                            .rotationEffect(.degrees(90))
+                            .foregroundColor(.textSecondary)
+                            .padding(8)
                     }
-                    
-                    Button(role: .destructive, action: onDelete) {
-                        Label("Delete", systemImage: "trash")
-                    }
-                } label: {
-                    Image(systemName: "ellipsis")
-                        .rotationEffect(.degrees(90))
-                        .foregroundColor(.textSecondary)
-                        .padding(8)
                 }
             }
         }
