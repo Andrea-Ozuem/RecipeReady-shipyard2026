@@ -14,10 +14,17 @@ class ProfileViewModel: ObservableObject {
     // MARK: - App Storage
     @AppStorage("measurementSystem") var measurementSystem: MeasurementSystem = .metric
     @AppStorage("areNotificationsEnabled") var areNotificationsEnabled: Bool = true
+    @AppStorage("userName") var userName: String = ""
     
     // MARK: - Published Properties
     @Published var appVersion: String = ""
     @Published var buildNumber: String = ""
+    @Published var activeSheet: ProfileSheet?
+    
+    // MARK: - Computed Properties
+    var userInitial: String {
+        return String(userName.prefix(1)).uppercased()
+    }
     
     // MARK: - Init
     init() {
@@ -27,6 +34,20 @@ class ProfileViewModel: ObservableObject {
         if let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String {
             self.buildNumber = build
         }
+        
+        // Generate random username if empty
+        if userName.isEmpty {
+            userName = "Chef_\(Int.random(in: 1000...9999))"
+        }
+    }
+    
+    // MARK: - Actions
+    func updateName(_ newName: String) {
+        let trimmed = newName.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !trimmed.isEmpty {
+            userName = trimmed
+        }
+        activeSheet = nil
     }
     
     // MARK: - Actions
@@ -62,5 +83,13 @@ enum MeasurementSystem: String, CaseIterable, Identifiable {
         case .metric: return "ruler"
         case .imperial: return "ruler.fill"
         }
+    }
+}
+// MARK: - Sheets
+enum ProfileSheet: Identifiable {
+    case editProfile
+    
+    var id: Int {
+        hashValue
     }
 }

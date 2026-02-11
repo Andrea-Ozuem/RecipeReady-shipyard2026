@@ -16,6 +16,7 @@ class RevenueCatService: NSObject, ObservableObject {
     
     func configure() {
         Purchases.logLevel = .debug
+        #warning("REPLACE WITH PRODUCTION API KEY BEFORE RELEASE")
         Purchases.configure(withAPIKey: "test_rrAaUcyyDwNjOiwYGtrSATRBubg")
         
         Purchases.shared.delegate = self

@@ -234,7 +234,7 @@ struct CookbookDetailView: View {
     private func delete(_ recipe: Recipe) {
         if let index = cookbook.recipes.firstIndex(where: { $0.id == recipe.id }) {
             withAnimation {
-                cookbook.recipes.remove(at: index)
+                _ = cookbook.recipes.remove(at: index)
                 // Optional: If you want to delete the recipe entirely from the app if it's not in any other cookbook,
                 // you'd need more complex logic. For now, we assume "Delete" in the context of a cookbook means removing it from that cookbook.
                 // However, if this is the "Main" list or "My Recipes", usage might vary.

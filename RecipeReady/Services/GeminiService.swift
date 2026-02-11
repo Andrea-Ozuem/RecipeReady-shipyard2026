@@ -265,7 +265,7 @@ final class GeminiService {
     
     private func parseResponse(_ response: String) throws -> GeminiRecipeResult {
         // Clean up response (remove markdown code blocks if present)
-        var cleanedResponse = response
+        let cleanedResponse = response
             .replacingOccurrences(of: "```json", with: "")
             .replacingOccurrences(of: "```", with: "")
             .trimmingCharacters(in: .whitespacesAndNewlines)

@@ -168,6 +168,7 @@ struct ExtractionSheet: View {
                     }
                     .buttonStyle(.bordered)
                     .controlSize(.large)
+                    .hidden() // HIDDEN FOR RELEASE: Feature not ready
                 }
                 .padding(.top)
             }
@@ -222,6 +223,7 @@ struct ExtractionSheet: View {
                 .font(.headline)
                 .foregroundStyle(.primary)
                 .padding(.vertical, 8)
+                .hidden() // HIDDEN FOR RELEASE: Feature not ready
             }
             .padding(.bottom, 20)
         }

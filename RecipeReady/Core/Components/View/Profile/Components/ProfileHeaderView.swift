@@ -8,12 +8,7 @@
 import SwiftUI
 
 struct ProfileHeaderView: View {
-    // For MVP we can hardcode or use simple bindings.
-    // In a real app, this would come from a User model.
-    var userName: String = "Alex Smith"
-    var userInitial: String = "A"
-    
-    var onEditProfile: () -> Void
+    @ObservedObject var viewModel: ProfileViewModel
     
     var body: some View {
         HStack(spacing: 20) {
@@ -26,7 +21,7 @@ struct ProfileHeaderView: View {
                             .stroke(Color.primaryGreen, lineWidth: 2)
                     )
                 
-                Text(userInitial)
+                Text(viewModel.userInitial)
                     .font(.display) // 32pt bold
                     .foregroundColor(.primaryGreen)
             }
@@ -35,12 +30,14 @@ struct ProfileHeaderView: View {
             // Info
             VStack(alignment: .leading, spacing: 8) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(userName)
+                    Text(viewModel.userName)
                         .font(.heading2) // 20pt bold
                         .foregroundColor(.textPrimary)
                 }
                 
-                Button(action: onEditProfile) {
+                Button(action: {
+                    viewModel.activeSheet = .editProfile
+                }) {
                     Text("Edit profile")
                         .font(.captionMeta)
                         .foregroundColor(.primaryGreen)
@@ -60,6 +57,6 @@ struct ProfileHeaderView: View {
 }
 
 #Preview {
-    ProfileHeaderView(onEditProfile: {})
+    ProfileHeaderView(viewModel: ProfileViewModel())
         .padding()
 }

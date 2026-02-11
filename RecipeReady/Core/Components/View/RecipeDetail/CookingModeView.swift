@@ -110,7 +110,7 @@ struct CookingModeView: View {
                                 }
                             }
                         }
-                        .onChange(of: currentStepIndex) { newIndex in
+                        .onChange(of: currentStepIndex) { _, newIndex in
                             withAnimation {
                                 proxy.scrollTo(newIndex, anchor: .center)
                             }

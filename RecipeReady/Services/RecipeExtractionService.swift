@@ -116,7 +116,8 @@ final class RecipeExtractionService: RecipeExtractionServiceProtocol {
         let audioURL = try await audioExtractor.extractAudio(from: localVideoURL)
         defer { audioExtractor.cleanup(audioURL: audioURL) }
         
-        let audioData = try Data(contentsOf: audioURL)
+        // Read audio file asynchronously to prevent UI blocking
+        let audioData = try await readFileAsync(url: audioURL)
         let audioResult = try await geminiService.parseRecipeFromAudio(audioData)
         
         // 4. Merge Results
@@ -217,6 +218,13 @@ final class RecipeExtractionService: RecipeExtractionServiceProtocol {
         try FileManager.default.moveItem(at: tempURL, to: destURL)
         
         return destURL
+    }
+    
+    /// Reads a file asynchronously on a background thread to prevent UI blocking
+    private func readFileAsync(url: URL) async throws -> Data {
+        try await Task.detached(priority: .userInitiated) {
+            try Data(contentsOf: url)
+        }.value
     }
 }
 

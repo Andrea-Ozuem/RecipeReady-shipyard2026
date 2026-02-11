@@ -17,9 +17,7 @@ struct ProfileView: View {
             ScrollView {
                 VStack(spacing: 32) {
                     // Header
-                    ProfileHeaderView(onEditProfile: {
-                        // TODO: Implement Edit Profile Flow
-                    })
+                    ProfileHeaderView(viewModel: viewModel)
                     .padding(.horizontal)
                     
                     Divider()
@@ -66,7 +64,9 @@ struct ProfileView: View {
                             
                             // Manage Subscription Button
                             Button(action: {
-                                // TODO: Manage Subscription Action
+                                if let url = URL(string: "https://apps.apple.com/account/subscriptions") {
+                                    UIApplication.shared.open(url)
+                                }
                             }) {
                                 Text("Manage subscription")
                                     .font(.bodyBold)
@@ -166,6 +166,12 @@ struct ProfileView: View {
             .navigationTitle("Profile")
             .navigationBarTitleDisplayMode(.large)
             .background(Color.screenBackground)
+            .sheet(item: $viewModel.activeSheet) { sheet in
+                switch sheet {
+                case .editProfile:
+                    EditProfileView(viewModel: viewModel)
+                }
+            }
         }
     }
 }

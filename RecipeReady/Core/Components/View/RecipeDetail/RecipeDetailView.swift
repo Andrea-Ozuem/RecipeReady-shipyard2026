@@ -312,6 +312,7 @@ struct RecipeDetailView: View {
                             .background(Color.white.opacity(0.8)) // Add background for consistency
                             .clipShape(Circle())
                     }
+                    .hidden() // HIDDEN FOR RELEASE: Feature not ready
 
                     Button(action: {
                         showAddToCookbook = true
