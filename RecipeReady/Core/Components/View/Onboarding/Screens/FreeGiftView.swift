@@ -28,7 +28,7 @@ struct FreeGiftView: View {
                     .font(.heading3)
                     .foregroundColor(.textPrimary)
                 
-                Text("Includes lifetime access to all of Eitan's future cookbooks and revisions.")
+                Text("Includes lifetime access to all of Eitan Bernath's future cookbooks.")
                     .font(.bodyRegular)
                     .multilineTextAlignment(.center)
                     .foregroundColor(.textSecondary)

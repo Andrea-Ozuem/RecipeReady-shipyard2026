@@ -23,6 +23,7 @@ struct OnboardingData {
 // MARK: - Onboarding Step Enum
 enum OnboardingStep: Int, CaseIterable {
     case welcome = 0
+    case featuresOverview
     case gender
     case acquisitionSource
     case competitorUsage

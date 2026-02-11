@@ -48,6 +48,9 @@ struct OnboardingContainerView: View {
         case .welcome:
             WelcomeView(viewModel: viewModel)
             
+        case .featuresOverview:
+            FeaturesOverviewView(viewModel: viewModel)
+            
         case .gender:
             GenericSelectionView(
                 title: "What is your gender?",
@@ -190,21 +193,24 @@ struct OnboardingContainerView: View {
                  
                  Spacer()
                  
-                 // Hero Image Placeholder
-                 ZStack {
-                     RoundedRectangle(cornerRadius: 24)
-                         .fill(Color.gray.opacity(0.1))
+                 // Hero Graphic: Saved -> Cooked
+                 HStack(spacing: 20) {
+                     // Saved State
+                     Image(systemName: "bookmark.fill")
+                         .font(.system(size: 50))
+                         .foregroundColor(.gray)
                      
+                     // Transition
+                     Image(systemName: "arrow.right")
+                         .font(.system(size: 30, weight: .bold))
+                         .foregroundColor(.gray.opacity(0.5))
+                     
+                     // Cooked State
                      Image(systemName: "frying.pan.fill")
-                         .font(.system(size: 60, weight: .light))
-                         .foregroundColor(.primaryGreen.opacity(0.6))
+                         .font(.system(size: 60))
+                         .foregroundColor(.primaryGreen)
                  }
-                 .aspectRatio(1.5, contentMode: .fit)
-                 .padding(.horizontal, 20)
-                 .overlay(
-                     RoundedRectangle(cornerRadius: 24)
-                         .stroke(Color.gray.opacity(0.1), lineWidth: 1)
-                 )
+                 .padding(20)
                  
                  Spacer()
                  
@@ -312,6 +318,7 @@ extension OnboardingStep: CustomStringConvertible {
     var description: String {
         switch self {
         case .welcome: return "Welcome"
+        case .featuresOverview: return "Features"
         case .gender: return "Gender"
         case .acquisitionSource: return "Source"
         case .competitorUsage: return "Competitor"
