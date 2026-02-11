@@ -30,12 +30,20 @@ struct LargeFeaturedCard: View {
                              }
                          }
                      } else {
-                         // Local Image
-                         Image(imageURLString)
-                             .resizable()
-                             .aspectRatio(contentMode: .fill)
-                             .frame(width: geometry.size.width, height: geometry.size.height)
-                             .clipped()
+                         // Local file (Documents dir) or asset catalog fallback
+                         if let uiImage = loadLocalImage(named: imageURLString) {
+                             Image(uiImage: uiImage)
+                                 .resizable()
+                                 .aspectRatio(contentMode: .fill)
+                                 .frame(width: geometry.size.width, height: geometry.size.height)
+                                 .clipped()
+                         } else {
+                             Image(imageURLString) // Asset catalog
+                                 .resizable()
+                                 .aspectRatio(contentMode: .fill)
+                                 .frame(width: geometry.size.width, height: geometry.size.height)
+                                 .clipped()
+                         }
                      }
                 } else {
                      Rectangle().fill(Color.gray.opacity(0.1))
@@ -72,6 +80,11 @@ struct LargeFeaturedCard: View {
         }
         .frame(height: UIScreen.main.bounds.height * 0.5)
         .padding(.bottom, 80) // Add space for the hanging card so it doesn't overlap next section
+    }
+    
+    private func loadLocalImage(named filename: String) -> UIImage? {
+        let fileURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent(filename)
+        return UIImage(contentsOfFile: fileURL.path)
     }
 }
 

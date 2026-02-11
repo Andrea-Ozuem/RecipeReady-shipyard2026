@@ -29,10 +29,16 @@ struct RecipeCard: View {
                              }
                          }
                      } else {
-                         // Local or fallback
-                         Image(imageURLString) // Attempt to load from assets/local
-                             .resizable()
-                             .aspectRatio(contentMode: .fill)
+                         // Local file (Documents dir) or asset catalog fallback
+                         if let uiImage = loadLocalImage(named: imageURLString) {
+                             Image(uiImage: uiImage)
+                                 .resizable()
+                                 .aspectRatio(contentMode: .fill)
+                         } else {
+                             Image(imageURLString) // Asset catalog (e.g. "recipe1")
+                                 .resizable()
+                                 .aspectRatio(contentMode: .fill)
+                         }
                      }
                 } else {
                     Rectangle().fill(Color.gray.opacity(0.1))
@@ -69,6 +75,11 @@ struct RecipeCard: View {
                 }
             }
         }
+    }
+    
+    private func loadLocalImage(named filename: String) -> UIImage? {
+        let fileURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent(filename)
+        return UIImage(contentsOfFile: fileURL.path)
     }
 }
 
