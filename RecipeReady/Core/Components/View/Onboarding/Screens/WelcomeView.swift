@@ -4,8 +4,8 @@ import AVKit
 struct WelcomeView: View {
     @ObservedObject var viewModel: OnboardingViewModel
     
-    // Placeholder video URL - in a real app, integrate a local file or remote URL
-    private let videoURL = URL(string: "https://www.w3schools.com/html/mov_bbb.mp4")
+    // We hold the player in a State object so it persists across refreshes
+    @State private var player: AVPlayer?
     
     var body: some View {
         VStack(spacing: 0) {
@@ -23,16 +23,23 @@ struct WelcomeView: View {
                     .shadow(color: Color.black.opacity(0.1), radius: 20, x: 0, y: 10)
                 
                 // Video Content
-                if let url = videoURL {
-                    VideoPlayer(player: AVPlayer(url: url))
-                        .disabled(true)
+                if let player = player {
+                    VideoPlayer(player: player)
+                        .disabled(true) // Disable controls
+                        .onAppear {
+                            player.play()
+                        }
                         .clipShape(RoundedRectangle(cornerRadius: 28))
                         .padding(4) // Bezel space
                 } else {
+                    // Fallback / Loading state
                     ZStack {
                         Color.gray.opacity(0.1)
-                        Text("Demo Video")
-                            .foregroundColor(.gray)
+                        if player == nil {
+                             // Only show if we truly failed to load or are initializing
+                            Text("Loading Video...")
+                                .foregroundColor(.gray)
+                        }
                     }
                     .clipShape(RoundedRectangle(cornerRadius: 28))
                     .padding(4)
@@ -73,6 +80,31 @@ struct WelcomeView: View {
             .padding(.top, 0)
         }
         .edgesIgnoringSafeArea(.top) // Allow phone mockup to feel expansive if needed
+        .onAppear {
+            setupPlayer()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .AVPlayerItemDidPlayToEndTime)) { notification in
+            // Loop the video
+            if let item = notification.object as? AVPlayerItem, item == player?.currentItem {
+                player?.seek(to: .zero)
+                player?.play()
+            }
+        }
+    }
+    
+    private func setupPlayer() {
+        // Look for the file in the main bundle
+        guard let url = Bundle.main.url(forResource: "demo", withExtension: "mp4") else {
+            print("❌ Error: Could not find demo.mp4 in bundle.")
+            return
+        }
+        
+        // Create player only if not already created to avoid resets
+        if player == nil {
+            let p = AVPlayer(url: url)
+            p.isMuted = true // Often better for onboarding videos to be muted by default
+            self.player = p
+        }
     }
 }
 

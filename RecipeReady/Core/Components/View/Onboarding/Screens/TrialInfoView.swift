@@ -44,18 +44,11 @@ struct TrialInfoView: View {
             
             Spacer()
             
-            OnboardingButton(title: "Enable Reminders & Continue") {
-                requestNotificationPermission()
+            OnboardingButton(title: "Continue") {
                 viewModel.next()
             }
         }
         .padding()
-    }
-    
-    func requestNotificationPermission() {
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
-            // Handle result if needed, but for onboarding speed we usually just move on or rely on system prompt
-        }
     }
 }
 

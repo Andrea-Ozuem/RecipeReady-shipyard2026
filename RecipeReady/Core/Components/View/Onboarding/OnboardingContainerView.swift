@@ -224,41 +224,44 @@ struct OnboardingContainerView: View {
              VStack(spacing: 24) {
                  // Title
                  Text("Awesome 🥳")
-                     .font(.display) // Larger, bolder header
+                     .font(.display)
                      .multilineTextAlignment(.center)
                      .padding(.top, 40)
                  
                  Spacer()
                  
-                 // Image Placeholder
-                 // User requested a placeholder for now
-                 ZStack {
-                     RoundedRectangle(cornerRadius: 24)
-                         .fill(Color.gray.opacity(0.1))
-                         .overlay(
-                             RoundedRectangle(cornerRadius: 24)
-                                 .stroke(style: StrokeStyle(lineWidth: 2, dash: [5]))
-                                 .foregroundColor(.gray.opacity(0.5))
-                         )
+                 // Logos Side-by-Side
+                 HStack(spacing: 40) {
+                     VStack(spacing: 12) {
+                         Image("instagram")
+                             .resizable()
+                             .scaledToFit()
+                             .frame(width: 80, height: 80)
+                         
+                         Text("Instagram")
+                             .font(.heading3)
+                             .foregroundColor(.textPrimary)
+                     }
                      
                      VStack(spacing: 12) {
-                         Image(systemName: "photo.on.rectangle.angled")
-                             .font(.system(size: 40, weight: .light))
-                             .foregroundColor(.gray)
-                         Text("Social Media Integration Image")
-                             .font(.caption)
-                             .foregroundColor(.gray)
+                         Image("tiktok")
+                             .resizable()
+                             .scaledToFit()
+                             .frame(width: 80, height: 80)
+                         
+                         Text("TikTok")
+                             .font(.heading3)
+                             .foregroundColor(.textPrimary)
                      }
                  }
-                 .aspectRatio(1, contentMode: .fit) // Square aspect ratio
-                 .padding(.horizontal, 40)
+                 .padding(.horizontal, 24)
                  
                  Spacer()
                  
                  // Description Text
                  Text("We support extracting recipes from your favourite food platforms like Instagram and TikTok.")
                      .font(.bodyRegular)
-                     .multilineTextAlignment(.center) // Center aligned
+                     .multilineTextAlignment(.center)
                      .padding(.horizontal, 32)
                      .padding(.bottom, 16)
                  
