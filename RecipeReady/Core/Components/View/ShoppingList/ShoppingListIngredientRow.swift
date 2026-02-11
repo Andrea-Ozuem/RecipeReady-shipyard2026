@@ -10,6 +10,7 @@ import SwiftData
 
 struct ShoppingListIngredientRow: View {
     let ingredient: ShoppingListItem
+    var quantityOverride: String? // Added for scaling support
     let onToggle: () -> Void
     
     var body: some View {
@@ -20,7 +21,7 @@ struct ShoppingListIngredientRow: View {
                     .foregroundStyle(ingredient.isChecked ? Color.textSecondary : Color.textPrimary)
                     .strikethrough(ingredient.isChecked)
                 
-                Text(ingredient.quantity)
+                Text(quantityOverride ?? ingredient.quantity)
                     .font(.bodyRegular)
                     .foregroundStyle(ingredient.isChecked ? Color.textSecondary : Color.textPrimary)
                     .strikethrough(ingredient.isChecked)

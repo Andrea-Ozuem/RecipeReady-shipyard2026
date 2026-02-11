@@ -13,16 +13,19 @@ struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(ExtractionManager.self) private var extractionManager
 
+    @EnvironmentObject var navigationManager: NavigationManager
+
     @State private var recipeToOpen: Recipe?
     @State private var showRecipeDetail = false
 
     var body: some View {
-        TabView {
+        TabView(selection: $navigationManager.selectedTab) {
             // Home Tab
             HomeView()
                 .tabItem {
                     Label("Home", systemImage: "house")
                 }
+                .tag(NavigationManager.Tab.home)
             
             NavigationStack {
                 CookbookView()
@@ -30,18 +33,21 @@ struct ContentView: View {
             .tabItem {
                 Label("Cookbooks", systemImage: "heart")
             }
+            .tag(NavigationManager.Tab.cookbooks)
             
             // Grocery List Tab
             ShoppingListView()
                 .tabItem {
                     Label("Grocery list", systemImage: "cart")
                 }
+                .tag(NavigationManager.Tab.groceryList)
             
             // Profile Tab
             ProfileView()
                 .tabItem {
                     Label("Profile", systemImage: "person")
                 }
+                .tag(NavigationManager.Tab.profile)
         }
         .tint(.primaryBlue)
         .sheet(isPresented: Binding(
@@ -97,4 +103,5 @@ struct ContentView: View {
     ContentView()
         .modelContainer(for: [Recipe.self, Cookbook.self], inMemory: true)
         .environment(ExtractionManager())
+        .environmentObject(NavigationManager())
 }

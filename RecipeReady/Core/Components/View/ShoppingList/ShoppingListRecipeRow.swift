@@ -95,9 +95,10 @@ struct ShoppingListRecipeRow: View {
 
 #Preview {
     let config = ModelConfiguration(isStoredInMemoryOnly: true)
-    let _ = try! ModelContainer(for: ShoppingListRecipe.self, ShoppingListItem.self, configurations: config)
+    let container = try! ModelContainer(for: ShoppingListRecipe.self, ShoppingListItem.self, configurations: config)
     let recipe = ShoppingListRecipe(title: "Test Recipe", imageURL: nil)
     
     return ShoppingListRecipeRow(recipe: recipe)
         .padding()
+        .modelContainer(container)
 }

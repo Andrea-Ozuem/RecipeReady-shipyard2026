@@ -57,6 +57,7 @@ class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
 struct RecipeReadyApp: App {
     @State private var extractionManager = ExtractionManager()
     @StateObject private var revenueCatService = RevenueCatService.shared
+    @StateObject private var navigationManager = NavigationManager()
 
     init() {
         // Configure RevenueCat on launch
@@ -85,6 +86,7 @@ struct RecipeReadyApp: App {
                     ContentView()
                         .environment(extractionManager)
                         .environmentObject(revenueCatService)
+                        .environmentObject(navigationManager)
                         .onAppear {
                             extractionManager.checkForPendingExtraction()
                         }

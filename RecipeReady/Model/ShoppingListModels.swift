@@ -15,16 +15,18 @@ final class ShoppingListRecipe {
     var title: String
     var imageURL: String?
     var servings: Int
+    var originalServings: Int? // Added for scaling
     var isExpanded: Bool
     
     @Relationship(deleteRule: .cascade) var items: [ShoppingListItem] = []
     
-    init(id: UUID = UUID(), originalRecipeID: UUID? = nil, title: String, imageURL: String? = nil, servings: Int = 1, isExpanded: Bool = true) {
+    init(id: UUID = UUID(), originalRecipeID: UUID? = nil, title: String, imageURL: String? = nil, servings: Int = 1, originalServings: Int? = 1, isExpanded: Bool = true) {
         self.id = id
         self.originalRecipeID = originalRecipeID
         self.title = title
         self.imageURL = imageURL
         self.servings = servings
+        self.originalServings = originalServings
         self.isExpanded = isExpanded
     }
     

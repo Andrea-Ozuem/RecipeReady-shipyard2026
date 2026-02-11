@@ -113,11 +113,22 @@ struct ShoppingListView: View {
                             // All Items Tab
                             ZStack(alignment: .bottom) {
                                 List {
-                                    ForEach(allIngredients) { item in
-                                        ShoppingListIngredientRow(ingredient: item) {
-                                            item.isChecked.toggle()
+                                    ForEach(recipes) { recipe in
+                                        ForEach(recipe.items) { item in
+                                            let scaledAmount = IngredientScaler.scale(
+                                                amount: item.quantity,
+                                                from: recipe.originalServings ?? 1,
+                                                to: recipe.servings
+                                            )
+                                            
+                                            ShoppingListIngredientRow(
+                                                ingredient: item,
+                                                quantityOverride: scaledAmount
+                                            ) {
+                                                item.isChecked.toggle()
+                                            }
+                                            .listRowSeparator(.hidden)
                                         }
-                                        .listRowSeparator(.hidden)
                                     }
                                 }
                                 .listStyle(.plain)

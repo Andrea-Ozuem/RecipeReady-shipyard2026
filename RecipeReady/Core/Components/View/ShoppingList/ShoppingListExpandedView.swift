@@ -30,7 +30,16 @@ struct ShoppingListExpandedView: View {
             // Ingredients List
             VStack(spacing: 0) {
                 ForEach(recipe.items) { item in
-                    ShoppingListIngredientRow(ingredient: item) {
+                    let scaledAmount = IngredientScaler.scale(
+                        amount: item.quantity,
+                        from: recipe.originalServings ?? 1,
+                        to: recipe.servings
+                    )
+                    
+                    ShoppingListIngredientRow(
+                        ingredient: item,
+                        quantityOverride: scaledAmount
+                    ) {
                         item.isChecked.toggle()
                     }
                     

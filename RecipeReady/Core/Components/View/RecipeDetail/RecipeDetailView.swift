@@ -16,6 +16,8 @@ struct RecipeDetailView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var shoppingListRecipes: [ShoppingListRecipe]
     
+    @EnvironmentObject var navigationManager: NavigationManager
+    
     @State private var currentServings: Int
     @State private var showToast = false
     @State private var showAddToCookbook = false
@@ -216,8 +218,7 @@ struct RecipeDetailView: View {
                             // Add to Grocery List Button
                             Button(action: {
                                 if isInShoppingList {
-                                    // TODO: Navigate to Grocery List tab
-                                    // For now, we just give feedback or do nothing as the user requested UI update
+                                    navigationManager.selectedTab = .groceryList
                                 } else {
                                     addToShoppingList()
                                 }
@@ -375,6 +376,7 @@ struct RecipeDetailView: View {
             title: recipe.title,
             imageURL: recipe.imageURL,
             servings: currentServings, // Use the *current* servings selected in UI
+            originalServings: currentServings, // Store base for future scaling
             isExpanded: true
         )
         
@@ -417,5 +419,6 @@ struct RecipeDetailView: View {
             ],
             sourceLink: "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
         ))
+        .environmentObject(NavigationManager())
     }
 }

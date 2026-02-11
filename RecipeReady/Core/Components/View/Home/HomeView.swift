@@ -154,4 +154,5 @@ let previewContainer: ModelContainer = {
 #Preview {
     HomeView()
         .modelContainer(previewContainer)
+        .environmentObject(NavigationManager())
 }
