@@ -27,13 +27,8 @@ struct DataSeeder {
         let featured = SampleData.featured
         context.insert(featured)
         
-        // 2. Eitan's Kitchen
-        for recipe in SampleData.eitanRecipes {
-            context.insert(recipe)
-        }
-        
-        // 3. Cook This Tonight (Fast)
-        for recipe in SampleData.tonightRecipes {
+        // 2. Eitan's Kitchen (Static Cookbook)
+        for recipe in SampleData.eitanStaticRecipes {
             context.insert(recipe)
         }
         

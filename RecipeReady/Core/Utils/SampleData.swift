@@ -23,47 +23,6 @@ struct SampleData {
             servings: 4
         )
     }
-    
-    // 2. Eitan's Kitchen
-    static var eitanRecipes: [Recipe] {
-        [
-            Recipe(
-                title: "Oven Fresh and Cozy",
-                author: "Eitan Bernath",
-                imageURL: "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=600&q=80",
-                difficulty: "Easy",
-                prepTime: 10,
-                cookingTime: 20
-            ),
-            Recipe(
-                title: "Fluffy Pancakes",
-                author: "Eitan Bernath",
-                imageURL: "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&w=600&q=80",
-                prepTime: 15,
-                cookingTime: 15
-            )
-        ]
-    }
-    
-    // 3. Cook This Tonight (Fast)
-    static var tonightRecipes: [Recipe] {
-        [
-            Recipe(
-                title: "Lemon Garlic Pasta",
-                author: "Chef John",
-                imageURL: "https://images.unsplash.com/photo-1555949258-eb67b1ef0ceb?auto=format&fit=crop&w=600&q=80",
-                difficulty: "Easy",
-                cookingTime: 15
-            ),
-            Recipe(
-                title: "Avocado Toast",
-                author: "Healthy Eats",
-                imageURL: "https://images.unsplash.com/photo-1588137372308-15f75323a399?auto=format&fit=crop&w=600&q=80",
-                difficulty: "Easy",
-                cookingTime: 5
-            )
-        ]
-    }
 
     // 4. Eitan's Static Recipes (Eitan Eats the world)
     static var eitanStaticRecipes: [Recipe] {

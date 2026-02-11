@@ -47,8 +47,6 @@ struct HomeView: View {
                     
                     HomeSection(title: "From Eitan's Kitchen", recipes: viewModel.eitanRecipes)
                     
-                    HomeSection(title: "Cook This Tonight", recipes: viewModel.tonightRecipes)
-                    
                     VStack(alignment: .leading, spacing: 16) {
                         Text("From Your Saved Videos")
                             .font(.heading2)
