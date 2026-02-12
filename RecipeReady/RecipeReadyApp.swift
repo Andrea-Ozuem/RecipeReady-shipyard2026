@@ -68,7 +68,7 @@ struct RecipeReadyApp: App {
         ])
         
         // App Group Identifier - Must match entitlements
-        let appGroupIdentifier = "group.com.vividex.recipeready.shared"
+        let appGroupIdentifier = "group.com.andrea.recipereadyv2"
         
         guard let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupIdentifier) else {
             fatalError("Shared App Group container not found. Check Entitlements.")

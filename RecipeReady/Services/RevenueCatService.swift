@@ -100,9 +100,7 @@ class RevenueCatService: NSObject, ObservableObject {
     private func updateCustomerStatus(info: CustomerInfo) {
         DispatchQueue.main.async {
             self.customerInfo = info
-            // FOR BETA REVIEW: Always grant Pro access
-            self.isPro = true 
-            // Original logic: info.entitlements["Recipe Ready Pro"]?.isActive == true
+            self.isPro = info.entitlements["Recipe Ready Pro"]?.isActive == true
             self.isConfigured = true
         }
     }

@@ -2,17 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>UIAppFonts</key>
-	<array>
-		<string>Absans-Regular.otf</string>
-		<string>Pangram-Black.otf</string>
-		<string>Pangram-Bold.otf</string>
-		<string>Pangram-ExtraBold.otf</string>
-		<string>Pangram-ExtraLight.otf</string>
-		<string>Pangram-Light.otf</string>
-		<string>Pangram-Medium.otf</string>
-		<string>Pangram-Regular.otf</string>
-	</array>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -26,7 +15,16 @@
 			</array>
 		</dict>
 	</array>
-	<key>ITSAppUsesNonExemptEncryption</key>
-	<false/>
+	<key>UIAppFonts</key>
+	<array>
+		<string>Absans-Regular.otf</string>
+		<string>Pangram-Black.otf</string>
+		<string>Pangram-Bold.otf</string>
+		<string>Pangram-ExtraBold.otf</string>
+		<string>Pangram-ExtraLight.otf</string>
+		<string>Pangram-Light.otf</string>
+		<string>Pangram-Medium.otf</string>
+		<string>Pangram-Regular.otf</string>
+	</array>
 </dict>
 </plist>

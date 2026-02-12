@@ -10,7 +10,7 @@ import Foundation
 /// Configuration constants for App Group.
 enum AppGroupConfig {
     /// App Group identifier - must match entitlements
-    static let identifier = "group.com.vividex.recipeready.shared"
+    static let identifier = "group.com.andrea.recipereadyv2"
     
     /// Directory name for pending extractions
     static let pendingDirectory = "pending"
