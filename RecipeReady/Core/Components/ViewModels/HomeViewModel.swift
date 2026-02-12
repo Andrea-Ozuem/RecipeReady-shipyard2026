@@ -33,7 +33,10 @@ class HomeViewModel {
         }
         
         // 2. Eitan's Kitchen
-        let eitan = recipes.filter { $0.author?.contains("Eitan") == true }
+        let eitan = recipes.filter { 
+            ($0.author?.contains("Eitan") == true) &&
+            ($0.title != "Casseroles are the Best Kick-off for Autumn")
+        }
         self.eitanRecipes = eitan.isEmpty ? SampleData.eitanStaticRecipes : eitan
         
         

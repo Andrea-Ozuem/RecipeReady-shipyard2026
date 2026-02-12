@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>identifier</key>
+	<string>254f0d00</string>
+	<key>products</key>
+	<array>
+		<dict>
+			<key>displayPrice</key>
+			<string>4.99</string>
+			<key>familyShareable</key>
+			<false/>
+			<key>internalID</key>
+			<string>A1B2C3D4</string>
+			<key>localizations</key>
+			<array>
+				<dict>
+					<key>description</key>
+					<string>Unlock all recipes and features</string>
+					<key>displayName</key>
+					<string>Recipe Ready Pro Monthly</string>
+					<key>locale</key>
+					<string>en_US</string>
+				</dict>
+			</array>
+			<key>productID</key>
+			<string>monthly</string>
+			<key>referenceName</key>
+			<string>Monthly Subscription</string>
+			<key>type</key>
+			<string>AutoRenewable</string>
+		</dict>
+		<dict>
+			<key>displayPrice</key>
+			<string>39.99</string>
+			<key>familyShareable</key>
+			<false/>
+			<key>internalID</key>
+			<string>E5F6G7H8</string>
+			<key>localizations</key>
+			<array>
+				<dict>
+					<key>description</key>
+					<string>Best value for all features</string>
+					<key>displayName</key>
+					<string>Recipe Ready Pro Yearly</string>
+					<key>locale</key>
+					<string>en_US</string>
+				</dict>
+			</array>
+			<key>productID</key>
+			<string>yearly</string>
+			<key>referenceName</key>
+			<string>Yearly Subscription</string>
+			<key>type</key>
+			<string>AutoRenewable</string>
+		</dict>
+	</array>
+	<key>settings</key>
+	<dict>
+		<key>_failTransactionsEnabled</key>
+		<false/>
+		<key>_locale</key>
+		<string>en_US</string>
+		<key>_storefront</key>
+		<string>USA</string>
+	</dict>
+	<key>subscriptionGroups</key>
+	<array>
+		<dict>
+			<key>id</key>
+			<string>254f0d01</string>
+			<key>localizations</key>
+			<array>
+				<dict>
+					<key>description</key>
+					<string>Unlock Pro</string>
+					<key>displayName</key>
+					<string>Recipe Ready Pro</string>
+					<key>locale</key>
+					<string>en_US</string>
+				</dict>
+			</array>
+			<key>name</key>
+			<string>Recipe Ready Pro</string>
+		</dict>
+	</array>
+	<key>version</key>
+	<dict>
+		<key>major</key>
+		<integer>3</integer>
+		<key>minor</key>
+		<integer>0</integer>
+	</dict>
+</dict>
+</plist>
