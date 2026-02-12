@@ -82,6 +82,32 @@ struct RetentionOfferView: View {
                         .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 5)
                         .padding(.horizontal)
                         
+                    } else if let errorMessage = revenueCatService.errorMessage {
+                        VStack(spacing: 20) {
+                            Image(systemName: "exclamationmark.triangle")
+                                .font(.largeTitle)
+                                .foregroundColor(.red)
+                            Text("Error Loading Offer")
+                                .font(.headline)
+                            Text(errorMessage)
+                                .font(.caption)
+                                .multilineTextAlignment(.center)
+                                .foregroundColor(.secondary)
+                                .padding(.horizontal)
+                            
+                            Button(action: {
+                                revenueCatService.errorMessage = nil
+                                revenueCatService.fetchOfferings()
+                            }) {
+                                Text("Retry")
+                                    .fontWeight(.semibold)
+                                    .padding()
+                                    .background(Color.primaryGreen)
+                                    .foregroundColor(.white)
+                                    .cornerRadius(10)
+                            }
+                        }
+                        .padding()
                     } else {
                         ProgressView("Loading offer...")
                             .padding()

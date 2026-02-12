@@ -395,8 +395,8 @@ class ShareViewController: UIViewController {
                 }
             } catch {
                 await MainActor.run {
-                    // Fallback to default text on error
-                    self.handleApifyError(error, sourceURL: url)
+                    // Show the actual error to the user instead of failing silently
+                    self.showError("Extraction failed: \(error.localizedDescription)")
                 }
             }
         }
@@ -472,8 +472,8 @@ class ShareViewController: UIViewController {
             self.statusLabel.textColor = .systemRed
         }
 
-        // Auto-dismiss after delay
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+        // Auto-dismiss after delay (longer delay for reading logs/errors)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 10) {
             self.cancelTapped()
         }
     }

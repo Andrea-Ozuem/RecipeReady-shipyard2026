@@ -10,75 +10,83 @@ import SwiftData
 
 struct DataSeeder {
     static func seed(context: ModelContext) {
-        // 1. cleanupDuplicates (Fix for the bug where recipes appeared twice)
-        cleanupDuplicates(context: context)
-
-        // 2. Check if specific static recipes exist, and add if missing
-        // We do typically want to ensure Eitan's recipes are there, but only once.
-        
-        let staticRecipes = SampleData.eitanStaticRecipes
-        for staticRecipe in staticRecipes {
-            ensureRecipeExists(staticRecipe, context: context)
-        }
-        
-        // 3. Featured: Only add if absolutely no recipes exist? 
-        // Or check specifically for the featured one? 
-        // Existing logic was "if count > 0 return". 
-        // Let's preserve the "Hero" logic safely: Only add "Casseroles" if it's missing AND we think it should be there.
-        // But the user requested to REMOVE "Casseroles" in a previous task. 
-        // So we should actually NOT seed "Casseroles" / "Featured" anymore if the user wants it gone.
-        // To be safe and respect "Remove Static Recipe" intent, I will NOT force-seed the 'featured' recipe again.
+        // Centralized seeding logic for Eitan Eats the World static cookbook
         
         do {
-            try context.save()
-            print("✅ Seeding check complete.")
-        } catch {
-            print("❌ Seeding failed: \(error)")
-        }
-    }
-    
-    private static func ensureRecipeExists(_ recipe: Recipe, context: ModelContext) {
-        let title = recipe.title
-        let descriptor = FetchDescriptor<Recipe>(
-            predicate: #Predicate { $0.title == title }
-        )
-        do {
-            let count = try context.fetchCount(descriptor)
-            if count == 0 {
-                print("Inserting missing static recipe: \(title)")
-                context.insert(recipe)
-            }
-        } catch {
-            print("Error checking existence for \(title): \(error)")
-        }
-    }
-    
-    private static func cleanupDuplicates(context: ModelContext) {
-        // Fetch all recipes authored by Eitan
-        // Note: Predicate support for "contains" might be tricky in pure SwiftData depending on version, 
-        // but exact match for known titles is safer.
-        
-        let staticTitles = SampleData.eitanStaticRecipes.map { $0.title }
-        
-        for title in staticTitles {
-            let descriptor = FetchDescriptor<Recipe>(
-                predicate: #Predicate { $0.title == title }
+            // 1. Ensure the Static Cookbook exists
+            let cookbookRequest = FetchDescriptor<Cookbook>(
+                predicate: #Predicate { $0.name == "Eitan Eats the world" }
             )
-            do {
-                var recipes = try context.fetch(descriptor)
-                if recipes.count > 1 {
-                    print("Found \(recipes.count) duplicates for '\(title)'. Removing extras...")
-                    // Keep the first one, delete the rest
-                    // Sort by creation date if possible? Or just arbitrary.
-                    // recipes.sort { $0.createdAt < $1.createdAt } // Assuming Recipe has createdAt
-                    
-                    for i in 1..<recipes.count {
-                        context.delete(recipes[i])
-                    }
+            let cookbooks = try context.fetch(cookbookRequest)
+            
+            let eitanCookbook: Cookbook
+            if let existing = cookbooks.first {
+                eitanCookbook = existing
+                // Ensure it's marked static just in case
+                if eitanCookbook.isStatic != true {
+                    eitanCookbook.isStatic = true
                 }
-            } catch {
-                print("Error deduplicating \(title): \(error)")
+            } else {
+                print("Creating Static Cookbook 'Eitan Eats the world'")
+                eitanCookbook = Cookbook(
+                    name: "Eitan Eats the world",
+                    coverColor: "#FF6B35",
+                    isStatic: true
+                )
+                context.insert(eitanCookbook)
             }
+            
+            // 2. Ensure all static recipes exist and are linked
+            let staticRecipes = SampleData.eitanStaticRecipes
+            var cookbookWasModified = false
+            
+            for staticRecipe in staticRecipes {
+                let title = staticRecipe.title
+                
+                // Check if this recipe already exists in the DB
+                let recipeRequest = FetchDescriptor<Recipe>(
+                    predicate: #Predicate { $0.title == title }
+                )
+                let existingRecipes = try context.fetch(recipeRequest)
+                
+                let recipeToUse: Recipe
+                
+                if let existing = existingRecipes.first {
+                    // Recipe exists, use it
+                    recipeToUse = existing
+                    
+                    // Deduplicate if needed (if multiple found)
+                    if existingRecipes.count > 1 {
+                        print("Found duplicates for \(title), cleaning up...")
+                        for i in 1..<existingRecipes.count {
+                            context.delete(existingRecipes[i])
+                        }
+                    }
+                } else {
+                    // Recipe doesn't exist, create it
+                    print("Inserting missing static recipe: \(title)")
+                    context.insert(staticRecipe)
+                    recipeToUse = staticRecipe
+                }
+                
+                // 3. Ensure linkage to the cookbook
+                // Check if this recipe is already in the cookbook's recipes list
+                // We utilize the relationship. Note: 'eitanCookbook.recipes' is [Recipe]
+                
+                if !eitanCookbook.recipes.contains(where: { $0.id == recipeToUse.id }) {
+                    print("Linking \(title) to Eitan's cookbook")
+                    eitanCookbook.recipes.append(recipeToUse)
+                    cookbookWasModified = true
+                }
+            }
+            
+            if cookbookWasModified || context.hasChanges {
+                try context.save()
+                print("✅ DataSeeder completed successfully.")
+            }
+            
+        } catch {
+            print("❌ DataSeeder failed: \(error)")
         }
     }
 }

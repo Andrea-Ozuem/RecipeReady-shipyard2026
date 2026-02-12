@@ -24,14 +24,38 @@ struct RevenueCatPaywallView: View {
                         // Error is already handled by RevenueCat UI
                         print("Purchase failed: \(error.localizedDescription)")
                     }
+            } else if let errorMessage = revenueCatService.errorMessage {
+                VStack(spacing: 20) {
+                    Image(systemName: "exclamationmark.triangle")
+                        .font(.system(size: 50))
+                        .foregroundColor(.red)
+                    Text("Configuration Error")
+                        .font(.headline)
+                    Text(errorMessage)
+                        .font(.caption)
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(.secondary)
+                        .padding(.horizontal)
+                    
+                    Button(action: {
+                        revenueCatService.errorMessage = nil
+                        revenueCatService.fetchOfferings()
+                    }) {
+                        Text("Retry")
+                            .fontWeight(.semibold)
+                            .padding()
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                    }
+                }
             } else {
                 // Loading state while offerings are being fetched
                 VStack(spacing: 20) {
                     ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle())
                     Text("Loading subscription options...")
-                        .font(.bodyRegular)
-                        .foregroundColor(.textSecondary)
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
                 }
             }
         }

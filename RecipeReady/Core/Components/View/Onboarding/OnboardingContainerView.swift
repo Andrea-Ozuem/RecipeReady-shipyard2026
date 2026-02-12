@@ -306,9 +306,6 @@ struct OnboardingContainerView: View {
                      viewModel.next()
                  }
              }
-            
-        case .paywall:
-            RevenueCatPaywallView(viewModel: viewModel)
         }
     }
 }
@@ -340,7 +337,6 @@ extension OnboardingStep: CustomStringConvertible {
         case .cookbookIntro: return "Cookbook Intro"
         case .trialInfo: return "Trial Info"
         case .notificationPermission: return "Notifications"
-        case .paywall: return "Paywall"
         }
     }
 }

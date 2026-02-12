@@ -59,6 +59,40 @@ struct RecipeReadyApp: App {
     @StateObject private var revenueCatService = RevenueCatService.shared
     @StateObject private var navigationManager = NavigationManager()
 
+    var sharedModelContainer: ModelContainer = {
+        let schema = Schema([
+            Recipe.self,
+            Cookbook.self,
+            ShoppingListRecipe.self,
+            ShoppingListItem.self,
+        ])
+        
+        // App Group Identifier - Must match entitlements
+        let appGroupIdentifier = "group.com.vividex.recipeready.shared"
+        
+        guard let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupIdentifier) else {
+            fatalError("Shared App Group container not found. Check Entitlements.")
+        }
+        
+        // Ensure the directory exists. CoreData often expects 'Library/Application Support'
+        let applicationSupportURL = containerURL.appendingPathComponent("Library/Application Support")
+        
+        do {
+            try FileManager.default.createDirectory(at: applicationSupportURL, withIntermediateDirectories: true)
+        } catch {
+            print("Could not create Application Support directory in App Group: \(error)")
+        }
+        
+        let storeURL = applicationSupportURL.appendingPathComponent("default.store")
+        let modelConfiguration = ModelConfiguration(schema: schema, url: storeURL)
+        
+        do {
+            return try ModelContainer(for: schema, configurations: [modelConfiguration])
+        } catch {
+            fatalError("Could not create ModelContainer: \(error)")
+        }
+    }()
+
     init() {
         // Configure RevenueCat on launch
         RevenueCatService.shared.configure()
@@ -82,6 +116,7 @@ struct RecipeReadyApp: App {
     var body: some Scene {
         WindowGroup {
             Group {
+            if revenueCatService.isConfigured {
                 if revenueCatService.isPro {
                     ContentView()
                         .environment(extractionManager)
@@ -98,6 +133,16 @@ struct RecipeReadyApp: App {
                     RevenueCatPaywallView(viewModel: OnboardingViewModel())
                         .environmentObject(revenueCatService)
                 }
+            } else {
+                // Splash / Loading state
+                ZStack {
+                    Color(hex: "FFFAF5").edgesIgnoringSafeArea(.all)
+                    Image("AppLogo")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 150, height: 150) // Adjust size as needed
+                }
+            }
             }
             .onOpenURL { url in
                  // Handle URL regardless of state, or maybe only if pro? 
@@ -105,6 +150,6 @@ struct RecipeReadyApp: App {
                  extractionManager.handleURL(url)
             }
         }
-        .modelContainer(for: [Recipe.self, Cookbook.self, ShoppingListRecipe.self, ShoppingListItem.self])
+        .modelContainer(sharedModelContainer)
     }
 }

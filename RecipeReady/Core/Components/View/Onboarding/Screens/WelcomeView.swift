@@ -60,7 +60,7 @@ struct WelcomeView: View {
             
             // Text Content
             VStack(spacing: 12) {
-                Text("Recipe tracking made easy")
+                Text("Less Scrolling. More Cooking")
                     .font(.display) // Larger, bolder font
                     .multilineTextAlignment(.center)
                     .foregroundColor(.textPrimary)

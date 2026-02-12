@@ -71,6 +71,7 @@ struct RecipeDetailView: View {
                                     .resizable()
                                     .scaledToFill()
                                     .frame(height: 300)
+                                    .clipped()
                             } else if let assetImage = UIImage(named: imageURLString) {
                                 // Fallback to Asset Catalog
                                 Image(uiImage: assetImage)

@@ -45,7 +45,7 @@ enum OnboardingStep: Int, CaseIterable {
     case cookbookIntro
     case trialInfo
     case notificationPermission
-    case paywall
+    // case paywall (Disabled for Beta Review)
     
     var progress: Double {
         return Double(self.rawValue + 1) / Double(Self.allCases.count)

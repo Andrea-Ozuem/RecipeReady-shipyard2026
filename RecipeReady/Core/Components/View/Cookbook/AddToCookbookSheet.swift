@@ -17,8 +17,8 @@ struct AddToCookbookSheet: View {
     
     // Sort logic: Favorites first, then alphabetical or by date
     @Query(sort: [
-        SortDescriptor<Cookbook>(\.isFavorites, order: .reverse),
-        SortDescriptor<Cookbook>(\.name, order: .forward)
+        SortDescriptor(\Cookbook.isFavorites, order: .reverse),
+        SortDescriptor(\Cookbook.name, order: .forward)
     ])
     private var allCookbooks: [Cookbook]
     

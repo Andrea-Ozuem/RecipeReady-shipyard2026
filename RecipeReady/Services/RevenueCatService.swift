@@ -9,6 +9,9 @@ class RevenueCatService: NSObject, ObservableObject {
     @Published var currentOffering: Offering?
     @Published var retentionOffering: Offering?
     @Published var customerInfo: CustomerInfo?
+    @Published var isConfigured: Bool = false
+    
+    @Published var errorMessage: String?
     
     override private init() {
         super.init()
@@ -30,6 +33,10 @@ class RevenueCatService: NSObject, ObservableObject {
             guard let self = self else { return }
             if let error = error {
                 print("Error fetching customer info: \(error.localizedDescription)")
+                DispatchQueue.main.async {
+                    self.errorMessage = "Customer Info Error: \(error.localizedDescription)"
+                    self.isConfigured = true
+                }
             } else if let info = info {
                 self.updateCustomerStatus(info: info)
             }
@@ -39,13 +46,20 @@ class RevenueCatService: NSObject, ObservableObject {
     func fetchOfferings() {
         Purchases.shared.getOfferings { [weak self] (offerings, error) in
             guard let self = self else { return }
-            if let error = error {
-                print("Error fetching offerings: \(error.localizedDescription)")
-            } else if let offerings = offerings {
-                // We can choose 'current' or specific offering based on logic later
-                DispatchQueue.main.async {
+            
+            DispatchQueue.main.async {
+                if let error = error {
+                    print("Error fetching offerings: \(error.localizedDescription)")
+                    self.errorMessage = "Offerings Error: \(error.localizedDescription). Check App Store Connect agreements."
+                    self.isConfigured = true // Stop loading state even on error
+                } else if let offerings = offerings {
                     self.currentOffering = offerings.current
                     self.retentionOffering = offerings.offering(identifier: "retention")
+                    // If no current offering is found despite success, warn
+                    if offerings.current == nil {
+                        self.errorMessage = "No offerings found. Check RevenueCat configuration."
+                    }
+                    self.isConfigured = true
                 }
             }
         }
@@ -86,7 +100,10 @@ class RevenueCatService: NSObject, ObservableObject {
     private func updateCustomerStatus(info: CustomerInfo) {
         DispatchQueue.main.async {
             self.customerInfo = info
-            self.isPro = info.entitlements["Recipe Ready Pro"]?.isActive == true
+            // FOR BETA REVIEW: Always grant Pro access
+            self.isPro = true 
+            // Original logic: info.entitlements["Recipe Ready Pro"]?.isActive == true
+            self.isConfigured = true
         }
     }
 }
