@@ -16,7 +16,7 @@ class RevenueCatService: NSObject, ObservableObject {
     
     func configure() {
         Purchases.logLevel = .debug
-Purchases.configure(withAPIKey: "test_rrAaUcyyDwNjOiwYGtrSATRBubg")
+        Purchases.configure(withAPIKey: Secrets.revenueCatApiKey)
         
         Purchases.shared.delegate = self
         

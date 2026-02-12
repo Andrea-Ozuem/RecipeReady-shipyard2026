@@ -154,6 +154,9 @@ struct ProfileView: View {
 
                             ProfileOptionRow(icon: "hand.raised", title: "Privacy Policy", showChevron: true, action: viewModel.openPrivacyPolicy)
                                 .padding(.horizontal)
+
+                            ProfileOptionRow(icon: "doc.text", title: "Terms of Use", showChevron: true, action: viewModel.openTermsOfUse)
+                                .padding(.horizontal)
                         }
                     }
                     

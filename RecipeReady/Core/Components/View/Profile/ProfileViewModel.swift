@@ -75,6 +75,12 @@ class ProfileViewModel: ObservableObject {
             UIApplication.shared.open(url)
         }
     }
+    
+    func openTermsOfUse() {
+        if let url = URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/") {
+            UIApplication.shared.open(url)
+        }
+    }
 }
 
 // MARK: - Settings Enum
