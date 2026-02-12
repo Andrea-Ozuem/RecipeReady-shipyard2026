@@ -28,6 +28,7 @@ struct RecipeDetailView: View {
     // Share State
     @State private var shareItem: Any?
     @State private var isSharing = false
+    @State private var showEditSheet = false
     
     init(recipe: Recipe) {
         self.recipe = recipe
@@ -309,6 +310,17 @@ struct RecipeDetailView: View {
                 
                 HStack(spacing: 12) {
                     Button(action: {
+                        showEditSheet = true
+                    }) {
+                        Image(systemName: "pencil")
+                            .font(.iconRegular)
+                            .foregroundColor(.textPrimary)
+                            .padding(10)
+                            .background(Color.white.opacity(0.8)) // Add background for consistency
+                            .clipShape(Circle())
+                    }
+
+                    Button(action: {
                         shareRecipe()
                     }) {
                         Image(systemName: "square.and.arrow.up")
@@ -351,6 +363,9 @@ struct RecipeDetailView: View {
             AddToCookbookSheet(recipe: recipe)
                 .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.hidden) // We built our own custom indicator in the view
+        }
+        .sheet(isPresented: $showEditSheet) {
+            RecipeEditView(recipe: recipe)
         }
         .sheet(isPresented: $showSetReminder) {
             SetReminderSheet(recipe: recipe)
