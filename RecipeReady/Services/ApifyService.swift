@@ -18,6 +18,12 @@ struct ApifyRunData: Codable {
     let defaultDatasetId: String?
 }
 
+/// Video metadata from TikTok scraper
+struct ApifyVideoMeta: Codable {
+    let coverUrl: String?
+    let duration: Int?
+}
+
 /// Response from Apify dataset items
 struct ApifyDatasetItem: Codable {
     let caption: String?
@@ -29,6 +35,12 @@ struct ApifyDatasetItem: Codable {
     let ownerFullName: String?
     let likesCount: Int?
     let timestamp: String?
+    
+    // TikTok specific fields
+    let text: String?
+    let cover: String?
+    let mediaUrls: [String]?
+    let videoMeta: ApifyVideoMeta?
 }
 
 /// Errors that can occur during Apify operations
@@ -66,13 +78,16 @@ final class ApifyService {
     private let apiToken = Secrets.apifyApiKey
     
     /// Actor ID for Instagram scraper
-    private let actorId = "shu8hvrXbJbY3Eb9W"
+    private let instagramActorId = "shu8hvrXbJbY3Eb9W"
+    
+    /// Actor ID for TikTok scraper
+    private let tiktokActorId = "clockworks~free-tiktok-scraper"
     
     /// Base URL for Apify API
     private let baseURL = "https://api.apify.com/v2"
     
     /// Maximum time to wait for run completion (seconds)
-    private let maxWaitTime: TimeInterval = 30
+    private let maxWaitTime: TimeInterval = 60 // Increased wait time for video download
     
     /// Polling interval (seconds)
     private let pollInterval: TimeInterval = 2
@@ -100,17 +115,42 @@ final class ApifyService {
             return (nil, nil, nil)
         }
         
-        // Prefer displayUrl (full res) over thumbnailUrl
-        let image = firstItem.displayUrl ?? firstItem.thumbnailUrl
+        // Normalize fields based on source
+        // Instagram: caption, displayUrl/thumbnailUrl
+        // TikTok: text, cover
         
-        print("[ApifyService] ✅ Got item - caption: \(firstItem.caption?.prefix(50) ?? "nil")..., videoUrl: \(firstItem.videoUrl ?? "nil"), thumb: \(image ?? "nil")")
-        return (firstItem.caption, firstItem.videoUrl, image)
+        let caption = firstItem.caption ?? firstItem.text
+        
+        // Prefer displayUrl (full res) -> videoMeta.coverUrl (TikTok Scraper) -> thumbnailUrl -> cover
+        var image = firstItem.displayUrl ?? firstItem.thumbnailUrl ?? firstItem.cover
+        
+        if let tiktokCover = firstItem.videoMeta?.coverUrl {
+            image = tiktokCover
+        }
+        
+        // Video URL handling
+        // TikTok (free-tiktok-scraper): Use 'mediaUrls' (first item is usually the video)
+        // Instagram/Legacy: Use 'videoUrl'
+        var video = firstItem.videoUrl
+        
+        if let mediaUrls = firstItem.mediaUrls, let firstMedia = mediaUrls.first {
+             video = firstMedia
+        }
+        
+        print("[ApifyService] ✅ Got item - caption: \(caption?.prefix(50) ?? "nil")..., videoUrl: \(video ?? "nil"), thumb: \(image ?? "nil")")
+        return (caption, video, image)
     }
     
     // MARK: - Private Methods
     
     /// Starts a new Apify actor run
     private func startActorRun(with url: URL) async throws -> String {
+        let isTikTok = url.host?.contains("tiktok.com") == true
+        let actorId = isTikTok ? tiktokActorId : instagramActorId
+        
+        print("[ApifyService] 🚀 Starting actor run for: \(url.absoluteString)")
+        print("[ApifyService] 🎭 Actor: \(actorId)")
+        
         let endpoint = "\(baseURL)/acts/\(actorId)/runs?token=\(apiToken)"
         
         guard let requestURL = URL(string: endpoint) else {
@@ -121,11 +161,33 @@ final class ApifyService {
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
-        // Input for Instagram scraper
-        let input: [String: Any] = [
-            "directUrls": [url.absoluteString],
-            "resultsLimit": 1
-        ]
+        // Input payload
+        var input: [String: Any] = [:]
+        
+        if isTikTok {
+            // Clockworks Free TikTok Scraper input
+            // Based on user provided schema: "postURLs", "shouldDownloadVideos": true
+            input = [
+                "postURLs": [url.absoluteString],
+                "resultsPerPage": 1,
+                "shouldDownloadVideos": true,
+                "shouldDownloadCovers": true,
+                "shouldDownloadSubtitles": false,
+                "shouldDownloadSlideshowImages": false
+            ]
+        } else {
+            // Instagram Scraper input
+            input = [
+                "directUrls": [url.absoluteString],
+                "resultsLimit": 1
+            ]
+        }
+        
+        // Log Input
+        if let inputData = try? JSONSerialization.data(withJSONObject: input, options: .prettyPrinted),
+           let inputString = String(data: inputData, encoding: .utf8) {
+            print("[ApifyService] 📥 Input Payload:\n\(inputString)")
+        }
         
         request.httpBody = try JSONSerialization.data(withJSONObject: input)
         
@@ -133,10 +195,14 @@ final class ApifyService {
         
         guard let httpResponse = response as? HTTPURLResponse,
               httpResponse.statusCode == 201 else {
+            let errorBody = String(data: data, encoding: .utf8) ?? "unknown"
+            print("[ApifyService] ❌ Start run failed. Status: \( (response as? HTTPURLResponse)?.statusCode ?? -1 )")
+            print("[ApifyService] ❌ Response Body: \(errorBody)")
             throw ApifyError.networkError("Failed to start actor run")
         }
         
         let runResponse = try JSONDecoder().decode(ApifyRunResponse.self, from: data)
+        print("[ApifyService] ✅ Run started. ID: \(runResponse.data.id)")
         return runResponse.data.id
     }
     
@@ -149,19 +215,24 @@ final class ApifyService {
         }
         
         let startTime = Date()
+        print("[ApifyService] ⏳ Waiting for completion (Max: \(maxWaitTime)s)...")
         
         while Date().timeIntervalSince(startTime) < maxWaitTime {
             let (data, _) = try await URLSession.shared.data(from: requestURL)
             let runResponse = try JSONDecoder().decode(ApifyRunResponse.self, from: data)
+            
+            print("[ApifyService] 🔄 Status: \(runResponse.data.status)")
             
             switch runResponse.data.status {
             case "SUCCEEDED":
                 guard let datasetId = runResponse.data.defaultDatasetId else {
                     throw ApifyError.runFailed("No dataset ID")
                 }
+                print("[ApifyService] ✅ Run SUCCEEDED. Dataset ID: \(datasetId)")
                 return datasetId
                 
             case "FAILED", "ABORTED", "TIMED-OUT":
+                print("[ApifyService] ❌ Run FAILED with status: \(runResponse.data.status)")
                 throw ApifyError.runFailed(runResponse.data.status)
                 
             default:
@@ -170,6 +241,7 @@ final class ApifyService {
             }
         }
         
+        print("[ApifyService] ❌ Timeout waiting for run")
         throw ApifyError.timeout
     }
     
@@ -181,11 +253,12 @@ final class ApifyService {
             throw ApifyError.invalidURL
         }
         
+        print("[ApifyService] 📦 Fetching dataset items...")
         let (data, _) = try await URLSession.shared.data(from: requestURL)
         
         // Debug: Log raw response
         if let jsonString = String(data: data, encoding: .utf8) {
-            print("[ApifyService] 📦 Raw dataset response: \(jsonString.prefix(1000))...")
+            print("[ApifyService] 📄 Raw Dataset JSON:\n\(jsonString)")
         }
         
         return try JSONDecoder().decode([ApifyDatasetItem].self, from: data)

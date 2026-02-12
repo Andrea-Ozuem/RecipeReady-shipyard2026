@@ -203,11 +203,34 @@ final class RecipeExtractionService: RecipeExtractionServiceProtocol {
     
     /// Downloads video from URL to a temporary file
     private func downloadVideo(from url: URL) async throws -> URL {
-        let (tempURL, response) = try await URLSession.shared.download(from: url)
+        print("[RecipeExtractionService] ⬇️ Starting download for: \(url.absoluteString)")
         
-        guard let httpResponse = response as? HTTPURLResponse,
-              httpResponse.statusCode == 200 else {
-            throw RecipeExtractionError.networkError("Failed to download video")
+        // Use URLRequest to add headers (User-Agent is critical for some CDNs/TikTok)
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        let userAgent = "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1"
+        request.setValue(userAgent, forHTTPHeaderField: "User-Agent")
+        
+        print("[RecipeExtractionService] 👤 User-Agent: \(userAgent)")
+        
+        // Some CDNs check Referer
+        if let host = url.host {
+            request.setValue("https://\(host)/", forHTTPHeaderField: "Referer")
+            print("[RecipeExtractionService] 🔗 Referer: https://\(host)/")
+        }
+        
+        let (tempURL, response) = try await URLSession.shared.download(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse else {
+             print("[RecipeExtractionService] ❌ Response was not HTTP")
+             throw RecipeExtractionError.networkError("Failed to download video (Invalid response)")
+        }
+        
+        print("[RecipeExtractionService] 📡 Response Status: \(httpResponse.statusCode)")
+        
+        if httpResponse.statusCode != 200 {
+            print("[RecipeExtractionService] ❌ Download failed with status: \(httpResponse.statusCode)")
+            throw RecipeExtractionError.networkError("Failed to download video (Status: \(httpResponse.statusCode))")
         }
         
         // Move to a known location with proper extension
@@ -215,7 +238,13 @@ final class RecipeExtractionService: RecipeExtractionServiceProtocol {
             .appendingPathComponent(UUID().uuidString)
             .appendingPathExtension("mp4")
         
+        // Remove existing file if needed
+        if FileManager.default.fileExists(atPath: destURL.path) {
+            try? FileManager.default.removeItem(at: destURL)
+        }
+        
         try FileManager.default.moveItem(at: tempURL, to: destURL)
+        print("[RecipeExtractionService] ✅ Video saved to: \(destURL.path)")
         
         return destURL
     }
