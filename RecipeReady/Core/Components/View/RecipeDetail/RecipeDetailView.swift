@@ -8,6 +8,7 @@
 import SwiftUI
 import SwiftData
 
+@MainActor
 struct RecipeDetailView: View {
     let recipe: Recipe
     
@@ -23,6 +24,10 @@ struct RecipeDetailView: View {
     @State private var showAddToCookbook = false
     @State private var isCookingModePresented = false
     @State private var showSetReminder = false
+    
+    // Share State
+    @State private var shareItem: Any?
+    @State private var isSharing = false
     
     init(recipe: Recipe) {
         self.recipe = recipe
@@ -304,7 +309,7 @@ struct RecipeDetailView: View {
                 
                 HStack(spacing: 12) {
                     Button(action: {
-                        // TODO: Share action
+                        shareRecipe()
                     }) {
                         Image(systemName: "square.and.arrow.up")
                             .font(.iconRegular)
@@ -313,7 +318,6 @@ struct RecipeDetailView: View {
                             .background(Color.white.opacity(0.8)) // Add background for consistency
                             .clipShape(Circle())
                     }
-                    .hidden() // HIDDEN FOR RELEASE: Feature not ready
 
                     Button(action: {
                         showAddToCookbook = true
@@ -356,9 +360,42 @@ struct RecipeDetailView: View {
         .fullScreenCover(isPresented: $isCookingModePresented) {
             CookingModeView(recipe: recipe, isPresented: $isCookingModePresented)
         }
+        .sheet(isPresented: $isSharing) {
+             if let items = shareItem as? [Any] {
+                 ShareSheet(activityItems: items)
+                     .presentationDetents([.medium, .large])
+             }
+         }
     }
     
     // MARK: - Actions
+    
+    private func shareRecipe() {
+        let exportView = RecipeShareView(recipe: recipe)
+        let renderer = ImageRenderer(content: exportView)
+        
+        // render pdf
+        let url = URL.documentsDirectory.appending(path: "\(recipe.title).pdf")
+        
+        renderer.render { size, context in
+            var box = CGRect(x: 0, y: 0, width: size.width, height: size.height)
+            
+            guard let pdf = CGContext(url as CFURL, mediaBox: &box, nil) else {
+                return
+            }
+            
+            pdf.beginPDFPage(nil)
+            
+            // Draw the SwiftUI view into the PDF context
+            context(pdf)
+            
+            pdf.endPDFPage()
+            pdf.closePDF()
+        }
+        
+        shareItem = [url]
+        isSharing = true
+    }
     
     private var isInShoppingList: Bool {
         shoppingListRecipes.contains { $0.originalRecipeID == recipe.id }
