@@ -71,6 +71,12 @@ struct RecipeDetailView: View {
                                     .resizable()
                                     .scaledToFill()
                                     .frame(height: 300)
+                            } else if let assetImage = UIImage(named: imageURLString) {
+                                // Fallback to Asset Catalog
+                                Image(uiImage: assetImage)
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(height: 300)
                                     .clipped()
                             } else {
                                 // Fallback / Placeholder for failed load
