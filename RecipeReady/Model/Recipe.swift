@@ -38,6 +38,8 @@ final class Recipe {
     var reminderDate: Date?
     var reminderNotificationId: String?
     
+    @Relationship(inverse: \Cookbook.recipes) var cookbooks: [Cookbook]? = []
+    
     init(
         id: UUID = UUID(),
         title: String,
@@ -59,7 +61,8 @@ final class Recipe {
         createdAt: Date = Date(),
         updatedAt: Date = Date(),
         reminderDate: Date? = nil,
-        reminderNotificationId: String? = nil
+        reminderNotificationId: String? = nil,
+        cookbooks: [Cookbook] = []
     ) {
         self.id = id
         self.title = title
@@ -82,6 +85,7 @@ final class Recipe {
         self.updatedAt = updatedAt
         self.reminderDate = reminderDate
         self.reminderNotificationId = reminderNotificationId
+        self.cookbooks = cookbooks
     }
     
     var bakingTime: Int? {
