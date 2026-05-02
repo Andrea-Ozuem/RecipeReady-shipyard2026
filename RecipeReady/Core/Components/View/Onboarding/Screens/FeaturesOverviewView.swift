@@ -14,8 +14,10 @@ struct FeaturesOverviewView: View {
     
     var body: some View {
         VStack(spacing: 20) {
-            Text("Here's what you get ✨")
-                .font(.display)
+            (Text("Here's what you get ")
+                .font(.display) +
+             Text("✨")
+                .font(.system(size: 32)))
                 .multilineTextAlignment(.center)
                 .padding(.top, 32)
             

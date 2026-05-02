@@ -215,8 +215,10 @@ struct OnboardingContainerView: View {
                  Spacer()
                  
                  // Supportive Text
-                 Text("We're here to help you\nconquer your kitchen 🤝")
-                     .font(.heading2)
+                 (Text("We're here to help you\nconquer your kitchen ")
+                     .font(.heading2) +
+                  Text("🤝")
+                     .font(.system(size: 20)))
                      .foregroundColor(.textPrimary)
                      .multilineTextAlignment(.center)
                      .padding(.bottom, 20)
@@ -229,8 +231,10 @@ struct OnboardingContainerView: View {
         case .socialMediaSupport:
              VStack(spacing: 24) {
                  // Title
-                 Text("Awesome 🥳")
-                     .font(.display)
+                 (Text("Awesome ")
+                     .font(.display) +
+                  Text("🥳")
+                     .font(.system(size: 32)))
                      .multilineTextAlignment(.center)
                      .padding(.top, 40)
                  
